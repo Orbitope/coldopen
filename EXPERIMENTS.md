@@ -4,16 +4,44 @@ Working plan. The project's question is whether a player's skill can be read
 from how they play before their results say anything, and whether that can be
 learned from agents rather than from people.
 
-Ordering principle: **the cheapest experiment that could invalidate the thesis
-goes first.** Two of the items below need no reinforcement learning at all and
-could each retire a large part of the remaining work. The expensive builds are
-sequenced behind the cheap tests that decide whether they are worth doing.
+There are two tracks and **both are committed**, regardless of how either turns
+out:
+
+- a **lightweight track** — can skill be read from cheap, domain-general
+  aggregate metrics that most real-time games already expose?
+- an **agent track** — can a ladder of trained agents, built with no human data
+  at all, predict human skill, and how early?
+
+These answer different questions. The lightweight track asks whether a free
+prior exists. The agent track asks *why* skill is legible — which properties of
+a game make it legible early — and reaches move-level resolution that aggregate
+metrics cannot. A working heuristic does not make the agent work redundant; it
+makes it **measurable**, because the heuristic becomes the baseline the agent
+approach has to beat. A result of "58% from three rounds" means nothing on its
+own and a great deal against a known simple-baseline number.
+
+Ordering principle: cheapest first, so the baseline exists before the work it is
+meant to calibrate, and so results land early. Nothing below is sequenced on the
+assumption that an earlier result cancels a later one. The two tracks also
+interleave well in practice — the lightweight track is mostly waiting on network
+I/O, the agent track is mostly compute.
 
 A hard constraint runs through all of it: **nothing that requires the target
 game's human data may be used to build the method.** If the simulator has to be
 configured from real player telemetry, the cold-start problem has been relocated
 rather than solved, because at an actual launch that telemetry does not exist.
 Human data is for testing, once, at the end.
+
+| # | experiment | track | needs |
+|---|---|---|---|
+| E1 | cross-game speed/efficiency heuristic | lightweight | public data only |
+| E2 | handicapping vs undertraining | agent | nothing new — runs today |
+| E3 | chess transfer sanity check | agent | Lichess dumps |
+| E4 | minesweeper, per-move | agent | scraper, solver, ladder |
+| E5 | TETR.IO simulation | agent | versus sim, attack table |
+| E6 | riichi mahjong | agent | Mjx or Mahjax |
+| E7 | baseline vs agent, head to head | both | E1 + E4/E5 |
+| E8 | deployment framing | both | E7 |
 
 ---
 
@@ -46,11 +74,12 @@ numbers to skill have a common shape across games? If it does, it is a free
 cold-start prior for most real-time games, needing no simulation and no
 per-game feature engineering.
 
-**Why first.** No RL, no environment, no training. Pure public data collection
-and regression. It is the cheapest item here and it makes the largest claim — a
-domain-general result would subsume much of the rest of the project. It also
-answers the question that the discarded calibration idea was trying to answer,
-without touching the target game.
+**Why first.** No RL, no environment, no training — pure public data collection
+and regression, so it produces a result quickly. Its output is the **baseline
+every later experiment is scored against**: whatever E4 and E5 achieve on a
+given game, the number that matters is how much they beat this. It also supplies
+the speed-accuracy coupling that E5's ladder needs, from games that are not the
+target.
 
 **Method.**
 1. For each game, pull rank-labelled records exposing a speed axis and an
@@ -77,9 +106,12 @@ Minesweeper is the most valuable entry because it is *not* a versus game and not
 real-time in the same sense — if the relationship holds there too, it is a
 statement about skill rather than about action games.
 
-**Kill condition.** If cross-game prediction collapses to chance, the free-lunch
-idea dies cleanly and the per-game work in E4/E5 is justified rather than
-optional.
+**Outcomes, both useful.** If cross-game prediction holds up, there is a free
+prior applicable to most real-time games — a standalone result, and a demanding
+baseline for the agent track. If it collapses to chance, the free-lunch idea
+dies cleanly and the per-game work becomes the only route, with the null result
+worth reporting. Neither outcome changes whether E4 and E5 happen; it changes
+what their numbers mean.
 
 **Watch for.** Within a person, speed and accuracy trade off; *across* people
 they correlate positively. The cross-person direction is the one being tested,
@@ -186,8 +218,11 @@ skill label, never a username. Publish aggregates only.
 **Question.** Can an agent ladder trained entirely offline predict the skill of
 real TETR.IO players from their first few rounds?
 
-**Why later.** It is the largest build here, and E1–E3 can each change what it
-should look like or whether it is needed.
+**Why later.** It is the largest build here, and E1–E3 each sharpen it: E1
+supplies the speed-accuracy coupling for the ladder and the baseline to beat, E2
+decides how the ladder is generated, E3 says what transfer failure looks like
+before it is expensive to discover. Later in sequence, not contingent — this is
+the centrepiece of the agent track and it happens whatever E1 returns.
 
 **Available without any replay access.** `GET /users/:user/records/league/recent`
 returns per-match records containing **both players' stats broken down per
@@ -254,7 +289,26 @@ reimplementation reaching 1–2M steps/sec, and a much closer fit to the existin
 
 ---
 
-## E7 — The deployment question
+## E7 — Baseline versus agent telemetry, head to head
+
+**Question.** On a game where both tracks have run, how much does the agent
+ladder add over the domain-general heuristic from E1?
+
+This is where the two tracks meet, and it is the experiment that makes the whole
+project's claim precise. Three numbers per game, at each observation budget N:
+the E1 heuristic alone, the agent-derived features alone, and both together.
+
+The interesting cases are not the obvious one. If the agent features add a lot,
+the per-game investment is vindicated. If they add little *on aggregate metrics*
+but a lot at **move resolution** (E4's minesweeper features, E5's per-round
+`btb` and downstacking signals), that localises where the value is — and says
+the agent track's contribution is resolution rather than accuracy. If they add
+nothing anywhere, that is a real and publishable finding about how much of
+"skill legibility" is just speed and efficiency wearing a costume.
+
+---
+
+## E8 — The deployment question
 
 **Question.** The one a matchmaker actually cares about: given N observations,
 how much better is a telemetry prior than the default of starting everyone in
