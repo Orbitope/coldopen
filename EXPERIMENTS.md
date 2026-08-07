@@ -340,34 +340,76 @@ classifier:
 - **blindspot** — hide a band of the board before the network looks. Models
   attention rather than decision noise.
 
-Temperature, at a 689 Elo range against the trained ladder's 736:
+All four ladders span a comparable range (612–736 Elo), so the comparison is at
+matched measured strength:
 
-| moves seen | undertrained | temperature-handicapped |
-|---|---|---|
-| 1 | **0.468** | 0.287 |
-| 2 | 0.575 | 0.302 |
-| 3 | 0.602 | 0.280 |
-| 16 | 0.619 | 0.384 |
+| moves seen | undertrained | temperature | epsilon | blindspot |
+|---|---|---|---|---|
+| 1 | **0.468** | 0.281 | 0.249 | 0.307 |
+| 3 | 0.602 | 0.312 | 0.283 | 0.369 |
+| 5 | 0.548 | 0.302 | 0.286 | **0.536** |
+| 12 | 0.567 | 0.358 | 0.346 | 0.486 |
+| 20 | 0.631 | 0.402 | 0.382 | 0.525 |
 
-**At matched strength, skill is far less legible from early moves when weakness
-comes from decision noise than when it comes from an undertrained value
-function.** The curve is both lower and slower-rising, exactly as predicted.
+**At matched strength, undertraining is by far the most legible from a single
+move.** Every handicap lands between 0.25 and 0.31 where undertraining reaches
+0.468. This is the most consequential result in the project so far: the headline
+finding — most of the signal arriving on move one — is substantially a property of
+*how the ladder was built*, not of Connect Four.
 
-This is the most consequential result in the project so far, because the headline
-finding — most of the signal arriving on move one — turns out to be substantially
-a property of *how the ladder was built*. An undertrained network is uniformly bad
-and therefore easy to recognise from any single move. A policy that still prefers
-good moves and merely wavers between close ones is not.
+It also sharpens the standing E3 prediction. If humans resemble any of these
+handicaps more than they resemble an undertrained network, achievable accuracy
+from one move is nearer 0.3 than 0.47.
 
-Human error is far more likely to resemble the second. That makes the written
-E3 prediction — that transfer to humans will compress — both more specific and
-more likely: if humans look like temperature-handicapped agents, achievable
-accuracy from one move is nearer 0.29 than 0.47.
+### The prediction was wrong, and the reversal is more useful
 
-**A secondary finding.** The handicapped ladder *ranks better* than the trained
-one — concordance 0.978 against 0.912 — because the handicap dial controls
-strength directly while training only correlates with it. If the point of a
-ladder is graded strength, handicapping is the better instrument.
+I predicted handicapping would produce *more structured* errors than
+undertraining. Measuring the concentration of each tier's blunder profile —
+0 meaning mistakes spread evenly across missed wins, missed blocks and handed-over
+wins, 1 meaning they all pile into one kind — gives the opposite:
+
+| generator | error concentration, weakest tiers |
+|---|---|
+| undertrained | 0.33, 0.34, 0.25, 0.37 |
+| blindspot | 0.31, 0.36, 0.19, 0.14 |
+| epsilon | 0.21, 0.13, 0.12, 0.11 |
+| temperature | 0.16, 0.15, 0.12, 0.12 |
+
+**Undertraining produces the most concentrated errors; noise handicaps produce
+the most uniform ones.** Obvious in hindsight: an undertrained network has
+systematic gaps — it has learned something about the centre and nothing about
+blocking — so its mistakes have a characteristic shape. Noise applied evenly
+across positions spreads mistakes evenly across error types.
+
+That reverses the mechanism but strengthens the conclusion. Undertrained agents
+are easy to classify early *because* their errors are systematic: one move can
+reveal a recognisable profile of what the agent has not learned. Noise-degraded
+agents are hard because their errors are unbiased, so you must accumulate
+observations to estimate a rate.
+
+**Blindspot behaves differently from both**, and its curve is the giveaway: flat
+until three moves, then a jump to 0.536 at five, then a plateau. Attention
+failures show up as occasional catastrophic misses, so a few moves reveal
+nothing and then one does.
+
+### What this gives the agent track
+
+The three generators have **distinguishable fingerprints** — the shape of the
+accuracy curve and the concentration of the error profile. That is a method, not
+just a caveat: compute the same two signatures on a human corpus, and the
+generator whose fingerprint matches is the one to build the ladder with. It turns
+"which failure model are humans?" from a guess into a measurement, and it is
+cheap because the human side needs no agents at all.
+
+Neither pure generator is obviously right. Human beginners have systematic gaps,
+like an undertrained network, *and* noisy execution, like a temperature policy.
+A ladder combining both is the likely answer, and now there is a way to check.
+
+**A secondary finding.** All three handicapped ladders rank at least as well as
+the trained one — concordance 1.000 for epsilon and blindspot, 0.978 for
+temperature, against 0.912 — because a handicap dial controls strength directly
+while training only correlates with it. If the point of a ladder is graded
+strength, handicapping is the better instrument.
 
 **A limit worth recording.** Blindspot cannot reach the bottom of the ladder:
 blind to most of the board it still scores about 0.80 against random, because a

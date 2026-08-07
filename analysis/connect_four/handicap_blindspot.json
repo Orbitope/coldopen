@@ -1,0 +1,1534 @@
+{
+  "game": "connect_four",
+  "generator": "blindspot",
+  "league": {
+    "table": [
+      {
+        "id": "random",
+        "plies": -1,
+        "elo": 0.0,
+        "strength": 0.114262254709306,
+        "tier": "bronze",
+        "tier_index": 0
+      },
+      {
+        "id": "blindspot_1",
+        "plies": 0,
+        "elo": 173.5,
+        "strength": 0.31023240587872514,
+        "tier": "silver",
+        "tier_index": 1
+      },
+      {
+        "id": "blindspot_0.9",
+        "plies": 1,
+        "elo": 252.5,
+        "strength": 0.48880327917111943
+      },
+      {
+        "id": "blindspot_0.8",
+        "plies": 2,
+        "elo": 257.1,
+        "strength": 0.5020202404707742
+      },
+      {
+        "id": "blindspot_0.7",
+        "plies": 3,
+        "elo": 301.8,
+        "strength": 0.6490990906183985,
+        "tier": "gold",
+        "tier_index": 2
+      },
+      {
+        "id": "blindspot_0.6",
+        "plies": 4,
+        "elo": 374.7,
+        "strength": 0.9876603443352852
+      },
+      {
+        "id": "blindspot_0.45",
+        "plies": 5,
+        "elo": 454.1,
+        "strength": 1.5596799567022683,
+        "tier": "platinum",
+        "tier_index": 3
+      },
+      {
+        "id": "blindspot_0.3",
+        "plies": 6,
+        "elo": 542.0,
+        "strength": 2.587457544599177
+      },
+      {
+        "id": "blindspot_0.15",
+        "plies": 7,
+        "elo": 627.8,
+        "strength": 4.2406382507031175,
+        "tier": "diamond",
+        "tier_index": 4
+      },
+      {
+        "id": "blindspot_0",
+        "plies": 8,
+        "elo": 785.0,
+        "strength": 10.478428249475824,
+        "tier": "grandmaster",
+        "tier_index": 5
+      }
+    ],
+    "pairs": [
+      {
+        "a": "random",
+        "b": "blindspot_1",
+        "wins_a": 40,
+        "wins_b": 260,
+        "draws": 0,
+        "score_a": 0.13333334028720856
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.9",
+        "wins_a": 69,
+        "wins_b": 231,
+        "draws": 0,
+        "score_a": 0.23000000417232513
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.8",
+        "wins_a": 54,
+        "wins_b": 246,
+        "draws": 0,
+        "score_a": 0.18000000715255737
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.7",
+        "wins_a": 51,
+        "wins_b": 249,
+        "draws": 0,
+        "score_a": 0.17000000178813934
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.6",
+        "wins_a": 26,
+        "wins_b": 274,
+        "draws": 0,
+        "score_a": 0.08666666597127914
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.45",
+        "wins_a": 30,
+        "wins_b": 270,
+        "draws": 0,
+        "score_a": 0.10000000149011612
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.3",
+        "wins_a": 27,
+        "wins_b": 272,
+        "draws": 1,
+        "score_a": 0.09166666865348816
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.15",
+        "wins_a": 9,
+        "wins_b": 289,
+        "draws": 2,
+        "score_a": 0.03333333507180214
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0",
+        "wins_a": 6,
+        "wins_b": 294,
+        "draws": 0,
+        "score_a": 0.019999999552965164
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.9",
+        "wins_a": 97,
+        "wins_b": 199,
+        "draws": 4,
+        "score_a": 0.33000001311302185
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.8",
+        "wins_a": 87,
+        "wins_b": 210,
+        "draws": 3,
+        "score_a": 0.29499998688697815
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.7",
+        "wins_a": 89,
+        "wins_b": 207,
+        "draws": 4,
+        "score_a": 0.3033333420753479
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.6",
+        "wins_a": 67,
+        "wins_b": 232,
+        "draws": 1,
+        "score_a": 0.22499999403953552
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.45",
+        "wins_a": 48,
+        "wins_b": 252,
+        "draws": 0,
+        "score_a": 0.1599999964237213
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.3",
+        "wins_a": 40,
+        "wins_b": 260,
+        "draws": 0,
+        "score_a": 0.13333334028720856
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.15",
+        "wins_a": 29,
+        "wins_b": 271,
+        "draws": 0,
+        "score_a": 0.09666666388511658
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0",
+        "wins_a": 7,
+        "wins_b": 293,
+        "draws": 0,
+        "score_a": 0.023333333432674408
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.8",
+        "wins_a": 146,
+        "wins_b": 152,
+        "draws": 2,
+        "score_a": 0.49000000953674316
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.7",
+        "wins_a": 126,
+        "wins_b": 170,
+        "draws": 4,
+        "score_a": 0.4266666769981384
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.6",
+        "wins_a": 93,
+        "wins_b": 203,
+        "draws": 4,
+        "score_a": 0.3166666626930237
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.45",
+        "wins_a": 75,
+        "wins_b": 224,
+        "draws": 1,
+        "score_a": 0.2516666650772095
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.3",
+        "wins_a": 43,
+        "wins_b": 255,
+        "draws": 2,
+        "score_a": 0.14666666090488434
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.15",
+        "wins_a": 27,
+        "wins_b": 272,
+        "draws": 1,
+        "score_a": 0.09166666865348816
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0",
+        "wins_a": 17,
+        "wins_b": 282,
+        "draws": 1,
+        "score_a": 0.05833333358168602
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.7",
+        "wins_a": 126,
+        "wins_b": 174,
+        "draws": 0,
+        "score_a": 0.41999998688697815
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.6",
+        "wins_a": 106,
+        "wins_b": 193,
+        "draws": 1,
+        "score_a": 0.35499998927116394
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.45",
+        "wins_a": 54,
+        "wins_b": 245,
+        "draws": 1,
+        "score_a": 0.18166667222976685
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.3",
+        "wins_a": 39,
+        "wins_b": 260,
+        "draws": 1,
+        "score_a": 0.1316666603088379
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.15",
+        "wins_a": 24,
+        "wins_b": 274,
+        "draws": 2,
+        "score_a": 0.0833333358168602
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0",
+        "wins_a": 19,
+        "wins_b": 281,
+        "draws": 0,
+        "score_a": 0.06333333253860474
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.6",
+        "wins_a": 116,
+        "wins_b": 180,
+        "draws": 4,
+        "score_a": 0.3933333456516266
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.45",
+        "wins_a": 80,
+        "wins_b": 217,
+        "draws": 3,
+        "score_a": 0.27166667580604553
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.3",
+        "wins_a": 64,
+        "wins_b": 234,
+        "draws": 2,
+        "score_a": 0.21666666865348816
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.15",
+        "wins_a": 34,
+        "wins_b": 266,
+        "draws": 0,
+        "score_a": 0.1133333370089531
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0",
+        "wins_a": 19,
+        "wins_b": 278,
+        "draws": 3,
+        "score_a": 0.06833333522081375
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.45",
+        "wins_a": 116,
+        "wins_b": 180,
+        "draws": 4,
+        "score_a": 0.3933333456516266
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.3",
+        "wins_a": 70,
+        "wins_b": 228,
+        "draws": 2,
+        "score_a": 0.23666666448116302
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.15",
+        "wins_a": 63,
+        "wins_b": 232,
+        "draws": 5,
+        "score_a": 0.21833333373069763
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0",
+        "wins_a": 17,
+        "wins_b": 281,
+        "draws": 2,
+        "score_a": 0.05999999865889549
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0.3",
+        "wins_a": 117,
+        "wins_b": 182,
+        "draws": 1,
+        "score_a": 0.3916666805744171
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0.15",
+        "wins_a": 77,
+        "wins_b": 222,
+        "draws": 1,
+        "score_a": 0.25833332538604736
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0",
+        "wins_a": 25,
+        "wins_b": 274,
+        "draws": 1,
+        "score_a": 0.08500000089406967
+      },
+      {
+        "a": "blindspot_0.3",
+        "b": "blindspot_0.15",
+        "wins_a": 119,
+        "wins_b": 173,
+        "draws": 8,
+        "score_a": 0.4099999964237213
+      },
+      {
+        "a": "blindspot_0.3",
+        "b": "blindspot_0",
+        "wins_a": 52,
+        "wins_b": 237,
+        "draws": 11,
+        "score_a": 0.19166666269302368
+      },
+      {
+        "a": "blindspot_0.15",
+        "b": "blindspot_0",
+        "wins_a": 92,
+        "wins_b": 200,
+        "draws": 8,
+        "score_a": 0.3199999928474426
+      }
+    ],
+    "games_per_pair": 300,
+    "monotonicity": {
+      "adjacent_inversions": 0,
+      "adjacent_pairs": 8,
+      "rank_concordance": 1.0,
+      "elo_range": 611.5,
+      "strictly_monotone": true,
+      "monotone_from_plies": 0,
+      "monotone_suffix_length": 9
+    },
+    "tiers": [
+      {
+        "id": "random",
+        "plies": -1,
+        "elo": 0.0,
+        "strength": 0.114262254709306,
+        "tier": "bronze",
+        "tier_index": 0
+      },
+      {
+        "id": "blindspot_1",
+        "plies": 0,
+        "elo": 173.5,
+        "strength": 0.31023240587872514,
+        "tier": "silver",
+        "tier_index": 1
+      },
+      {
+        "id": "blindspot_0.7",
+        "plies": 3,
+        "elo": 301.8,
+        "strength": 0.6490990906183985,
+        "tier": "gold",
+        "tier_index": 2
+      },
+      {
+        "id": "blindspot_0.45",
+        "plies": 5,
+        "elo": 454.1,
+        "strength": 1.5596799567022683,
+        "tier": "platinum",
+        "tier_index": 3
+      },
+      {
+        "id": "blindspot_0.15",
+        "plies": 7,
+        "elo": 627.8,
+        "strength": 4.2406382507031175,
+        "tier": "diamond",
+        "tier_index": 4
+      },
+      {
+        "id": "blindspot_0",
+        "plies": 8,
+        "elo": 785.0,
+        "strength": 10.478428249475824,
+        "tier": "grandmaster",
+        "tier_index": 5
+      }
+    ]
+  },
+  "telemetry": {
+    "feature_names": [
+      "missed_win",
+      "missed_block",
+      "gave_win",
+      "made_threat",
+      "took_win",
+      "center_distance",
+      "ref_agreement",
+      "ref_regret"
+    ],
+    "curves": {
+      "all": [
+        {
+          "n_moves": 1,
+          "n_samples": 3600,
+          "exact_accuracy": 0.30722222222222223,
+          "within_one_tier": 0.5288888888888889,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.2568477767644753,
+          "mean_absolute_tier_error": 1.6075,
+          "confusion": [
+            [
+              494,
+              39,
+              13,
+              22,
+              0,
+              32
+            ],
+            [
+              0,
+              247,
+              99,
+              61,
+              9,
+              184
+            ],
+            [
+              8,
+              230,
+              121,
+              69,
+              10,
+              162
+            ],
+            [
+              8,
+              239,
+              104,
+              82,
+              12,
+              155
+            ],
+            [
+              11,
+              251,
+              98,
+              61,
+              6,
+              173
+            ],
+            [
+              7,
+              268,
+              102,
+              56,
+              11,
+              156
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3600,
+          "exact_accuracy": 0.3244444444444444,
+          "within_one_tier": 0.5502777777777778,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.29544905033896546,
+          "mean_absolute_tier_error": 1.5116666666666667,
+          "confusion": [
+            [
+              574,
+              5,
+              5,
+              5,
+              4,
+              7
+            ],
+            [
+              0,
+              269,
+              61,
+              98,
+              85,
+              87
+            ],
+            [
+              16,
+              251,
+              62,
+              120,
+              67,
+              84
+            ],
+            [
+              11,
+              267,
+              65,
+              121,
+              68,
+              68
+            ],
+            [
+              22,
+              290,
+              54,
+              98,
+              62,
+              74
+            ],
+            [
+              26,
+              269,
+              53,
+              101,
+              71,
+              80
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3600,
+          "exact_accuracy": 0.3688888888888889,
+          "within_one_tier": 0.615,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.43429670538089676,
+          "mean_absolute_tier_error": 1.3183333333333334,
+          "confusion": [
+            [
+              562,
+              1,
+              3,
+              12,
+              8,
+              14
+            ],
+            [
+              0,
+              248,
+              112,
+              89,
+              50,
+              101
+            ],
+            [
+              10,
+              213,
+              134,
+              105,
+              46,
+              92
+            ],
+            [
+              18,
+              203,
+              108,
+              108,
+              47,
+              116
+            ],
+            [
+              20,
+              175,
+              107,
+              71,
+              34,
+              193
+            ],
+            [
+              24,
+              138,
+              93,
+              67,
+              36,
+              242
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3600,
+          "exact_accuracy": 0.5358333333333334,
+          "within_one_tier": 0.8269444444444445,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7442001794357603,
+          "mean_absolute_tier_error": 0.7466666666666667,
+          "confusion": [
+            [
+              552,
+              0,
+              6,
+              18,
+              18,
+              6
+            ],
+            [
+              0,
+              482,
+              52,
+              20,
+              18,
+              28
+            ],
+            [
+              7,
+              200,
+              172,
+              118,
+              58,
+              45
+            ],
+            [
+              11,
+              90,
+              153,
+              143,
+              112,
+              91
+            ],
+            [
+              19,
+              42,
+              71,
+              98,
+              142,
+              228
+            ],
+            [
+              16,
+              25,
+              14,
+              20,
+              87,
+              438
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3600,
+          "exact_accuracy": 0.5069444444444444,
+          "within_one_tier": 0.8186111111111111,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7214589549766491,
+          "mean_absolute_tier_error": 0.7772222222222223,
+          "confusion": [
+            [
+              546,
+              3,
+              5,
+              18,
+              21,
+              7
+            ],
+            [
+              2,
+              368,
+              112,
+              58,
+              44,
+              16
+            ],
+            [
+              4,
+              124,
+              218,
+              152,
+              67,
+              35
+            ],
+            [
+              15,
+              60,
+              151,
+              170,
+              143,
+              61
+            ],
+            [
+              19,
+              29,
+              74,
+              133,
+              204,
+              141
+            ],
+            [
+              9,
+              19,
+              31,
+              61,
+              161,
+              319
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4855555555555556,
+          "within_one_tier": 0.795,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7010514528931333,
+          "mean_absolute_tier_error": 0.8225,
+          "confusion": [
+            [
+              549,
+              1,
+              9,
+              17,
+              12,
+              12
+            ],
+            [
+              1,
+              309,
+              141,
+              87,
+              39,
+              23
+            ],
+            [
+              7,
+              119,
+              248,
+              133,
+              71,
+              22
+            ],
+            [
+              14,
+              74,
+              166,
+              144,
+              118,
+              84
+            ],
+            [
+              15,
+              18,
+              83,
+              132,
+              199,
+              153
+            ],
+            [
+              16,
+              19,
+              39,
+              77,
+              150,
+              299
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3600,
+          "exact_accuracy": 0.48777777777777775,
+          "within_one_tier": 0.8130555555555555,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7215497360239576,
+          "mean_absolute_tier_error": 0.8011111111111111,
+          "confusion": [
+            [
+              566,
+              1,
+              4,
+              12,
+              7,
+              10
+            ],
+            [
+              2,
+              292,
+              121,
+              96,
+              44,
+              45
+            ],
+            [
+              9,
+              143,
+              221,
+              133,
+              56,
+              38
+            ],
+            [
+              13,
+              59,
+              133,
+              176,
+              126,
+              93
+            ],
+            [
+              9,
+              17,
+              49,
+              134,
+              200,
+              191
+            ],
+            [
+              16,
+              10,
+              23,
+              63,
+              187,
+              301
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3600,
+          "exact_accuracy": 0.5247222222222222,
+          "within_one_tier": 0.8627777777777778,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.778961999434673,
+          "mean_absolute_tier_error": 0.6841666666666667,
+          "confusion": [
+            [
+              578,
+              2,
+              1,
+              8,
+              4,
+              7
+            ],
+            [
+              2,
+              296,
+              173,
+              67,
+              28,
+              34
+            ],
+            [
+              6,
+              141,
+              254,
+              131,
+              39,
+              29
+            ],
+            [
+              5,
+              42,
+              156,
+              192,
+              142,
+              63
+            ],
+            [
+              7,
+              10,
+              46,
+              142,
+              229,
+              166
+            ],
+            [
+              5,
+              10,
+              32,
+              51,
+              162,
+              340
+            ]
+          ]
+        }
+      ],
+      "intrinsic_only": [
+        {
+          "n_moves": 1,
+          "n_samples": 3600,
+          "exact_accuracy": 0.30722222222222223,
+          "within_one_tier": 0.4936111111111111,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5399129707583946,
+          "mean_absolute_tier_error": 1.7130555555555556,
+          "confusion": [
+            [
+              506,
+              94,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              600,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              23,
+              577,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              26,
+              574,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              16,
+              584,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              8,
+              592,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3600,
+          "exact_accuracy": 0.3308333333333333,
+          "within_one_tier": 0.4888888888888889,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5301518128785713,
+          "mean_absolute_tier_error": 1.7102777777777778,
+          "confusion": [
+            [
+              591,
+              8,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              600,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              39,
+              560,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              45,
+              554,
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              34,
+              566,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              27,
+              573,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3600,
+          "exact_accuracy": 0.36444444444444446,
+          "within_one_tier": 0.5705555555555556,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.36969455520321753,
+          "mean_absolute_tier_error": 1.4744444444444444,
+          "confusion": [
+            [
+              551,
+              0,
+              3,
+              0,
+              13,
+              33
+            ],
+            [
+              0,
+              562,
+              2,
+              0,
+              36,
+              0
+            ],
+            [
+              8,
+              500,
+              6,
+              0,
+              71,
+              15
+            ],
+            [
+              8,
+              471,
+              3,
+              0,
+              77,
+              41
+            ],
+            [
+              11,
+              421,
+              0,
+              0,
+              96,
+              72
+            ],
+            [
+              17,
+              398,
+              0,
+              0,
+              88,
+              97
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3600,
+          "exact_accuracy": 0.435,
+          "within_one_tier": 0.7127777777777777,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5733740169404035,
+          "mean_absolute_tier_error": 1.0802777777777777,
+          "confusion": [
+            [
+              552,
+              0,
+              4,
+              3,
+              22,
+              19
+            ],
+            [
+              0,
+              538,
+              25,
+              1,
+              29,
+              7
+            ],
+            [
+              7,
+              355,
+              77,
+              8,
+              117,
+              36
+            ],
+            [
+              7,
+              255,
+              55,
+              8,
+              178,
+              97
+            ],
+            [
+              19,
+              161,
+              26,
+              5,
+              224,
+              165
+            ],
+            [
+              29,
+              163,
+              19,
+              13,
+              209,
+              167
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4652777777777778,
+          "within_one_tier": 0.765,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6435579764915061,
+          "mean_absolute_tier_error": 0.935,
+          "confusion": [
+            [
+              535,
+              2,
+              4,
+              16,
+              29,
+              14
+            ],
+            [
+              0,
+              334,
+              165,
+              40,
+              36,
+              25
+            ],
+            [
+              5,
+              174,
+              245,
+              71,
+              47,
+              58
+            ],
+            [
+              16,
+              118,
+              148,
+              69,
+              128,
+              121
+            ],
+            [
+              23,
+              70,
+              80,
+              50,
+              173,
+              204
+            ],
+            [
+              16,
+              44,
+              67,
+              17,
+              137,
+              319
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4736111111111111,
+          "within_one_tier": 0.7708333333333334,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6935023110959934,
+          "mean_absolute_tier_error": 0.875,
+          "confusion": [
+            [
+              547,
+              0,
+              6,
+              20,
+              19,
+              8
+            ],
+            [
+              0,
+              335,
+              110,
+              96,
+              41,
+              18
+            ],
+            [
+              6,
+              145,
+              206,
+              120,
+              68,
+              55
+            ],
+            [
+              24,
+              80,
+              132,
+              123,
+              123,
+              118
+            ],
+            [
+              19,
+              40,
+              79,
+              121,
+              115,
+              226
+            ],
+            [
+              10,
+              16,
+              52,
+              50,
+              93,
+              379
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3600,
+          "exact_accuracy": 0.47888888888888886,
+          "within_one_tier": 0.7952777777777778,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6820673701207073,
+          "mean_absolute_tier_error": 0.8694444444444445,
+          "confusion": [
+            [
+              551,
+              2,
+              9,
+              10,
+              17,
+              11
+            ],
+            [
+              2,
+              313,
+              119,
+              69,
+              50,
+              47
+            ],
+            [
+              9,
+              165,
+              208,
+              113,
+              43,
+              62
+            ],
+            [
+              19,
+              80,
+              126,
+              149,
+              124,
+              102
+            ],
+            [
+              19,
+              35,
+              43,
+              117,
+              159,
+              227
+            ],
+            [
+              27,
+              18,
+              25,
+              42,
+              144,
+              344
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3600,
+          "exact_accuracy": 0.49722222222222223,
+          "within_one_tier": 0.8244444444444444,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7385948968715438,
+          "mean_absolute_tier_error": 0.7772222222222223,
+          "confusion": [
+            [
+              562,
+              4,
+              1,
+              14,
+              10,
+              9
+            ],
+            [
+              6,
+              292,
+              159,
+              72,
+              36,
+              35
+            ],
+            [
+              8,
+              177,
+              217,
+              100,
+              55,
+              43
+            ],
+            [
+              14,
+              59,
+              135,
+              176,
+              125,
+              91
+            ],
+            [
+              16,
+              18,
+              55,
+              129,
+              164,
+              218
+            ],
+            [
+              13,
+              10,
+              23,
+              50,
+              125,
+              379
+            ]
+          ]
+        }
+      ]
+    },
+    "feature_means_by_tier": {
+      "0": {
+        "missed_win": 0.049861110746860504,
+        "missed_block": 0.1599999964237213,
+        "gave_win": 0.1899999976158142,
+        "made_threat": 0.10263887792825699,
+        "took_win": 0.011666667647659779,
+        "center_distance": 1.7661110162734985,
+        "ref_agreement": 0.15388888120651245,
+        "ref_regret": 0.35513365268707275
+      },
+      "1": {
+        "missed_win": 0.022638889029622078,
+        "missed_block": 0.10125000029802322,
+        "gave_win": 0.11944445222616196,
+        "made_threat": 0.09291666746139526,
+        "took_win": 0.02708333358168602,
+        "center_distance": 0.6606944799423218,
+        "ref_agreement": 0.34513887763023376,
+        "ref_regret": 0.2270558625459671
+      },
+      "2": {
+        "missed_win": 0.06263889372348785,
+        "missed_block": 0.07194443792104721,
+        "gave_win": 0.1155555471777916,
+        "made_threat": 0.14888888597488403,
+        "took_win": 0.033472225069999695,
+        "center_distance": 0.7450000047683716,
+        "ref_agreement": 0.35208332538604736,
+        "ref_regret": 0.2183143049478531
+      },
+      "3": {
+        "missed_win": 0.05097222700715065,
+        "missed_block": 0.04138889163732529,
+        "gave_win": 0.06791666895151138,
+        "made_threat": 0.14388889074325562,
+        "took_win": 0.04583333432674408,
+        "center_distance": 0.8723610639572144,
+        "ref_agreement": 0.3809722363948822,
+        "ref_regret": 0.17935946583747864
+      },
+      "4": {
+        "missed_win": 0.03375000134110451,
+        "missed_block": 0.020694445818662643,
+        "gave_win": 0.036249998956918716,
+        "made_threat": 0.13152778148651123,
+        "took_win": 0.05694444105029106,
+        "center_distance": 0.9679166674613953,
+        "ref_agreement": 0.41972222924232483,
+        "ref_regret": 0.1512252688407898
+      },
+      "5": {
+        "missed_win": 0.016805557534098625,
+        "missed_block": 0.007083333563059568,
+        "gave_win": 0.010555556043982506,
+        "made_threat": 0.11986111849546432,
+        "took_win": 0.06805555522441864,
+        "center_distance": 0.9893054962158203,
+        "ref_agreement": 0.43138885498046875,
+        "ref_regret": 0.11866780370473862
+      }
+    },
+    "error_structure": {
+      "0": 0.312955885868809,
+      "1": 0.360445209326466,
+      "2": 0.19294833966936353,
+      "3": 0.13561523374694742,
+      "4": 0.15773352110165265,
+      "5": 0.23185486757425455
+    }
+  }
+}

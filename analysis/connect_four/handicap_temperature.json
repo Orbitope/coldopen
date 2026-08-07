@@ -1,0 +1,1620 @@
+{
+  "game": "connect_four",
+  "generator": "temperature",
+  "league": {
+    "table": [
+      {
+        "id": "random",
+        "plies": -1,
+        "elo": 0.0,
+        "strength": 0.366926852080267
+      },
+      {
+        "id": "temperature_20",
+        "plies": 0,
+        "elo": -6.1,
+        "strength": 0.3542492569851419,
+        "tier": "bronze",
+        "tier_index": 0
+      },
+      {
+        "id": "temperature_14",
+        "plies": 1,
+        "elo": 13.1,
+        "strength": 0.39555954924894055
+      },
+      {
+        "id": "temperature_8",
+        "plies": 2,
+        "elo": 12.2,
+        "strength": 0.393698160262738
+      },
+      {
+        "id": "temperature_4",
+        "plies": 3,
+        "elo": 35.0,
+        "strength": 0.44873565725430614
+      },
+      {
+        "id": "temperature_2",
+        "plies": 4,
+        "elo": 64.1,
+        "strength": 0.5307214562342233
+      },
+      {
+        "id": "temperature_1",
+        "plies": 5,
+        "elo": 119.8,
+        "strength": 0.7314013676911862,
+        "tier": "silver",
+        "tier_index": 1
+      },
+      {
+        "id": "temperature_0.6",
+        "plies": 6,
+        "elo": 183.7,
+        "strength": 1.0561191253847184,
+        "tier": "gold",
+        "tier_index": 2
+      },
+      {
+        "id": "temperature_0.3",
+        "plies": 7,
+        "elo": 328.8,
+        "strength": 2.4347698018049773,
+        "tier": "platinum",
+        "tier_index": 3
+      },
+      {
+        "id": "temperature_0.15",
+        "plies": 8,
+        "elo": 467.9,
+        "strength": 5.4250439826050805,
+        "tier": "diamond",
+        "tier_index": 4
+      },
+      {
+        "id": "temperature_0",
+        "plies": 9,
+        "elo": 697.4,
+        "strength": 20.33055461026856,
+        "tier": "grandmaster",
+        "tier_index": 5
+      }
+    ],
+    "pairs": [
+      {
+        "a": "random",
+        "b": "temperature_20",
+        "wins_a": 166,
+        "wins_b": 133,
+        "draws": 1,
+        "score_a": 0.5550000071525574
+      },
+      {
+        "a": "random",
+        "b": "temperature_14",
+        "wins_a": 122,
+        "wins_b": 175,
+        "draws": 3,
+        "score_a": 0.4116666615009308
+      },
+      {
+        "a": "random",
+        "b": "temperature_8",
+        "wins_a": 133,
+        "wins_b": 166,
+        "draws": 1,
+        "score_a": 0.4449999928474426
+      },
+      {
+        "a": "random",
+        "b": "temperature_4",
+        "wins_a": 146,
+        "wins_b": 154,
+        "draws": 0,
+        "score_a": 0.4866666793823242
+      },
+      {
+        "a": "random",
+        "b": "temperature_2",
+        "wins_a": 121,
+        "wins_b": 178,
+        "draws": 1,
+        "score_a": 0.4050000011920929
+      },
+      {
+        "a": "random",
+        "b": "temperature_1",
+        "wins_a": 122,
+        "wins_b": 177,
+        "draws": 1,
+        "score_a": 0.40833333134651184
+      },
+      {
+        "a": "random",
+        "b": "temperature_0.6",
+        "wins_a": 68,
+        "wins_b": 232,
+        "draws": 0,
+        "score_a": 0.2266666740179062
+      },
+      {
+        "a": "random",
+        "b": "temperature_0.3",
+        "wins_a": 40,
+        "wins_b": 260,
+        "draws": 0,
+        "score_a": 0.13333334028720856
+      },
+      {
+        "a": "random",
+        "b": "temperature_0.15",
+        "wins_a": 12,
+        "wins_b": 288,
+        "draws": 0,
+        "score_a": 0.03999999910593033
+      },
+      {
+        "a": "random",
+        "b": "temperature_0",
+        "wins_a": 7,
+        "wins_b": 293,
+        "draws": 0,
+        "score_a": 0.023333333432674408
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_14",
+        "wins_a": 153,
+        "wins_b": 146,
+        "draws": 1,
+        "score_a": 0.5116666555404663
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_8",
+        "wins_a": 140,
+        "wins_b": 159,
+        "draws": 1,
+        "score_a": 0.46833333373069763
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_4",
+        "wins_a": 136,
+        "wins_b": 164,
+        "draws": 0,
+        "score_a": 0.4533333480358124
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_2",
+        "wins_a": 111,
+        "wins_b": 187,
+        "draws": 2,
+        "score_a": 0.3733333349227905
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_1",
+        "wins_a": 89,
+        "wins_b": 211,
+        "draws": 0,
+        "score_a": 0.2966666519641876
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_0.6",
+        "wins_a": 79,
+        "wins_b": 220,
+        "draws": 1,
+        "score_a": 0.26499998569488525
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_0.3",
+        "wins_a": 43,
+        "wins_b": 256,
+        "draws": 1,
+        "score_a": 0.14499999582767487
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_0.15",
+        "wins_a": 22,
+        "wins_b": 278,
+        "draws": 0,
+        "score_a": 0.07333333045244217
+      },
+      {
+        "a": "temperature_20",
+        "b": "temperature_0",
+        "wins_a": 9,
+        "wins_b": 291,
+        "draws": 0,
+        "score_a": 0.029999999329447746
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_8",
+        "wins_a": 152,
+        "wins_b": 148,
+        "draws": 0,
+        "score_a": 0.5066666603088379
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_4",
+        "wins_a": 135,
+        "wins_b": 163,
+        "draws": 2,
+        "score_a": 0.4533333480358124
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_2",
+        "wins_a": 109,
+        "wins_b": 191,
+        "draws": 0,
+        "score_a": 0.3633333444595337
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_1",
+        "wins_a": 112,
+        "wins_b": 187,
+        "draws": 1,
+        "score_a": 0.375
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_0.6",
+        "wins_a": 86,
+        "wins_b": 213,
+        "draws": 1,
+        "score_a": 0.28833332657814026
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_0.3",
+        "wins_a": 38,
+        "wins_b": 262,
+        "draws": 0,
+        "score_a": 0.12666666507720947
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_0.15",
+        "wins_a": 23,
+        "wins_b": 277,
+        "draws": 0,
+        "score_a": 0.07666666805744171
+      },
+      {
+        "a": "temperature_14",
+        "b": "temperature_0",
+        "wins_a": 8,
+        "wins_b": 292,
+        "draws": 0,
+        "score_a": 0.02666666731238365
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_4",
+        "wins_a": 133,
+        "wins_b": 166,
+        "draws": 1,
+        "score_a": 0.4449999928474426
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_2",
+        "wins_a": 149,
+        "wins_b": 151,
+        "draws": 0,
+        "score_a": 0.49666666984558105
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_1",
+        "wins_a": 92,
+        "wins_b": 208,
+        "draws": 0,
+        "score_a": 0.30666667222976685
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_0.6",
+        "wins_a": 72,
+        "wins_b": 227,
+        "draws": 1,
+        "score_a": 0.24166665971279144
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_0.3",
+        "wins_a": 41,
+        "wins_b": 259,
+        "draws": 0,
+        "score_a": 0.1366666704416275
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_0.15",
+        "wins_a": 20,
+        "wins_b": 280,
+        "draws": 0,
+        "score_a": 0.06666667014360428
+      },
+      {
+        "a": "temperature_8",
+        "b": "temperature_0",
+        "wins_a": 3,
+        "wins_b": 297,
+        "draws": 0,
+        "score_a": 0.009999999776482582
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_2",
+        "wins_a": 138,
+        "wins_b": 162,
+        "draws": 0,
+        "score_a": 0.46000000834465027
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_1",
+        "wins_a": 114,
+        "wins_b": 185,
+        "draws": 1,
+        "score_a": 0.3816666603088379
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_0.6",
+        "wins_a": 102,
+        "wins_b": 194,
+        "draws": 4,
+        "score_a": 0.3466666638851166
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_0.3",
+        "wins_a": 43,
+        "wins_b": 255,
+        "draws": 2,
+        "score_a": 0.14666666090488434
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_0.15",
+        "wins_a": 13,
+        "wins_b": 287,
+        "draws": 0,
+        "score_a": 0.04333333298563957
+      },
+      {
+        "a": "temperature_4",
+        "b": "temperature_0",
+        "wins_a": 7,
+        "wins_b": 293,
+        "draws": 0,
+        "score_a": 0.023333333432674408
+      },
+      {
+        "a": "temperature_2",
+        "b": "temperature_1",
+        "wins_a": 123,
+        "wins_b": 177,
+        "draws": 0,
+        "score_a": 0.4099999964237213
+      },
+      {
+        "a": "temperature_2",
+        "b": "temperature_0.6",
+        "wins_a": 97,
+        "wins_b": 200,
+        "draws": 3,
+        "score_a": 0.3283333480358124
+      },
+      {
+        "a": "temperature_2",
+        "b": "temperature_0.3",
+        "wins_a": 58,
+        "wins_b": 242,
+        "draws": 0,
+        "score_a": 0.19333332777023315
+      },
+      {
+        "a": "temperature_2",
+        "b": "temperature_0.15",
+        "wins_a": 25,
+        "wins_b": 274,
+        "draws": 1,
+        "score_a": 0.08500000089406967
+      },
+      {
+        "a": "temperature_2",
+        "b": "temperature_0",
+        "wins_a": 3,
+        "wins_b": 297,
+        "draws": 0,
+        "score_a": 0.009999999776482582
+      },
+      {
+        "a": "temperature_1",
+        "b": "temperature_0.6",
+        "wins_a": 123,
+        "wins_b": 177,
+        "draws": 0,
+        "score_a": 0.4099999964237213
+      },
+      {
+        "a": "temperature_1",
+        "b": "temperature_0.3",
+        "wins_a": 76,
+        "wins_b": 224,
+        "draws": 0,
+        "score_a": 0.25333333015441895
+      },
+      {
+        "a": "temperature_1",
+        "b": "temperature_0.15",
+        "wins_a": 31,
+        "wins_b": 269,
+        "draws": 0,
+        "score_a": 0.10333333164453506
+      },
+      {
+        "a": "temperature_1",
+        "b": "temperature_0",
+        "wins_a": 13,
+        "wins_b": 287,
+        "draws": 0,
+        "score_a": 0.04333333298563957
+      },
+      {
+        "a": "temperature_0.6",
+        "b": "temperature_0.3",
+        "wins_a": 83,
+        "wins_b": 215,
+        "draws": 2,
+        "score_a": 0.2800000011920929
+      },
+      {
+        "a": "temperature_0.6",
+        "b": "temperature_0.15",
+        "wins_a": 53,
+        "wins_b": 245,
+        "draws": 2,
+        "score_a": 0.18000000715255737
+      },
+      {
+        "a": "temperature_0.6",
+        "b": "temperature_0",
+        "wins_a": 20,
+        "wins_b": 280,
+        "draws": 0,
+        "score_a": 0.06666667014360428
+      },
+      {
+        "a": "temperature_0.3",
+        "b": "temperature_0.15",
+        "wins_a": 86,
+        "wins_b": 213,
+        "draws": 1,
+        "score_a": 0.28833332657814026
+      },
+      {
+        "a": "temperature_0.3",
+        "b": "temperature_0",
+        "wins_a": 41,
+        "wins_b": 258,
+        "draws": 1,
+        "score_a": 0.13833333551883698
+      },
+      {
+        "a": "temperature_0.15",
+        "b": "temperature_0",
+        "wins_a": 42,
+        "wins_b": 252,
+        "draws": 6,
+        "score_a": 0.15000000596046448
+      }
+    ],
+    "games_per_pair": 300,
+    "monotonicity": {
+      "adjacent_inversions": 1,
+      "adjacent_pairs": 9,
+      "rank_concordance": 0.9777777777777777,
+      "elo_range": 703.5,
+      "strictly_monotone": false,
+      "monotone_from_plies": 2,
+      "monotone_suffix_length": 8
+    },
+    "tiers": [
+      {
+        "id": "temperature_20",
+        "plies": 0,
+        "elo": -6.1,
+        "strength": 0.3542492569851419,
+        "tier": "bronze",
+        "tier_index": 0
+      },
+      {
+        "id": "temperature_1",
+        "plies": 5,
+        "elo": 119.8,
+        "strength": 0.7314013676911862,
+        "tier": "silver",
+        "tier_index": 1
+      },
+      {
+        "id": "temperature_0.6",
+        "plies": 6,
+        "elo": 183.7,
+        "strength": 1.0561191253847184,
+        "tier": "gold",
+        "tier_index": 2
+      },
+      {
+        "id": "temperature_0.3",
+        "plies": 7,
+        "elo": 328.8,
+        "strength": 2.4347698018049773,
+        "tier": "platinum",
+        "tier_index": 3
+      },
+      {
+        "id": "temperature_0.15",
+        "plies": 8,
+        "elo": 467.9,
+        "strength": 5.4250439826050805,
+        "tier": "diamond",
+        "tier_index": 4
+      },
+      {
+        "id": "temperature_0",
+        "plies": 9,
+        "elo": 697.4,
+        "strength": 20.33055461026856,
+        "tier": "grandmaster",
+        "tier_index": 5
+      }
+    ]
+  },
+  "telemetry": {
+    "feature_names": [
+      "missed_win",
+      "missed_block",
+      "gave_win",
+      "made_threat",
+      "took_win",
+      "center_distance",
+      "ref_agreement",
+      "ref_regret"
+    ],
+    "curves": {
+      "all": [
+        {
+          "n_moves": 1,
+          "n_samples": 3564,
+          "exact_accuracy": 0.2814253647586981,
+          "within_one_tier": 0.5757575757575758,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.3807562219535908,
+          "mean_absolute_tier_error": 1.494949494949495,
+          "confusion": [
+            [
+              103,
+              109,
+              83,
+              143,
+              56,
+              100
+            ],
+            [
+              145,
+              68,
+              103,
+              142,
+              46,
+              90
+            ],
+            [
+              111,
+              102,
+              67,
+              138,
+              62,
+              114
+            ],
+            [
+              116,
+              75,
+              88,
+              153,
+              47,
+              115
+            ],
+            [
+              77,
+              77,
+              79,
+              126,
+              59,
+              176
+            ],
+            [
+              3,
+              2,
+              0,
+              21,
+              15,
+              553
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3114478114478115,
+          "within_one_tier": 0.5998877665544332,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.43136540326260303,
+          "mean_absolute_tier_error": 1.3636363636363635,
+          "confusion": [
+            [
+              125,
+              134,
+              122,
+              100,
+              83,
+              30
+            ],
+            [
+              137,
+              123,
+              120,
+              101,
+              81,
+              32
+            ],
+            [
+              105,
+              118,
+              130,
+              100,
+              100,
+              41
+            ],
+            [
+              107,
+              129,
+              112,
+              92,
+              101,
+              53
+            ],
+            [
+              92,
+              92,
+              121,
+              93,
+              108,
+              88
+            ],
+            [
+              9,
+              8,
+              12,
+              8,
+              25,
+              532
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3117283950617284,
+          "within_one_tier": 0.6083052749719416,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.4341034071984074,
+          "mean_absolute_tier_error": 1.3409090909090908,
+          "confusion": [
+            [
+              137,
+              134,
+              125,
+              96,
+              88,
+              14
+            ],
+            [
+              129,
+              135,
+              119,
+              101,
+              89,
+              21
+            ],
+            [
+              121,
+              135,
+              116,
+              98,
+              100,
+              24
+            ],
+            [
+              99,
+              118,
+              101,
+              117,
+              115,
+              44
+            ],
+            [
+              83,
+              90,
+              96,
+              112,
+              147,
+              66
+            ],
+            [
+              14,
+              15,
+              34,
+              24,
+              48,
+              459
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3564,
+          "exact_accuracy": 0.30190796857463525,
+          "within_one_tier": 0.6245791245791246,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.43807677313534654,
+          "mean_absolute_tier_error": 1.3336139169472503,
+          "confusion": [
+            [
+              132,
+              135,
+              136,
+              84,
+              93,
+              14
+            ],
+            [
+              146,
+              115,
+              139,
+              101,
+              76,
+              17
+            ],
+            [
+              117,
+              134,
+              116,
+              105,
+              101,
+              21
+            ],
+            [
+              105,
+              114,
+              105,
+              103,
+              130,
+              37
+            ],
+            [
+              87,
+              83,
+              68,
+              115,
+              176,
+              65
+            ],
+            [
+              23,
+              16,
+              21,
+              24,
+              76,
+              434
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3324915824915825,
+          "within_one_tier": 0.6748035914702581,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5584387349807065,
+          "mean_absolute_tier_error": 1.1641414141414141,
+          "confusion": [
+            [
+              159,
+              152,
+              128,
+              92,
+              58,
+              5
+            ],
+            [
+              157,
+              135,
+              136,
+              89,
+              68,
+              9
+            ],
+            [
+              136,
+              111,
+              108,
+              123,
+              96,
+              20
+            ],
+            [
+              94,
+              97,
+              116,
+              115,
+              139,
+              33
+            ],
+            [
+              52,
+              47,
+              84,
+              112,
+              227,
+              72
+            ],
+            [
+              3,
+              6,
+              16,
+              26,
+              102,
+              441
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3564,
+          "exact_accuracy": 0.35774410774410775,
+          "within_one_tier": 0.6992143658810326,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6155845548500718,
+          "mean_absolute_tier_error": 1.0715488215488216,
+          "confusion": [
+            [
+              198,
+              156,
+              127,
+              72,
+              38,
+              3
+            ],
+            [
+              150,
+              170,
+              115,
+              107,
+              48,
+              4
+            ],
+            [
+              139,
+              125,
+              111,
+              104,
+              105,
+              10
+            ],
+            [
+              80,
+              97,
+              110,
+              143,
+              135,
+              29
+            ],
+            [
+              41,
+              56,
+              77,
+              140,
+              213,
+              67
+            ],
+            [
+              0,
+              4,
+              9,
+              26,
+              115,
+              440
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3888888888888889,
+          "within_one_tier": 0.7415824915824916,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6703410326241345,
+          "mean_absolute_tier_error": 0.9699775533108866,
+          "confusion": [
+            [
+              225,
+              162,
+              114,
+              62,
+              30,
+              1
+            ],
+            [
+              177,
+              141,
+              128,
+              94,
+              50,
+              4
+            ],
+            [
+              132,
+              149,
+              115,
+              105,
+              92,
+              1
+            ],
+            [
+              59,
+              88,
+              113,
+              170,
+              147,
+              17
+            ],
+            [
+              25,
+              39,
+              76,
+              152,
+              246,
+              56
+            ],
+            [
+              1,
+              5,
+              13,
+              18,
+              68,
+              489
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3564,
+          "exact_accuracy": 0.4020763187429854,
+          "within_one_tier": 0.7735690235690236,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7062075832979452,
+          "mean_absolute_tier_error": 0.9051627384960719,
+          "confusion": [
+            [
+              231,
+              183,
+              107,
+              48,
+              25,
+              0
+            ],
+            [
+              168,
+              170,
+              145,
+              73,
+              36,
+              2
+            ],
+            [
+              117,
+              134,
+              138,
+              123,
+              81,
+              1
+            ],
+            [
+              65,
+              89,
+              105,
+              151,
+              171,
+              13
+            ],
+            [
+              19,
+              36,
+              64,
+              152,
+              269,
+              54
+            ],
+            [
+              0,
+              2,
+              6,
+              23,
+              89,
+              474
+            ]
+          ]
+        }
+      ],
+      "intrinsic_only": [
+        {
+          "n_moves": 1,
+          "n_samples": 3564,
+          "exact_accuracy": 0.2932098765432099,
+          "within_one_tier": 0.5777216610549943,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.40890988353900215,
+          "mean_absolute_tier_error": 1.467732884399551,
+          "confusion": [
+            [
+              181,
+              109,
+              95,
+              110,
+              0,
+              99
+            ],
+            [
+              159,
+              116,
+              105,
+              123,
+              0,
+              91
+            ],
+            [
+              138,
+              131,
+              97,
+              112,
+              0,
+              116
+            ],
+            [
+              128,
+              134,
+              100,
+              112,
+              0,
+              120
+            ],
+            [
+              111,
+              105,
+              80,
+              111,
+              0,
+              187
+            ],
+            [
+              0,
+              19,
+              9,
+              27,
+              0,
+              539
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3564,
+          "exact_accuracy": 0.30331088664421996,
+          "within_one_tier": 0.6085858585858586,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.4434803108473242,
+          "mean_absolute_tier_error": 1.3928170594837261,
+          "confusion": [
+            [
+              117,
+              262,
+              49,
+              16,
+              120,
+              30
+            ],
+            [
+              121,
+              276,
+              42,
+              9,
+              110,
+              36
+            ],
+            [
+              133,
+              211,
+              34,
+              23,
+              154,
+              39
+            ],
+            [
+              115,
+              217,
+              48,
+              12,
+              157,
+              45
+            ],
+            [
+              94,
+              182,
+              20,
+              15,
+              193,
+              90
+            ],
+            [
+              4,
+              10,
+              2,
+              10,
+              119,
+              449
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3229517396184063,
+          "within_one_tier": 0.5872615039281706,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.420706545061911,
+          "mean_absolute_tier_error": 1.4407968574635241,
+          "confusion": [
+            [
+              214,
+              58,
+              28,
+              134,
+              117,
+              43
+            ],
+            [
+              191,
+              44,
+              46,
+              128,
+              140,
+              45
+            ],
+            [
+              155,
+              34,
+              38,
+              133,
+              171,
+              63
+            ],
+            [
+              155,
+              22,
+              42,
+              134,
+              161,
+              80
+            ],
+            [
+              134,
+              9,
+              29,
+              96,
+              202,
+              124
+            ],
+            [
+              8,
+              1,
+              3,
+              6,
+              57,
+              519
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3425925925925926,
+          "within_one_tier": 0.6388888888888888,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5033770565359129,
+          "mean_absolute_tier_error": 1.27020202020202,
+          "confusion": [
+            [
+              153,
+              139,
+              91,
+              63,
+              115,
+              33
+            ],
+            [
+              136,
+              142,
+              77,
+              79,
+              135,
+              25
+            ],
+            [
+              124,
+              129,
+              75,
+              83,
+              131,
+              52
+            ],
+            [
+              91,
+              115,
+              77,
+              79,
+              173,
+              59
+            ],
+            [
+              45,
+              78,
+              34,
+              66,
+              255,
+              116
+            ],
+            [
+              2,
+              0,
+              3,
+              12,
+              60,
+              517
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3564,
+          "exact_accuracy": 0.33221099887766553,
+          "within_one_tier": 0.6705948372615039,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5427573404932065,
+          "mean_absolute_tier_error": 1.1910774410774412,
+          "confusion": [
+            [
+              164,
+              143,
+              106,
+              94,
+              70,
+              17
+            ],
+            [
+              146,
+              132,
+              111,
+              108,
+              78,
+              19
+            ],
+            [
+              115,
+              126,
+              93,
+              113,
+              119,
+              28
+            ],
+            [
+              89,
+              81,
+              90,
+              123,
+              162,
+              49
+            ],
+            [
+              46,
+              60,
+              65,
+              123,
+              212,
+              88
+            ],
+            [
+              3,
+              4,
+              4,
+              19,
+              104,
+              460
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3564,
+          "exact_accuracy": 0.35886644219977554,
+          "within_one_tier": 0.6907968574635241,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5816223522818176,
+          "mean_absolute_tier_error": 1.1150392817059485,
+          "confusion": [
+            [
+              173,
+              152,
+              123,
+              87,
+              49,
+              10
+            ],
+            [
+              164,
+              140,
+              105,
+              108,
+              61,
+              16
+            ],
+            [
+              134,
+              115,
+              104,
+              132,
+              90,
+              19
+            ],
+            [
+              82,
+              86,
+              87,
+              159,
+              143,
+              37
+            ],
+            [
+              39,
+              60,
+              57,
+              122,
+              236,
+              80
+            ],
+            [
+              5,
+              7,
+              11,
+              21,
+              83,
+              467
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3564,
+          "exact_accuracy": 0.37008978675645343,
+          "within_one_tier": 0.7090347923681257,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6080224054382833,
+          "mean_absolute_tier_error": 1.0628507295173961,
+          "confusion": [
+            [
+              214,
+              141,
+              127,
+              64,
+              42,
+              6
+            ],
+            [
+              138,
+              164,
+              132,
+              93,
+              58,
+              9
+            ],
+            [
+              137,
+              134,
+              105,
+              108,
+              101,
+              9
+            ],
+            [
+              65,
+              85,
+              93,
+              155,
+              176,
+              20
+            ],
+            [
+              38,
+              56,
+              63,
+              121,
+              242,
+              74
+            ],
+            [
+              6,
+              14,
+              12,
+              32,
+              91,
+              439
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3564,
+          "exact_accuracy": 0.3877665544332211,
+          "within_one_tier": 0.7292368125701459,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6599867576774326,
+          "mean_absolute_tier_error": 0.98989898989899,
+          "confusion": [
+            [
+              219,
+              158,
+              129,
+              62,
+              24,
+              2
+            ],
+            [
+              165,
+              164,
+              120,
+              86,
+              55,
+              4
+            ],
+            [
+              141,
+              129,
+              110,
+              110,
+              92,
+              12
+            ],
+            [
+              67,
+              86,
+              99,
+              150,
+              170,
+              22
+            ],
+            [
+              22,
+              47,
+              66,
+              115,
+              282,
+              62
+            ],
+            [
+              3,
+              5,
+              13,
+              27,
+              89,
+              457
+            ]
+          ]
+        }
+      ]
+    },
+    "feature_means_by_tier": {
+      "0": {
+        "missed_win": 0.11069023609161377,
+        "missed_block": 0.12387766689062119,
+        "gave_win": 0.18448373675346375,
+        "made_threat": 0.1950055956840515,
+        "took_win": 0.023148149251937866,
+        "center_distance": 1.6971100568771362,
+        "ref_agreement": 0.14688552916049957,
+        "ref_regret": 0.3706778585910797
+      },
+      "1": {
+        "missed_win": 0.08431538194417953,
+        "missed_block": 0.10535915195941925,
+        "gave_win": 0.14337822794914246,
+        "made_threat": 0.16764871776103973,
+        "took_win": 0.030583616346120834,
+        "center_distance": 1.6725589036941528,
+        "ref_agreement": 0.16638606786727905,
+        "ref_regret": 0.3302517235279083
+      },
+      "2": {
+        "missed_win": 0.07786194980144501,
+        "missed_block": 0.08235128968954086,
+        "gave_win": 0.11349606513977051,
+        "made_threat": 0.16652637720108032,
+        "took_win": 0.03858024626970291,
+        "center_distance": 1.6115319728851318,
+        "ref_agreement": 0.19696970283985138,
+        "ref_regret": 0.2968009114265442
+      },
+      "3": {
+        "missed_win": 0.05162738636136055,
+        "missed_block": 0.049382712692022324,
+        "gave_win": 0.07056678086519241,
+        "made_threat": 0.1533389389514923,
+        "took_win": 0.053170591592788696,
+        "center_distance": 1.542227864265442,
+        "ref_agreement": 0.2379349172115326,
+        "ref_regret": 0.24385689198970795
+      },
+      "4": {
+        "missed_win": 0.038439951837062836,
+        "missed_block": 0.026094278320670128,
+        "gave_win": 0.040544334799051285,
+        "made_threat": 0.1496913731098175,
+        "took_win": 0.06691919267177582,
+        "center_distance": 1.374719500541687,
+        "ref_agreement": 0.28703704476356506,
+        "ref_regret": 0.19545720517635345
+      },
+      "5": {
+        "missed_win": 0.020763186737895012,
+        "missed_block": 0.003367003286257386,
+        "gave_win": 0.007295174058526754,
+        "made_threat": 0.18139730393886566,
+        "took_win": 0.10830528289079666,
+        "center_distance": 0.717452347278595,
+        "ref_agreement": 0.46773284673690796,
+        "ref_regret": 0.09700213372707367
+      }
+    },
+    "error_structure": {
+      "0": 0.16036158528034883,
+      "1": 0.14574555913397697,
+      "2": 0.12198871148834756,
+      "3": 0.11692560995410108,
+      "4": 0.12750331147838842,
+      "5": 0.49107141686255634
+    }
+  }
+}
