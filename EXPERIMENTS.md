@@ -39,9 +39,8 @@ Human data is for testing, once, at the end.
 | E3 | chess transfer sanity check | agent | Lichess dumps |
 | E4 | minesweeper, per-move | agent | scraper, solver, ladder |
 | E5 | TETR.IO simulation | agent | versus sim, attack table |
-| E6 | riichi mahjong | agent | Mjx or Mahjax |
-| E7 | baseline vs agent, head to head | both | E1 + E4/E5 |
-| E8 | deployment framing | both | E7 |
+| E6 | baseline vs agent, head to head | both | E1 + E4/E5 |
+| E7 | deployment framing | both | E6 |
 
 ---
 
@@ -272,24 +271,7 @@ account" rather than literal cold start.
 
 ---
 
-## E6 — Riichi mahjong
-
-**Question.** Extends the axes to four players, hidden information and chance
-simultaneously — none of the current four games combines all three.
-
-**Why it is now tractable.** Mjx is a full riichi simulator with a Gym-like API,
-~100× faster than Mjai, and **exact Tenhou compatibility** — so the simulator and
-the human corpus are the same game, which was the objection against pgx's
-simplified `sparrow_mahjong`. Tenhou logs carry every draw, discard and call,
-with each player's dan rank and rate embedded in the log.
-
-**Blocker.** Mjx does not support Apple Silicon. Either use Mahjax (a JAX
-reimplementation reaching 1–2M steps/sec, and a much closer fit to the existing
-`games.py` adapter) or run Mjx in Linux for data generation only.
-
----
-
-## E7 — Baseline versus agent telemetry, head to head
+## E6 — Baseline versus agent telemetry, head to head
 
 **Question.** On a game where both tracks have run, how much does the agent
 ladder add over the domain-general heuristic from E1?
@@ -308,7 +290,7 @@ nothing anywhere, that is a real and publishable finding about how much of
 
 ---
 
-## E8 — The deployment question
+## E7 — The deployment question
 
 **Question.** The one a matchmaker actually cares about: given N observations,
 how much better is a telemetry prior than the default of starting everyone in
@@ -357,4 +339,3 @@ no usernames in any exported artefact.
 | Minesweeper.online | scrape (JS/XHR) | per click | rank | robots.txt clear, no ToS |
 | Jstris | public API | per record | leaderboard | open, undocumented terms |
 | Lichess | bulk dumps | per move + clock | rating | published for research |
-| Tenhou | log archive | per action | dan, rate | community archives |
