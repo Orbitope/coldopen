@@ -25,3 +25,11 @@ def load_game(name, blob):
     if loader is None:
         return []
     return standardise(loader(blob))
+
+
+def load_csv_game(name, path):
+    """Sources that ship as a flat file rather than an API response."""
+    if name == "skillcraft":
+        from coldopen.human.skillcraft import skillcraft_axes
+        return standardise(skillcraft_axes(path))
+    return []

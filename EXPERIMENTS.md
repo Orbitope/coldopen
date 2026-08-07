@@ -116,42 +116,96 @@ what their numbers mean.
 they correlate positively. The cross-person direction is the one being tested,
 and mixing the two would produce a sign error that looks like a null result.
 
-### Status: TETR.IO ingested, framework built, one game so far
+### Result: each axis transfers; their *combination* does not
 
-`coldopen/human/` ingests real players; `coldopen/crossgame.py` runs the
-transfer matrix. On a 54-player pilot spanning all 18 ranks:
+Two games ingested — TETR.IO (450 players, 25,707 rounds, all 18 ranks) and
+SkillCraft1 (3,395 rated StarCraft II players). Transfer matrix, Spearman ρ
+against the game's own rating, ridge on two standardised axes:
 
-| rounds seen | Spearman ρ vs. real rating | mean error (percentile) |
+|  | → skillcraft | → tetrio |
 |---|---|---|
-| 1 | 0.892 | 0.090 |
-| 2 | 0.940 | 0.072 |
-| 3 | 0.956 | 0.068 |
-| all | 0.957 | 0.061 |
+| fit on skillcraft | 0.658\* | 0.911 |
+| fit on tetrio | 0.606 | 0.974\* |
 
-Two features, a ridge regression, cross-validated grouped by player. That is the
-number the agent track has to beat, and it is a high bar from a single round.
+\* within-game, cross-validated grouped by player.
 
-The cross-person speed-efficiency correlation the design assumed is confirmed
-rather than asserted: **ρ = 0.878** between PPS and attack-per-piece across
-players. Slow-but-efficient players essentially do not exist, which is why E5's
-ladder must couple its handicap axes rather than grid them.
+Read alone, that looks like a strong positive: a model that has never seen
+Tetris ranks Tetris players at 0.911. **The ablation says otherwise.**
+
+| feature set | skillcraft→tetrio | tetrio→skillcraft |
+|---|---|---|
+| speed only | 0.926 | **0.661** |
+| efficiency only | **0.927** | 0.436 |
+| both | 0.911 | 0.606 |
+
+**Combining the axes helps within a game and hurts across games.** Within
+TETR.IO the pair scores 0.974 against 0.924 for speed alone — genuinely
+complementary. Across games the pair is *worse* than either axis by itself in
+both directions.
+
+The reason is that a standardised single-axis model has almost nothing to
+transfer: after within-game z-scoring, "rank players by speed" needs no fitting,
+so its cross-game score is really just that axis's within-game correlation
+wearing a transfer costume. Note that speed-only scores 0.661 both within
+SkillCraft *and* transferred from Tetris — identical, because nothing was
+actually carried across.
+
+So the strong form of the hypothesis is **not** supported. What is domain-general
+is that speed and efficiency each correlate with skill. The *weighting* between
+them is game-specific, and importing one game's weighting into another costs
+accuracy rather than buying it.
+
+That still leaves a usable prior — "z-score whichever axis you have" is free and
+gets 0.93 on TETR.IO — but it is a much weaker claim than a transferable shape,
+and it is the claim the write-up has to make.
+
+### Also established
+
+The cross-person speed-efficiency correlation the E5 ladder design assumes is
+confirmed rather than asserted: **ρ = 0.878** between PPS and attack-per-piece
+across players. Slow-but-efficient players essentially do not exist, which is
+why E5's ladder must couple its handicap axes rather than grid them.
+
+**Observation budget, TETR.IO, 450 players:**
+
+| rounds seen | ρ | mean error (percentile) |
+|---|---|---|
+| 1 | 0.900 | 0.086 |
+| 3 | 0.939 | 0.072 |
+| 10 | 0.965 | 0.055 |
+| all | 0.974 | 0.048 |
 
 **One prior did not survive.** `VS / APM` was expected to isolate downstacking
 skill, since VS counts garbage cleared as well as attack sent. Across ranks its
-mean is flat at ~1.9-2.1 from D to X+ — the variation seen in individual records
-is within-rank noise, not between-rank signal. VS carries no skill information
-beyond APM here.
+mean is flat at ~1.9–2.1 from D to X+; the variation in individual records is
+within-rank noise, not between-rank signal.
 
-**Caveat on the pilot.** Sampling is stratified to hold ranks equal, which makes
-the task easier than a natural population concentrated in the middle ranks. The
-percentile label is computed within that stratified sample. Report both, and do
-not compare this ρ to one computed on an unstratified corpus.
+### Caveats and what is still needed
 
-**Still needed for the actual experiment:** a second game. Jstris is a poor
-choice despite its open API — in sprint the rating *is* the completion time, so
-speed would predict skill tautologically. Minesweeper is the right second entry
-(3BV/s and efficiency% are genuinely separable, and the rank ladder is a third
-thing), which makes E4's scraper a dependency of E1 as well.
+**Sampling is stratified** to hold ranks equal, which makes the task easier than
+a natural population concentrated in the middle ranks, and the percentile label
+is computed within that stratified sample. Do not compare these ρ values to one
+computed on an unstratified corpus.
+
+**SkillCraft is one row per player**, so it contributes to the shape test but
+cannot contribute to the observation-budget curve.
+
+**SkillCraft's efficiency axis is a proxy.** It has no output-per-action measure,
+so the axis is hotkey selections per action — efficiency of execution, the direct
+analogue of Tetris finesse, but not a measurement of output. Raw
+`SelectByHotkeys` correlates 0.82 with APM and would have been speed under
+another name; normalising by APM is what makes it an efficiency measure at all.
+Some of the weak `tetrio→skillcraft` transfer is likely this proxy rather than
+the hypothesis.
+
+**A third game is needed** before the matrix says much: two games give two
+ordered pairs, and one of them is carried by a proxy axis. Requirements are
+strict — the skill label must not be derived from speed. That rules out Jstris
+(a sprint rating *is* the completion time), osu! (pp is computed from accuracy)
+and typing tests. Minesweeper qualifies (3BV/s, efficiency %, and a separate
+rank ladder), which makes E4's scraper a dependency of E1. Rocket League also
+qualifies via ballchasing: `goals/shot` is genuine output-per-action and rank
+comes from wins, though it needs an API key.
 
 ---
 

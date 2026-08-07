@@ -103,6 +103,37 @@ def transfer(train_rows, test_rows, features=FEATURES, seed=0):
     }
 
 
+#: Each axis alone, and the pair. The ablation is not optional colour: a
+#: two-axis transfer score is only evidence of a transferable *shape* if it
+#: beats what one axis achieves on its own. Standardised single-axis models have
+#: almost nothing to transfer - the prediction is essentially the z-score - so
+#: they set the floor that the pair has to clear.
+ABLATIONS = {
+    "speed_only": ("speed",),
+    "efficiency_only": ("efficiency",),
+    "both": ("speed", "efficiency"),
+}
+
+
+def ablate(games, seed=0):
+    """Within-game and transfer scores for each axis alone and for the pair."""
+    out = {}
+    for name, features in ABLATIONS.items():
+        entry = {"within": {}, "transfer": {}}
+        for game, rows in games.items():
+            scored = within_game(rows, features, seed)
+            entry["within"][game] = scored["spearman"] if scored else None
+        for source in games:
+            for target in games:
+                if source == target:
+                    continue
+                scored = transfer(games[source], games[target], features, seed)
+                entry["transfer"][f"{source}->{target}"] = (
+                    scored["spearman"] if scored else None)
+        out[name] = entry
+    return out
+
+
 def run(games, features=FEATURES, seed=0):
     """Full transfer matrix over every ordered pair of games.
 
@@ -152,6 +183,19 @@ def describe(result):
     print("  rows are the game fitted on, columns the game predicted; "
           "* is within-game (the ceiling)")
 
+    if "ablation" not in result:
+        return
+    print(f"\n{'feature set':18}" + "".join(
+        f"{k:>22}" for k in sorted(result["ablation"]["both"]["transfer"])))
+    for name in ("speed_only", "efficiency_only", "both"):
+        entry = result["ablation"][name]
+        row = f"{name:18}"
+        for key in sorted(entry["transfer"]):
+            row += f"{(entry['transfer'][key] or 0):>22.3f}"
+        print(row)
+    print("  a pair that does not beat its own best single axis has not shown "
+          "a transferable shape")
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -163,25 +207,33 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
-    from coldopen.human import load_game
+    from coldopen.human import load_csv_game, load_game
+    from coldopen.human.axes import per_player
 
     directory = pathlib.Path(args.human)
     prepared, rounds = {}, {}
-    for path in sorted(directory.glob("*.json")):
-        name = path.stem
-        rows = load_game(name, json.loads(path.read_text()))
+    sources = [(p.stem, p, load_game) for p in sorted(directory.glob("*.json"))]
+    # Not every source is an API response; SkillCraft ships as a flat file.
+    sources += [("skillcraft", p, None)
+                for p in sorted(directory.glob("SkillCraft*.csv"))]
+
+    for name, path, loader in sources:
+        if loader is None:
+            rows = load_csv_game(name, path)
+        else:
+            rows = loader(name, json.loads(path.read_text()))
         if not rows:
             print(f"  ! {name}: no usable rows")
             continue
         rounds[name] = rows
-        from coldopen.human.axes import per_player
         prepared[name] = per_player(rows, budget=args.budget)
-        print(f"  {name}: {len(rows)} rounds -> {len(prepared[name])} players")
+        print(f"  {name}: {len(rows)} rows -> {len(prepared[name])} players")
 
     if not prepared:
         raise SystemExit(f"no ingested games found in {directory}")
 
     result = run(prepared, seed=args.seed)
+    result["ablation"] = ablate(prepared, seed=args.seed)
     result["budget_curves"] = budget_curve(rounds, seed=args.seed)
     describe(result)
 

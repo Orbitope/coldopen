@@ -1,0 +1,166 @@
+{
+  "games": [
+    "skillcraft",
+    "tetrio"
+  ],
+  "within": {
+    "skillcraft": {
+      "n": 3395,
+      "players": 3395,
+      "spearman": 0.6580114235735512,
+      "mae_percentile": 0.1794471348252283
+    },
+    "tetrio": {
+      "n": 450,
+      "players": 450,
+      "spearman": 0.9741638888751716,
+      "mae_percentile": 0.04751537391762337
+    }
+  },
+  "transfer": {
+    "skillcraft->tetrio": {
+      "n": 450,
+      "spearman": 0.9108048928636686,
+      "mae_percentile": 0.1311302524377039,
+      "coefficients": {
+        "speed": 0.19257421414796394,
+        "efficiency": -0.01125733920204416
+      }
+    },
+    "tetrio->skillcraft": {
+      "n": 3395,
+      "spearman": 0.6057769450816969,
+      "mae_percentile": 0.21476541491613277,
+      "coefficients": {
+        "speed": 0.15926004273007102,
+        "efficiency": 0.19040420567201236
+      }
+    }
+  },
+  "features": [
+    "speed",
+    "efficiency"
+  ],
+  "ablation": {
+    "speed_only": {
+      "within": {
+        "tetrio": 0.924343066714733,
+        "skillcraft": 0.6607842323394288
+      },
+      "transfer": {
+        "tetrio->skillcraft": 0.661188465608109,
+        "skillcraft->tetrio": 0.9261045239729581
+      }
+    },
+    "efficiency_only": {
+      "within": {
+        "tetrio": 0.926133626997335,
+        "skillcraft": 0.4352480783788966
+      },
+      "transfer": {
+        "tetrio->skillcraft": 0.4360167262069504,
+        "skillcraft->tetrio": 0.9268039183732595
+      }
+    },
+    "both": {
+      "within": {
+        "tetrio": 0.9741638888751716,
+        "skillcraft": 0.6580114235735512
+      },
+      "transfer": {
+        "tetrio->skillcraft": 0.6057769450816969,
+        "skillcraft->tetrio": 0.9108048928636686
+      }
+    }
+  },
+  "budget_curves": {
+    "tetrio": [
+      {
+        "budget": 1,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.9002329888048831,
+        "mae_percentile": 0.08574431949574739
+      },
+      {
+        "budget": 2,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.9258996176112805,
+        "mae_percentile": 0.07494500359738118
+      },
+      {
+        "budget": 3,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.9390482586745286,
+        "mae_percentile": 0.07165624743391204
+      },
+      {
+        "budget": 5,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.9500120659032063,
+        "mae_percentile": 0.06497801307708277
+      },
+      {
+        "budget": 10,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.965353178698825,
+        "mae_percentile": 0.05506329704553895
+      },
+      {
+        "budget": null,
+        "n": 450,
+        "players": 450,
+        "spearman": 0.9741638888751716,
+        "mae_percentile": 0.04751537391762337
+      }
+    ],
+    "skillcraft": [
+      {
+        "budget": 1,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      },
+      {
+        "budget": 2,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      },
+      {
+        "budget": 3,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      },
+      {
+        "budget": 5,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      },
+      {
+        "budget": 10,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      },
+      {
+        "budget": null,
+        "n": 3395,
+        "players": 3395,
+        "spearman": 0.6580114235735512,
+        "mae_percentile": 0.1794471348252283
+      }
+    ]
+  }
+}
