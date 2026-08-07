@@ -1,9 +1,16 @@
 {
   "games": [
+    "lichess",
     "skillcraft",
     "tetrio"
   ],
   "within": {
+    "lichess": {
+      "n": 6917,
+      "players": 6917,
+      "spearman": 0.3553501585508746,
+      "mae_percentile": 0.21314071184677477
+    },
     "skillcraft": {
       "n": 3395,
       "players": 3395,
@@ -18,6 +25,33 @@
     }
   },
   "transfer": {
+    "lichess->skillcraft": {
+      "n": 3395,
+      "spearman": 0.4364731839461624,
+      "mae_percentile": 0.2216222996601395,
+      "coefficients": {
+        "speed": 0.00011080220847174594,
+        "efficiency": 0.1017606525029905
+      }
+    },
+    "lichess->tetrio": {
+      "n": 450,
+      "spearman": 0.9269674747365009,
+      "mae_percentile": 0.17395933572317257,
+      "coefficients": {
+        "speed": 0.00011080220847174594,
+        "efficiency": 0.1017606525029905
+      }
+    },
+    "skillcraft->lichess": {
+      "n": 6917,
+      "spearman": 0.07319311662417499,
+      "mae_percentile": 0.2612275152662221,
+      "coefficients": {
+        "speed": 0.19257421414796394,
+        "efficiency": -0.01125733920204416
+      }
+    },
     "skillcraft->tetrio": {
       "n": 450,
       "spearman": 0.9108048928636686,
@@ -25,6 +59,15 @@
       "coefficients": {
         "speed": 0.19257421414796394,
         "efficiency": -0.01125733920204416
+      }
+    },
+    "tetrio->lichess": {
+      "n": 6917,
+      "spearman": 0.31695661138046677,
+      "mae_percentile": 0.24634647394197454,
+      "coefficients": {
+        "speed": 0.15926004273007102,
+        "efficiency": 0.19040420567201236
       }
     },
     "tetrio->skillcraft": {
@@ -42,38 +85,112 @@
     "efficiency"
   ],
   "ablation": {
+    "no_fit": {
+      "within": {
+        "speed": {
+          "lichess": 0.1021173358530413,
+          "tetrio": 0.9261045239729581,
+          "skillcraft": 0.661188465608109
+        },
+        "efficiency": {
+          "lichess": 0.35788991721224517,
+          "tetrio": 0.9268039183732595,
+          "skillcraft": 0.4360167262069504
+        }
+      },
+      "transfer": {}
+    },
     "speed_only": {
       "within": {
+        "lichess": 0.08657455866014284,
         "tetrio": 0.924343066714733,
         "skillcraft": 0.6607842323394288
       },
       "transfer": {
+        "lichess->tetrio": 0.9261045239729581,
+        "lichess->skillcraft": 0.661188465608109,
+        "tetrio->lichess": 0.10211512127288691,
         "tetrio->skillcraft": 0.661188465608109,
+        "skillcraft->lichess": 0.10211258760463823,
         "skillcraft->tetrio": 0.9261045239729581
       }
     },
     "efficiency_only": {
       "within": {
+        "lichess": 0.3562230444109227,
         "tetrio": 0.926133626997335,
         "skillcraft": 0.4352480783788966
       },
       "transfer": {
+        "lichess->tetrio": 0.9268039183732595,
+        "lichess->skillcraft": 0.4360167262069504,
+        "tetrio->lichess": 0.3578909946784635,
         "tetrio->skillcraft": 0.4360167262069504,
+        "skillcraft->lichess": 0.35789122739521223,
         "skillcraft->tetrio": 0.9268039183732595
       }
     },
     "both": {
       "within": {
+        "lichess": 0.3553501585508746,
         "tetrio": 0.9741638888751716,
         "skillcraft": 0.6580114235735512
       },
       "transfer": {
+        "lichess->tetrio": 0.9269674747365009,
+        "lichess->skillcraft": 0.4364731839461624,
+        "tetrio->lichess": 0.31695661138046677,
         "tetrio->skillcraft": 0.6057769450816969,
+        "skillcraft->lichess": 0.07319311662417499,
         "skillcraft->tetrio": 0.9108048928636686
       }
     }
   },
   "budget_curves": {
+    "lichess": [
+      {
+        "budget": 1,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.323578545508295,
+        "mae_percentile": 0.21559625275033423
+      },
+      {
+        "budget": 2,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.3453142497756547,
+        "mae_percentile": 0.21367249257645116
+      },
+      {
+        "budget": 3,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.3496248304580436,
+        "mae_percentile": 0.21343363885100672
+      },
+      {
+        "budget": 5,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.3533518813262058,
+        "mae_percentile": 0.2132623832447041
+      },
+      {
+        "budget": 10,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.355154852959384,
+        "mae_percentile": 0.21315317052932156
+      },
+      {
+        "budget": null,
+        "n": 6917,
+        "players": 6917,
+        "spearman": 0.3553501585508746,
+        "mae_percentile": 0.21314071184677477
+      }
+    ],
     "tetrio": [
       {
         "budget": 1,

@@ -116,48 +116,72 @@ what their numbers mean.
 they correlate positively. The cross-person direction is the one being tested,
 and mixing the two would produce a sign error that looks like a null result.
 
-### Result: each axis transfers; their *combination* does not
+### Result: the shape does not transfer. The axes are useful anyway.
 
-Two games ingested — TETR.IO (450 players, 25,707 rounds, all 18 ranks) and
-SkillCraft1 (3,395 rated StarCraft II players). Transfer matrix, Spearman ρ
-against the game's own rating, ridge on two standardised axes:
+Three games ingested: **TETR.IO** (450 players, 25,707 rounds, all 18 ranks),
+**SkillCraft1** (3,395 rated StarCraft II players) and **Lichess** (6,152 blitz
+games at 180+0, 12,304 player-rows, speed from clock deltas and efficiency from
+Stockfish annotations). Transfer matrix, Spearman ρ against each game's own
+rating, ridge on two standardised axes:
 
-|  | → skillcraft | → tetrio |
-|---|---|---|
-| fit on skillcraft | 0.658\* | 0.911 |
-| fit on tetrio | 0.606 | 0.974\* |
+|  | → lichess | → skillcraft | → tetrio |
+|---|---|---|---|
+| fit on lichess | 0.355\* | 0.436 | 0.927 |
+| fit on skillcraft | 0.073 | 0.658\* | 0.911 |
+| fit on tetrio | 0.317 | 0.606 | 0.974\* |
 
 \* within-game, cross-validated grouped by player.
 
-Read alone, that looks like a strong positive: a model that has never seen
-Tetris ranks Tetris players at 0.911. **The ablation says otherwise.**
+**The ablation kills the strong reading of that table.**
 
-| feature set | skillcraft→tetrio | tetrio→skillcraft |
+| feature set | →lichess | →skillcraft | →tetrio |
+|---|---|---|---|
+| speed only | 0.102 | 0.661 | 0.926 |
+| efficiency only | 0.358 | 0.436 | 0.927 |
+| **no fit at all** | **0.102 / 0.358** | **0.661 / 0.436** | **0.926 / 0.927** |
+
+The last row ranks players by the z-scored axis with no model whatsoever. It is
+**numerically identical** to the fitted single-axis transfer scores, and the
+fitted scores are identical regardless of which game they were fitted on — every
+column above is constant across source games. After within-game standardisation
+there is nothing left for a one-axis model to carry, so single-axis "transfer" is
+not transfer; it is the target game's own correlation wearing a costume.
+
+That leaves the two-axis combination as the only place a real learned
+relationship could live, and it **fails in five of six ordered pairs**:
+
+| pair | both | best single axis |
 |---|---|---|
-| speed only | 0.926 | **0.661** |
-| efficiency only | **0.927** | 0.436 |
-| both | 0.911 | 0.606 |
+| lichess→skillcraft | 0.436 | 0.661 |
+| lichess→tetrio | 0.927 | 0.927 |
+| skillcraft→lichess | 0.073 | 0.358 |
+| skillcraft→tetrio | 0.911 | 0.927 |
+| tetrio→lichess | 0.317 | 0.358 |
+| tetrio→skillcraft | 0.606 | 0.661 |
 
-**Combining the axes helps within a game and hurts across games.** Within
-TETR.IO the pair scores 0.974 against 0.924 for speed alone — genuinely
-complementary. Across games the pair is *worse* than either axis by itself in
-both directions.
+Within a game the pair is complementary — TETR.IO scores 0.974 against 0.926 for
+speed alone. Across games, importing the weighting costs accuracy every time.
 
-The reason is that a standardised single-axis model has almost nothing to
-transfer: after within-game z-scoring, "rank players by speed" needs no fitting,
-so its cross-game score is really just that axis's within-game correlation
-wearing a transfer costume. Note that speed-only scores 0.661 both within
-SkillCraft *and* transferred from Tetris — identical, because nothing was
-actually carried across.
+**Why: the relative importance of the two axes is entirely game-specific.**
 
-So the strong form of the hypothesis is **not** supported. What is domain-general
-is that speed and efficiency each correlate with skill. The *weighting* between
-them is game-specific, and importing one game's weighting into another costs
-accuracy rather than buying it.
+| game | speed | efficiency |
+|---|---|---|
+| chess (fixed time control) | 0.102 | **0.358** |
+| StarCraft II | **0.661** | 0.436 |
+| TETR.IO | 0.926 | 0.927 |
 
-That still leaves a usable prior — "z-score whichever axis you have" is free and
-gets 0.93 on TETR.IO — but it is a much weaker claim than a transferable shape,
-and it is the claim the write-up has to make.
+Chess at a single time control gives every player the same clock, so speed says
+almost nothing and move quality says everything. StarCraft rewards raw action
+rate. Tetris is the one game where the two are nearly interchangeable, and that
+is because they are correlated at 0.878 there — not because the pair is
+fundamental.
+
+**Verdict.** The strong hypothesis — a transferable speed/efficiency *shape* — is
+refuted. The weak one survives and is still worth having: **standardise whichever
+axis a game exposes and you get a skill estimate for free**, with no model, no
+training and no data from the target game. It is worth 0.93 in Tetris, 0.66 in
+StarCraft and 0.36 in chess. That is the baseline the agent track must beat, and
+in chess it is a low bar.
 
 ### Also established
 
@@ -198,14 +222,17 @@ another name; normalising by APM is what makes it an efficiency measure at all.
 Some of the weak `tetrio→skillcraft` transfer is likely this proxy rather than
 the hypothesis.
 
-**A third game is needed** before the matrix says much: two games give two
-ordered pairs, and one of them is carried by a proxy axis. Requirements are
-strict — the skill label must not be derived from speed. That rules out Jstris
-(a sprint rating *is* the completion time), osu! (pp is computed from accuracy)
-and typing tests. Minesweeper qualifies (3BV/s, efficiency %, and a separate
-rank ladder), which makes E4's scraper a dependency of E1. Rocket League also
-qualifies via ballchasing: `goals/shot` is genuine output-per-action and rank
-comes from wins, though it needs an API key.
+**Candidate games must have a skill label not derived from speed.** That rules
+out Jstris (a sprint rating *is* the completion time), osu! (pp is computed from
+accuracy) and typing tests, all of which would predict skill tautologically.
+Rocket League was considered and dropped: its telemetry is positional physics
+rather than an action rate, so the speed axis would not mean the same thing, and
+replay parsing is a project in itself.
+
+**Minesweeper remains the best fourth entry**, because `efficiency %` is
+literally board value per click — output per action, measured rather than
+proxied — and the rank ladder is a third quantity. That makes E4's scraper a
+dependency of E1 as well.
 
 ---
 

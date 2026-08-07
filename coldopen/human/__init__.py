@@ -16,6 +16,9 @@ from coldopen.human.axes import standardise, tetrio_axes
 #: skill) representation. Adding a game is a row here and an ingestion module.
 LOADERS = {
     "tetrio": lambda blob: tetrio_axes(blob["rounds"], blob["labels"]),
+    # Lichess is parsed into the common representation at ingest, since the
+    # work is in reading PGN rather than in reshaping the result.
+    "lichess": lambda blob: blob["rows"],
 }
 
 

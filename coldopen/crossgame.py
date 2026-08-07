@@ -115,9 +115,28 @@ ABLATIONS = {
 }
 
 
+def no_fit(rows, axis="speed"):
+    """Rank players by a standardised axis, fitting nothing at all.
+
+    This is the control that makes the ablation legible. A single-axis "transfer"
+    score cannot be evidence of a transferable relationship, because after
+    within-game standardisation there is nothing left to transfer: the model is
+    the identity up to a scale factor. If this baseline matches the fitted
+    single-axis transfer score, then the fitting was decorative.
+    """
+    values = np.array([row[axis] for row in rows], dtype=float)
+    truth = np.array([row["skill_pct"] for row in rows], dtype=float)
+    if len(truth) < 3:
+        return None
+    return spearman(values, truth)
+
+
 def ablate(games, seed=0):
     """Within-game and transfer scores for each axis alone and for the pair."""
-    out = {}
+    out = {"no_fit": {"within": {axis: {game: no_fit(rows, axis)
+                                        for game, rows in games.items()}
+                                 for axis in FEATURES},
+                      "transfer": {}}}
     for name, features in ABLATIONS.items():
         entry = {"within": {}, "transfer": {}}
         for game, rows in games.items():
