@@ -116,6 +116,43 @@ what their numbers mean.
 they correlate positively. The cross-person direction is the one being tested,
 and mixing the two would produce a sign error that looks like a null result.
 
+### Status: TETR.IO ingested, framework built, one game so far
+
+`coldopen/human/` ingests real players; `coldopen/crossgame.py` runs the
+transfer matrix. On a 54-player pilot spanning all 18 ranks:
+
+| rounds seen | Spearman ρ vs. real rating | mean error (percentile) |
+|---|---|---|
+| 1 | 0.892 | 0.090 |
+| 2 | 0.940 | 0.072 |
+| 3 | 0.956 | 0.068 |
+| all | 0.957 | 0.061 |
+
+Two features, a ridge regression, cross-validated grouped by player. That is the
+number the agent track has to beat, and it is a high bar from a single round.
+
+The cross-person speed-efficiency correlation the design assumed is confirmed
+rather than asserted: **ρ = 0.878** between PPS and attack-per-piece across
+players. Slow-but-efficient players essentially do not exist, which is why E5's
+ladder must couple its handicap axes rather than grid them.
+
+**One prior did not survive.** `VS / APM` was expected to isolate downstacking
+skill, since VS counts garbage cleared as well as attack sent. Across ranks its
+mean is flat at ~1.9-2.1 from D to X+ — the variation seen in individual records
+is within-rank noise, not between-rank signal. VS carries no skill information
+beyond APM here.
+
+**Caveat on the pilot.** Sampling is stratified to hold ranks equal, which makes
+the task easier than a natural population concentrated in the middle ranks. The
+percentile label is computed within that stratified sample. Report both, and do
+not compare this ρ to one computed on an unstratified corpus.
+
+**Still needed for the actual experiment:** a second game. Jstris is a poor
+choice despite its open API — in sprint the rating *is* the completion time, so
+speed would predict skill tautologically. Minesweeper is the right second entry
+(3BV/s and efficiency% are genuinely separable, and the rank ladder is a third
+thing), which makes E4's scraper a dependency of E1 as well.
+
 ---
 
 ## E2 — Handicapping versus undertraining, in the games already built
