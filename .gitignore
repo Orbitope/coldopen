@@ -6,9 +6,10 @@ __pycache__/
 .DS_Store
 
 # Trained networks are large and regenerable; the JSON in analysis/ is the record.
-coldopen/checkpoints/
-coldopen/reference/
-coldopen/ladders/
+# No trailing slash: these are sometimes symlinks to a run kept elsewhere.
+coldopen/checkpoints
+coldopen/reference
+coldopen/ladders
 *_stdout.log
 
 # Human game archives are big and belong to whoever published them.
