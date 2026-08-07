@@ -1,0 +1,11 @@
+6 tiers, reference loaded
+dataset 3600 games x 20 moves x 8 features
+  n=  1  exact 0.566  within-one 0.784  (tactical only 0.403)  baseline 0.167
+  n=  2  exact 0.606  within-one 0.768  (tactical only 0.374)  baseline 0.167
+  n=  3  exact 0.627  within-one 0.761  (tactical only 0.439)  baseline 0.167
+  n=  5  exact 0.612  within-one 0.794  (tactical only 0.523)  baseline 0.167
+  n=  8  exact 0.600  within-one 0.825  (tactical only 0.534)  baseline 0.167
+  n= 12  exact 0.590  within-one 0.821  (tactical only 0.528)  baseline 0.167
+  n= 16  exact 0.590  within-one 0.821  (tactical only 0.532)  baseline 0.167
+  n= 20  exact 0.595  within-one 0.826  (tactical only 0.529)  baseline 0.167
+wrote analysis/telemetry.json

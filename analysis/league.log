@@ -1,0 +1,218 @@
+20 players (including the random anchor)
+            random vs ckpt_0            61-239-  0
+            random vs ckpt_5000         58-242-  0
+            random vs ckpt_7587         58-242-  0
+            random vs ckpt_11514        50-250-  0
+            random vs ckpt_17472        54-246-  0
+            random vs ckpt_26514        30-270-  0
+            random vs ckpt_40236        54-246-  0
+            random vs ckpt_61058        59-241-  0
+            random vs ckpt_92655        49-251-  0
+            random vs ckpt_140604       18-282-  0
+            random vs ckpt_213366        6-294-  0
+            random vs ckpt_323782        3-297-  0
+            random vs ckpt_491339        2-298-  0
+            random vs ckpt_745607        0-300-  0
+            random vs ckpt_1131457       0-300-  0
+            random vs ckpt_1716984       1-299-  0
+            random vs ckpt_2605521       1-299-  0
+            random vs ckpt_3953875       0-300-  0
+            random vs ckpt_6000000       1-299-  0
+            ckpt_0 vs ckpt_5000        148-142- 10
+            ckpt_0 vs ckpt_7587        153-137- 10
+            ckpt_0 vs ckpt_11514       138-156-  6
+            ckpt_0 vs ckpt_17472       151-137- 12
+            ckpt_0 vs ckpt_26514       135-165-  0
+            ckpt_0 vs ckpt_40236        56-244-  0
+            ckpt_0 vs ckpt_61058       129-171-  0
+            ckpt_0 vs ckpt_92655        86-214-  0
+            ckpt_0 vs ckpt_140604       15-283-  2
+            ckpt_0 vs ckpt_213366        6-294-  0
+            ckpt_0 vs ckpt_323782       12-288-  0
+            ckpt_0 vs ckpt_491339        6-294-  0
+            ckpt_0 vs ckpt_745607        3-297-  0
+            ckpt_0 vs ckpt_1131457       4-296-  0
+            ckpt_0 vs ckpt_1716984       0-300-  0
+            ckpt_0 vs ckpt_2605521       2-298-  0
+            ckpt_0 vs ckpt_3953875       3-296-  1
+            ckpt_0 vs ckpt_6000000       9-291-  0
+         ckpt_5000 vs ckpt_7587        165-123- 12
+         ckpt_5000 vs ckpt_11514       136-150- 14
+         ckpt_5000 vs ckpt_17472       140-153-  7
+         ckpt_5000 vs ckpt_26514       134-166-  0
+         ckpt_5000 vs ckpt_40236        52-248-  0
+         ckpt_5000 vs ckpt_61058       139-161-  0
+         ckpt_5000 vs ckpt_92655        83-217-  0
+         ckpt_5000 vs ckpt_140604       14-285-  1
+         ckpt_5000 vs ckpt_213366        8-292-  0
+         ckpt_5000 vs ckpt_323782        6-294-  0
+         ckpt_5000 vs ckpt_491339        9-291-  0
+         ckpt_5000 vs ckpt_745607        4-296-  0
+         ckpt_5000 vs ckpt_1131457       1-299-  0
+         ckpt_5000 vs ckpt_1716984       1-299-  0
+         ckpt_5000 vs ckpt_2605521       1-299-  0
+         ckpt_5000 vs ckpt_3953875       4-296-  0
+         ckpt_5000 vs ckpt_6000000      11-289-  0
+         ckpt_7587 vs ckpt_11514       147-148-  5
+         ckpt_7587 vs ckpt_17472       154-140-  6
+         ckpt_7587 vs ckpt_26514       121-179-  0
+         ckpt_7587 vs ckpt_40236        54-246-  0
+         ckpt_7587 vs ckpt_61058       129-171-  0
+         ckpt_7587 vs ckpt_92655        71-229-  0
+         ckpt_7587 vs ckpt_140604       12-288-  0
+         ckpt_7587 vs ckpt_213366        7-293-  0
+         ckpt_7587 vs ckpt_323782       14-286-  0
+         ckpt_7587 vs ckpt_491339        4-296-  0
+         ckpt_7587 vs ckpt_745607        5-295-  0
+         ckpt_7587 vs ckpt_1131457       4-296-  0
+         ckpt_7587 vs ckpt_1716984       1-299-  0
+         ckpt_7587 vs ckpt_2605521       4-296-  0
+         ckpt_7587 vs ckpt_3953875       2-296-  2
+         ckpt_7587 vs ckpt_6000000       9-291-  0
+        ckpt_11514 vs ckpt_17472       144-145- 11
+        ckpt_11514 vs ckpt_26514       126-174-  0
+        ckpt_11514 vs ckpt_40236        53-247-  0
+        ckpt_11514 vs ckpt_61058       134-166-  0
+        ckpt_11514 vs ckpt_92655        87-213-  0
+        ckpt_11514 vs ckpt_140604       12-288-  0
+        ckpt_11514 vs ckpt_213366        8-292-  0
+        ckpt_11514 vs ckpt_323782        6-294-  0
+        ckpt_11514 vs ckpt_491339        5-295-  0
+        ckpt_11514 vs ckpt_745607        3-297-  0
+        ckpt_11514 vs ckpt_1131457       0-300-  0
+        ckpt_11514 vs ckpt_1716984       2-298-  0
+        ckpt_11514 vs ckpt_2605521       3-297-  0
+        ckpt_11514 vs ckpt_3953875       3-295-  2
+        ckpt_11514 vs ckpt_6000000       3-297-  0
+        ckpt_17472 vs ckpt_26514       139-161-  0
+        ckpt_17472 vs ckpt_40236        59-241-  0
+        ckpt_17472 vs ckpt_61058       130-170-  0
+        ckpt_17472 vs ckpt_92655        66-234-  0
+        ckpt_17472 vs ckpt_140604       16-284-  0
+        ckpt_17472 vs ckpt_213366        8-292-  0
+        ckpt_17472 vs ckpt_323782        5-295-  0
+        ckpt_17472 vs ckpt_491339        7-293-  0
+        ckpt_17472 vs ckpt_745607        5-295-  0
+        ckpt_17472 vs ckpt_1131457       4-296-  0
+        ckpt_17472 vs ckpt_1716984       1-299-  0
+        ckpt_17472 vs ckpt_2605521       2-298-  0
+        ckpt_17472 vs ckpt_3953875       9-291-  0
+        ckpt_17472 vs ckpt_6000000      11-289-  0
+        ckpt_26514 vs ckpt_40236       124-176-  0
+        ckpt_26514 vs ckpt_61058       150-150-  0
+        ckpt_26514 vs ckpt_92655       108-192-  0
+        ckpt_26514 vs ckpt_140604       31-269-  0
+        ckpt_26514 vs ckpt_213366        5-295-  0
+        ckpt_26514 vs ckpt_323782        5-295-  0
+        ckpt_26514 vs ckpt_491339        9-291-  0
+        ckpt_26514 vs ckpt_745607        6-294-  0
+        ckpt_26514 vs ckpt_1131457       2-298-  0
+        ckpt_26514 vs ckpt_1716984       8-292-  0
+        ckpt_26514 vs ckpt_2605521       3-297-  0
+        ckpt_26514 vs ckpt_3953875       0-300-  0
+        ckpt_26514 vs ckpt_6000000       4-296-  0
+        ckpt_40236 vs ckpt_61058        79-221-  0
+        ckpt_40236 vs ckpt_92655       122-178-  0
+        ckpt_40236 vs ckpt_140604       34-266-  0
+        ckpt_40236 vs ckpt_213366       22-278-  0
+        ckpt_40236 vs ckpt_323782        0-300-  0
+        ckpt_40236 vs ckpt_491339        4-296-  0
+        ckpt_40236 vs ckpt_745607        5-295-  0
+        ckpt_40236 vs ckpt_1131457       2-298-  0
+        ckpt_40236 vs ckpt_1716984       3-297-  0
+        ckpt_40236 vs ckpt_2605521       7-293-  0
+        ckpt_40236 vs ckpt_3953875       2-298-  0
+        ckpt_40236 vs ckpt_6000000       3-297-  0
+        ckpt_61058 vs ckpt_92655       151-147-  2
+        ckpt_61058 vs ckpt_140604       35-265-  0
+        ckpt_61058 vs ckpt_213366       22-278-  0
+        ckpt_61058 vs ckpt_323782       18-282-  0
+        ckpt_61058 vs ckpt_491339        8-292-  0
+        ckpt_61058 vs ckpt_745607        5-295-  0
+        ckpt_61058 vs ckpt_1131457       3-297-  0
+        ckpt_61058 vs ckpt_1716984       2-298-  0
+        ckpt_61058 vs ckpt_2605521       4-296-  0
+        ckpt_61058 vs ckpt_3953875       4-296-  0
+        ckpt_61058 vs ckpt_6000000       5-295-  0
+        ckpt_92655 vs ckpt_140604       90-210-  0
+        ckpt_92655 vs ckpt_213366       32-268-  0
+        ckpt_92655 vs ckpt_323782       21-279-  0
+        ckpt_92655 vs ckpt_491339        8-292-  0
+        ckpt_92655 vs ckpt_745607        4-296-  0
+        ckpt_92655 vs ckpt_1131457       4-295-  1
+        ckpt_92655 vs ckpt_1716984       2-298-  0
+        ckpt_92655 vs ckpt_2605521       2-298-  0
+        ckpt_92655 vs ckpt_3953875       4-296-  0
+        ckpt_92655 vs ckpt_6000000       6-294-  0
+       ckpt_140604 vs ckpt_213366      116-184-  0
+       ckpt_140604 vs ckpt_323782      101-199-  0
+       ckpt_140604 vs ckpt_491339       43-257-  0
+       ckpt_140604 vs ckpt_745607       31-267-  2
+       ckpt_140604 vs ckpt_1131457       7-293-  0
+       ckpt_140604 vs ckpt_1716984       8-292-  0
+       ckpt_140604 vs ckpt_2605521       6-294-  0
+       ckpt_140604 vs ckpt_3953875      16-283-  1
+       ckpt_140604 vs ckpt_6000000       6-293-  1
+       ckpt_213366 vs ckpt_323782      123-175-  2
+       ckpt_213366 vs ckpt_491339       59-240-  1
+       ckpt_213366 vs ckpt_745607       30-270-  0
+       ckpt_213366 vs ckpt_1131457      15-285-  0
+       ckpt_213366 vs ckpt_1716984      15-284-  1
+       ckpt_213366 vs ckpt_2605521      12-288-  0
+       ckpt_213366 vs ckpt_3953875      10-289-  1
+       ckpt_213366 vs ckpt_6000000       8-288-  4
+       ckpt_323782 vs ckpt_491339       80-217-  3
+       ckpt_323782 vs ckpt_745607       48-251-  1
+       ckpt_323782 vs ckpt_1131457      26-274-  0
+       ckpt_323782 vs ckpt_1716984      12-288-  0
+       ckpt_323782 vs ckpt_2605521      10-290-  0
+       ckpt_323782 vs ckpt_3953875      24-276-  0
+       ckpt_323782 vs ckpt_6000000      17-282-  1
+       ckpt_491339 vs ckpt_745607       90-204-  6
+       ckpt_491339 vs ckpt_1131457      29-266-  5
+       ckpt_491339 vs ckpt_1716984      17-281-  2
+       ckpt_491339 vs ckpt_2605521      25-275-  0
+       ckpt_491339 vs ckpt_3953875      17-283-  0
+       ckpt_491339 vs ckpt_6000000      27-272-  1
+       ckpt_745607 vs ckpt_1131457      76-211- 13
+       ckpt_745607 vs ckpt_1716984      51-245-  4
+       ckpt_745607 vs ckpt_2605521      41-253-  6
+       ckpt_745607 vs ckpt_3953875      38-254-  8
+       ckpt_745607 vs ckpt_6000000      36-264-  0
+      ckpt_1131457 vs ckpt_1716984      90-187- 23
+      ckpt_1131457 vs ckpt_2605521      54-233- 13
+      ckpt_1131457 vs ckpt_3953875      53-226- 21
+      ckpt_1131457 vs ckpt_6000000      62-229-  9
+      ckpt_1716984 vs ckpt_2605521      84-184- 32
+      ckpt_1716984 vs ckpt_3953875      78-200- 22
+      ckpt_1716984 vs ckpt_6000000      84-197- 19
+      ckpt_2605521 vs ckpt_3953875      96-176- 28
+      ckpt_2605521 vs ckpt_6000000      99-173- 28
+      ckpt_3953875 vs ckpt_6000000     115-156- 29
+
+                id      plies      elo
+            random         -1      0.0
+         ckpt_7587       7587    208.3
+        ckpt_17472      17472    218.4
+        ckpt_11514      11514    221.0
+         ckpt_5000       5000    221.4
+            ckpt_0          0    221.8
+        ckpt_26514      26514    279.7
+        ckpt_61058      61058    311.1
+        ckpt_40236      40236    361.5
+        ckpt_92655      92655    389.0
+       ckpt_140604     140604    656.6
+       ckpt_213366     213366    742.0
+       ckpt_323782     323782    794.7
+       ckpt_491339     491339    910.5
+       ckpt_745607     745607   1023.3
+      ckpt_1131457    1131457   1151.5
+      ckpt_1716984    1716984   1235.3
+      ckpt_2605521    2605521   1300.8
+      ckpt_3953875    3953875   1334.0
+      ckpt_6000000    6000000   1339.7
+
+monotone: False  inversions 4/18  concordance 0.947  range 1131 Elo
+
+tiers: bronze=random(0), silver=ckpt_26514(280), gold=ckpt_140604(657), platinum=ckpt_323782(795), diamond=ckpt_745607(1023), grandmaster=ckpt_6000000(1340)
+wrote analysis/league.json

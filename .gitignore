@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+.DS_Store
+
+# Trained networks are large and regenerable; the JSON in analysis/ is the record.
+coldopen/checkpoints/
+coldopen/reference/
+coldopen/ladders/
+*_stdout.log
+
+# Human game archives are big and belong to whoever published them.
+data/human/

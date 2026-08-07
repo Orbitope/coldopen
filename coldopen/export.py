@@ -1,0 +1,157 @@
+"""Assemble the offline results into docs/data.js for the article.
+
+None of this can run in a browser: the round-robin leagues, the telemetry
+classifier curves, the human-transfer results, and a few recorded games for the
+replay widgets. The page reads them as static data.
+
+    python -m coldopen.export --out docs/data.js
+"""
+
+import argparse
+import json
+import pathlib
+
+import torch
+
+from coldopen.c4 import COLS, ROWS, BatchedC4, blocking_moves, winning_moves
+from coldopen.league import load_checkpoints
+from coldopen.net import masked_q
+
+MISSING = object()
+
+
+def read_json(path):
+    p = pathlib.Path(path)
+    if not p.exists():
+        print(f"  ! missing {p}")
+        return None
+    return json.loads(p.read_text())
+
+
+def record_game(net_a, net_b, seed=0, device="cpu", epsilon=0.0, opening_plies=1):
+    """Play one game and record every move with its tactical annotations.
+
+    Annotations are computed *before* the move, so the replay can show what was
+    available at the moment of the decision rather than after the fact.
+    """
+    gen = torch.Generator(device=device).manual_seed(seed)
+    env = BatchedC4(1, device)
+    nets = [net_a, net_b]
+    moves = []
+
+    for _ in range(opening_plies):
+        legal = env.legal_mask()
+        noise = torch.rand(1, COLS, device=device, generator=gen)
+        act = noise.masked_fill(~legal, -1).argmax(dim=1)
+        moves.append({"seat": int(env.to_move.item()), "column": int(act.item()),
+                      "opening": True, "missed_win": False, "missed_block": False})
+        env.step(act)
+
+    while not env.done.all():
+        seat = int(env.to_move.item())
+        legal, obs = env.legal_mask(), env.observe()
+        net = nets[seat]
+        if net is None:
+            noise = torch.rand(1, COLS, device=device, generator=gen)
+            act = noise.masked_fill(~legal, -1).argmax(dim=1)
+        else:
+            with torch.no_grad():
+                act = masked_q(net, obs, legal).argmax(dim=1)
+
+        wins = winning_moves(env)[0]
+        blocks = blocking_moves(env)[0]
+        col = int(act.item())
+        took_win = bool(wins[col])
+        moves.append({
+            "seat": seat,
+            "column": col,
+            "opening": False,
+            "row": ROWS - 1 - int(env.heights[0, col].item()),
+            "had_win": bool(wins.any()),
+            "missed_win": bool(wins.any()) and not took_win,
+            "missed_block": bool(blocks.any()) and not bool(blocks[col]) and not took_win,
+            "took_win": took_win,
+        })
+        env.step(act)
+
+    return {
+        "moves": moves,
+        "winner": int(env.winner.item()),
+        "plies": len(moves),
+    }
+
+
+def record_tier_games(tiers, checkpoint_dir, device="cpu", per_pair=1):
+    """A few games from each end of the ladder, for the replay widget."""
+    entries = {e["id"]: e["net"] for e in load_checkpoints(checkpoint_dir, device)}
+    if len(tiers) < 2:
+        return []
+    low, high = tiers[0], tiers[-1]
+    games = []
+    for i in range(per_pair):
+        games.append({
+            "label": f"{low['tier']} vs {high['tier']}",
+            "seat_names": [low["tier"], high["tier"]],
+            "seat_elo": [low["elo"], high["elo"]],
+            **record_game(entries[low["id"]], entries[high["id"]], seed=100 + i, device=device),
+        })
+        games.append({
+            "label": f"{high['tier']} vs {high['tier']}",
+            "seat_names": [high["tier"], high["tier"]],
+            "seat_elo": [high["elo"], high["elo"]],
+            **record_game(entries[high["id"]], entries[high["id"]], seed=200 + i, device=device),
+        })
+    return games
+
+
+def trim_league(league):
+    if not league:
+        return None
+    return {
+        "table": league["table"],
+        "tiers": league["tiers"],
+        "monotonicity": league["monotonicity"],
+        "games_per_pair": league["games_per_pair"],
+        "pairs": league["pairs"],
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--league", default="analysis/league.json")
+    ap.add_argument("--telemetry", default="analysis/telemetry.json")
+    ap.add_argument("--checkpoints", default="coldopen/checkpoints")
+    ap.add_argument("--out", default="docs/data.js")
+    ap.add_argument("--device", default="cpu")
+    args = ap.parse_args()
+
+    print("collecting:")
+    league = read_json(args.league)
+    payload = {
+        "league": trim_league(league),
+        "telemetry": read_json(args.telemetry),
+        "games": [],
+    }
+
+    if league and pathlib.Path(args.checkpoints).exists():
+        print("  recording replay games")
+        payload["games"] = record_tier_games(league["tiers"], args.checkpoints, args.device)
+
+    path = pathlib.Path(args.out)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = json.dumps(payload, separators=(",", ":"))
+    path.write_text(
+        "/* Generated by coldopen/export.py - do not edit.\n"
+        "   Results that cannot be recomputed in a browser: MCMC posteriors, the\n"
+        "   checkpoint league, telemetry classifier curves, recorded games. The\n"
+        "   detector widgets on the page simulate live and use none of this. */\n"
+        "window.SHData = " + body + ";\n"
+    )
+    print(f"wrote {path} ({path.stat().st_size / 1024:.0f} KB)")
+    for key, value in payload.items():
+        state = "missing" if value in (None, []) else "ok"
+        print(f"  {key:12} {state}")
+
+
+if __name__ == "__main__":
+    main()
