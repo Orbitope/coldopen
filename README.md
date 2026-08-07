@@ -47,7 +47,7 @@ leaves the game's own vocabulary.
 |---|---|---|---|---|---|---|---|
 | Connect Four | perfect | none | 736 | 194 | 46.8% | **63.1%** | 39.8% |
 | Othello | perfect | none | 796 | 159 | 48.0% | 52.9% | 30.1% |
-| Backgammon | perfect | dice | 184 | 42 | 49.2% | 33.2% | 47.4% |
+| Backgammon | perfect | dice | 184 | 42 | 49.2% | 36.2% | 47.4% |
 | Leduc Hold'em | hidden | cards | 46 | 15 | 29.9% | **62.1%** | 24.1% |
 
 **Read the tier gap column before the accuracy columns.** The ladders are not
@@ -74,7 +74,7 @@ hypothesis surviving its first test.
 
 **Backgammon runs backwards, and that is the interesting one.** It is the only
 game where watching longer makes the prediction *worse*: 49.2% from one move,
-60.2% from two, then a steady decline to 33.2% by twenty. Backgammon starts from
+60.6% from two, then a steady decline to 36.2% by twenty. Backgammon starts from
 a fixed position, so the first couple of moves are a near-pure skill signal —
 after that the dice scatter players into positions that have little in common,
 and averaging over them dilutes the signal instead of accumulating it. Its

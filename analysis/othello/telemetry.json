@@ -59,7 +59,6 @@
     "gave_corner",
     "opp_mobility",
     "frontier",
-    "is_pass",
     "ref_agreement",
     "ref_regret"
   ],
@@ -71,8 +70,7 @@
     "c_square",
     "gave_corner",
     "opp_mobility",
-    "frontier",
-    "is_pass"
+    "frontier"
   ],
   "move_budgets": [
     1,
@@ -1044,7 +1042,6 @@
       "gave_corner": 0.16722223162651062,
       "opp_mobility": 8.818333625793457,
       "frontier": 8.994305610656738,
-      "is_pass": 0.0,
       "ref_agreement": 0.10458333045244217,
       "ref_regret": 0.09648454934358597
     },
@@ -1057,7 +1054,6 @@
       "gave_corner": 0.12541666626930237,
       "opp_mobility": 9.203888893127441,
       "frontier": 9.478888511657715,
-      "is_pass": 0.00013888889225199819,
       "ref_agreement": 0.14819444715976715,
       "ref_regret": 0.08456561714410782
     },
@@ -1070,7 +1066,6 @@
       "gave_corner": 0.11500000208616257,
       "opp_mobility": 8.747638702392578,
       "frontier": 9.839166641235352,
-      "is_pass": 0.0,
       "ref_agreement": 0.20194445550441742,
       "ref_regret": 0.0631994977593422
     },
@@ -1083,7 +1078,6 @@
       "gave_corner": 0.02291666716337204,
       "opp_mobility": 8.822500228881836,
       "frontier": 9.688750267028809,
-      "is_pass": 0.0006944444612599909,
       "ref_agreement": 0.23027779161930084,
       "ref_regret": 0.04490312188863754
     },
@@ -1096,7 +1090,6 @@
       "gave_corner": 0.008611111901700497,
       "opp_mobility": 8.993332862854004,
       "frontier": 9.72902774810791,
-      "is_pass": 0.00027777778450399637,
       "ref_agreement": 0.1865277737379074,
       "ref_regret": 0.039597056806087494
     },
@@ -1109,7 +1102,6 @@
       "gave_corner": 0.008611110970377922,
       "opp_mobility": 8.70486068725586,
       "frontier": 8.76319408416748,
-      "is_pass": 0.0,
       "ref_agreement": 0.3094444274902344,
       "ref_regret": 0.029008209705352783
     }

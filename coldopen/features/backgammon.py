@@ -14,14 +14,33 @@ concepts:
   count in your home board is the specific thing that traps checkers on the bar.
 * **Hitting and entering.** Hitting sends an opponent checker back; coming in
   from the bar is forced but tells you the state you were in.
-* **Over-stacking.** Piling five checkers on one point is the classic beginner
-  shape - safe, and wasteful, because the checkers do nothing there.
+* **Running the back checker, and how far you got.** ``moves_rearmost`` is the
+  running game against building at home, and it is the clearer *choice* of the
+  two. ``pip_gain`` - the die actually played - looks at first like the dice's
+  choice rather than the player's, and was cut on that reasoning. Removing it
+  cost 6.5 points of accuracy at one move and 5 at two, so the reasoning was
+  wrong: which die you are still *able* to play is decided by the position you
+  left yourself, and early on that is most of what separates the tiers. Both
+  are kept. The reasoning was worth writing down because it was wrong in the
+  direction this whole project is about - assuming you know which behaviour
+  carries skill instead of measuring it.
+* **Stacking.** Piling checkers on one point is safe and idle. This was written
+  down as a beginner habit and the measurement disagrees: the top tier stacks
+  *more* than the bottom (``stacks_high`` 0.077 -> 0.143, ``max_stack``
+  4.72 -> 5.03). Kept because it separates the tiers, but it is separating them
+  in the opposite direction to the received wisdom, and the received wisdom is
+  not what this file gets to assert.
 
 The board is Pgx's 28-vector, always written from the point of view of the
 player to move: entries 0-23 are the points in that player's direction of
 travel, 24 their bar, 25 the opponent's, 26 their borne-off checkers and 27 the
 opponent's. Positive counts are theirs, negative the opponent's, which means
 "a blot" is exactly ``board == 1`` and no perspective bookkeeping is needed.
+
+One thing is deliberately absent. ``bears_off`` fired on 0.000 of profiled moves
+in every tier: a backgammon game runs a couple of hundred plies and the
+telemetry window is the first twenty moves, so nobody in it is bearing off yet.
+It is a correct feature of the game and a dead column of this experiment.
 
 The post-move board is reconstructed here rather than read back from Pgx.
 Pgx flips the board every time the turn changes, and a backgammon turn is two to
@@ -85,6 +104,18 @@ def apply_move(board, src, tgt, is_noop):
     return out, hit
 
 
+def rearmost_point(board):
+    """[B] index of the player's furthest-back occupied point, or 24 if none.
+
+    "Furthest back" is the lowest index, since the mover always travels toward
+    23 in this frame.
+    """
+    points = board[:, :POINTS]
+    index = torch.arange(POINTS, device=board.device).unsqueeze(0)
+    occupied = points >= 1
+    return torch.where(occupied, index, torch.full_like(index, POINTS)).min(dim=1).values
+
+
 def _direct_shots(board):
     """[B] own blots an opponent checker could hit with a single die.
 
@@ -112,15 +143,15 @@ def _direct_shots(board):
 class BackgammonFeatures:
     names = (
         "hit",
-        "bears_off",
         "from_bar",
         "makes_point",
         "stacks_high",
+        "moves_rearmost",
+        "pip_gain",
         "blots_after",
         "blots_exposed",
         "home_points",
         "max_stack",
-        "pip_gain",
     )
 
     def extract(self, game, state, actions, key):
@@ -139,17 +170,22 @@ class BackgammonFeatures:
 
         return {
             "hit": hit.float(),
-            "bears_off": ((tgt == OFF) & ~is_noop).float(),
             "from_bar": ((src == BAR) & ~is_noop).float(),
             # Landing the second checker on a point you already held one of.
             "makes_point": ((before_tgt == 1) & on_board & ~is_noop).float(),
             # Landing on a point that already had three or more: safe and idle.
             "stacks_high": ((before_tgt >= 3) & on_board & ~is_noop).float(),
+            # Running the back checker rather than building at home.
+            "moves_rearmost": (
+                (src == rearmost_point(board)) & ~is_noop & (src < POINTS)).float(),
+            # The die actually played. Not as free a choice as the one above,
+            # but being unable to use the big die is a consequence of the
+            # position you left, and it is the strongest single early signal.
+            "pip_gain": torch.where(is_noop, torch.zeros_like(die), die).float(),
             "blots_after": (points == 1).sum(dim=1).float(),
             "blots_exposed": _direct_shots(after),
             "home_points": (points.ge(2) & home.unsqueeze(0)).sum(dim=1).float(),
             "max_stack": points.clamp(min=0).max(dim=1).values.float(),
-            "pip_gain": torch.where(is_noop, torch.zeros_like(die), die).float(),
         }
 
 

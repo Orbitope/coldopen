@@ -124,19 +124,49 @@ def test_point_making_and_stacking_are_told_apart(game):
     assert f["max_stack"].item() == 5.0
 
 
-def test_bearing_off_and_coming_in_are_flagged(game):
+def test_coming_in_from_the_bar_is_flagged(game):
     key = jax.random.PRNGKey(0)
     state = game.init(1, seed=0)
-
-    off = state.replace(_board=board(**{"22": 2}).numpy())
-    f = feat.FEATURES.extract(game, off, action(2 + 22, 5), key)
-    assert f["bears_off"].item() == 1.0
-    assert f["from_bar"].item() == 0.0
 
     entering = state.replace(_board=board(**{"bar": 1}).numpy())
     f = feat.FEATURES.extract(game, entering, action(1, 2), key)
     assert f["from_bar"].item() == 1.0
-    assert f["bears_off"].item() == 0.0
+
+    ordinary = state.replace(_board=board(**{"5": 2}).numpy())
+    f = feat.FEATURES.extract(game, ordinary, action(2 + 5, 3), key)
+    assert f["from_bar"].item() == 0.0
+
+
+def test_moving_the_back_checker_is_told_from_moving_a_front_one(game):
+    """The die decides how far you go; you decide which checker goes.
+
+    That is why this replaced ``pip_gain``, which was the die value and so was
+    the dice's choice rather than the player's - noise a classifier can fit.
+    """
+    key = jax.random.PRNGKey(0)
+    state = game.init(1, seed=0)
+    position = board(**{"3": 2, "11": 3, "18": 2})
+
+    assert int(feat.rearmost_point(position)) == 3
+
+    back = state.replace(_board=position.numpy())
+    f = feat.FEATURES.extract(game, back, action(2 + 3, 4), key)
+    assert f["moves_rearmost"].item() == 1.0
+
+    front = state.replace(_board=position.numpy())
+    f = feat.FEATURES.extract(game, front, action(2 + 11, 4), key)
+    assert f["moves_rearmost"].item() == 0.0
+
+    # A no-op moves nothing, so it moves nothing rearmost either.
+    f = feat.FEATURES.extract(game, back, action(0, 4), key)
+    assert f["moves_rearmost"].item() == 0.0
+
+
+def test_rearmost_point_ignores_the_opponents_checkers(game):
+    """Negative counts are theirs; the back checker is ours."""
+    assert int(feat.rearmost_point(board(**{"2": -3, "9": 1}))) == 9
+    # With nothing on the board at all it reports past the last point.
+    assert int(feat.rearmost_point(board(**{"off": 15}))) == feat.POINTS
 
 
 def test_home_points_counts_made_points_in_our_home_board(game):

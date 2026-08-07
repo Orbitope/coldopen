@@ -105,14 +105,21 @@ def test_frontier_counts_our_discs_touching_an_empty_square(game):
     assert f["frontier"].item() == 4.0, "all four of our discs touch empty space"
 
 
-def test_a_pass_is_flagged_and_flips_nothing(game):
-    """Action 64 is a pass; it must not be scored as a zero-flip move."""
+def test_a_pass_flips_nothing_and_lands_nowhere(game):
+    """Action 64 is a pass.
+
+    It is not reported as a feature - it never occurs inside the twenty-move
+    telemetry window - but it still has to be handled, or it would be scored as
+    a move that flipped no discs and sat on no square, which is a real move's
+    description and would drag the averages.
+    """
     state = one(game)
     f = extract(game, state, feat.PASS)
-    assert f["is_pass"].item() == 1.0
     assert f["discs_flipped"].item() == 0.0
     assert f["corner_taken"].item() == 0.0
     assert f["x_square"].item() == 0.0
+    assert f["c_square"].item() == 0.0
+    assert "is_pass" not in feat.FEATURES.names
 
 
 def test_extraction_does_not_advance_the_real_game(game):

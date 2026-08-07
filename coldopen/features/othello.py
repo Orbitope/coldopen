@@ -8,20 +8,26 @@ accuracy curve here should collapse.
 So the features are the things Othello players actually argue about, and each
 one is a specific, well-known difference between a beginner and a club player:
 
-* **Discs flipped.** The single most reliable beginner tell. New players take
-  the move that flips the most discs; strong players are frequently *behind* on
-  disc count through the whole midgame and do it on purpose.
 * **Corners, X-squares and C-squares.** Corners can never be flipped, so they
   are worth taking and worth not giving away. The X-square (diagonally inside an
   empty corner) is the classic way to hand one over, and the two C-squares
-  beside an empty corner are the second-classic way.
-* **Mobility.** Strong play restricts what the opponent can do; the count of
-  replies left to them after the move is the direct measure.
-* **Frontier.** Discs sitting next to an empty square are the ones that give the
-  opponent something to flip. Grabbing discs early inflates the frontier, which
-  is the mechanism behind the disc-count trap rather than a restatement of it.
+  beside an empty corner are the second-classic way. This is the family that
+  works: across the ladder, taking a corner goes 0.003 -> 0.060 and giving one
+  away 0.167 -> 0.009.
+* **Discs flipped.** Supposedly the most reliable beginner tell - new players
+  take the move that flips the most, strong players are behind on discs through
+  the midgame on purpose. It does not hold here: the measured direction is
+  *upward*, 1.545 -> 1.638. Kept, and kept honest, because the received wisdom
+  being wrong about these agents is a result rather than a bug.
+* **Mobility and frontier.** Strong play restricts the opponent's replies and
+  keeps few discs adjacent to empty squares. Both barely move across the ladder
+  (8.82 -> 8.71 and 8.99 -> 8.76), so on this evidence almost all of Othello's
+  own signal is the corner family.
 
-Board layout is Pgx's: 8x8, index ``row * 8 + col``, action 64 is a pass.
+Board layout is Pgx's: 8x8, index ``row * 8 + col``, action 64 is a pass. A pass
+is handled correctly everywhere below but is not itself reported: it never
+occurs inside the telemetry window, since Othello only forces one late in a
+game and the window is the first twenty moves.
 """
 
 import numpy as np
@@ -80,7 +86,6 @@ class OthelloFeatures:
         "gave_corner",
         "opp_mobility",
         "frontier",
-        "is_pass",
     )
 
     def extract(self, game, state, actions, key):
@@ -143,7 +148,6 @@ class OthelloFeatures:
             "gave_corner": gave_corner.float(),
             "opp_mobility": mobility,
             "frontier": _frontier(own_after, own_after + opp_after),
-            "is_pass": is_pass.float(),
         }
 
 
