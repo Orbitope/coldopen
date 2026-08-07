@@ -162,26 +162,59 @@ relationship could live, and it **fails in five of six ordered pairs**:
 Within a game the pair is complementary — TETR.IO scores 0.974 against 0.926 for
 speed alone. Across games, importing the weighting costs accuracy every time.
 
-**Why: the relative importance of the two axes is entirely game-specific.**
+**Why: the two axes are not equally portable.** With four games the asymmetry is
+clear.
 
 | game | speed | efficiency |
 |---|---|---|
-| chess (fixed time control) | 0.102 | **0.358** |
+| chess (fixed time control) | 0.102 | 0.358 |
+| NetHack | 0.173 | **0.654** |
 | StarCraft II | **0.661** | 0.436 |
 | TETR.IO | 0.926 | 0.927 |
 
-Chess at a single time control gives every player the same clock, so speed says
-almost nothing and move quality says everything. StarCraft rewards raw action
-rate. Tetris is the one game where the two are nearly interchangeable, and that
-is because they are correlated at 0.878 there — not because the pair is
-fundamental.
+**Efficiency — output per action — is the portable axis.** It is positive and
+useful in all four games. **Speed is the game-specific one**: near-worthless in
+chess at a fixed time control and in untimed NetHack, dominant in StarCraft,
+interchangeable with efficiency in Tetris. That fits the obvious mechanism —
+actions-per-second can only matter where the game applies time pressure.
+
+And importing the wrong emphasis is actively destructive rather than merely
+unhelpful. SkillCraft is speed-dominant, so a SkillCraft-fitted model
+over-weights speed; applied to NetHack, where speed is worth 0.173 and
+efficiency 0.654, the pair collapses to **0.158** — four times worse than
+ignoring SkillCraft entirely and using NetHack's own efficiency axis.
 
 **Verdict.** The strong hypothesis — a transferable speed/efficiency *shape* — is
-refuted. The weak one survives and is still worth having: **standardise whichever
-axis a game exposes and you get a skill estimate for free**, with no model, no
-training and no data from the target game. It is worth 0.93 in Tetris, 0.66 in
-StarCraft and 0.36 in chess. That is the baseline the agent track must beat, and
-in chess it is a low bar.
+refuted. What replaces it is more useful than the weak version stated earlier:
+
+> Take the game's output-per-action ratio, standardise it within the game, and
+> rank by it. No model, no training, no data from the target game. Add a speed
+> axis only if the game applies time pressure, and never import another game's
+> weighting between the two.
+
+That is worth 0.93 in Tetris, 0.65 in NetHack, 0.44 in StarCraft and 0.36 in
+chess. It is the baseline the agent track must beat, and it is a low bar in
+chess and a very high one in Tetris.
+
+### The cold-start curve, on real humans
+
+NetHack is the only corpus here with many games per identified player, so it is
+the only place the actual question can be asked without a proxy: **predict how
+good somebody turns out to be, from the first games they ever played.** Career
+labels are held out *in time* — skill is scored from the second half of a
+career and predicted from the first, so the observation window is never part of
+what it is predicting.
+
+| games seen | ρ against later career | 
+|---|---|
+| 1 | 0.303 |
+| 3 | 0.369 |
+| 5 | 0.409 |
+| 10 | 0.497 |
+| 20 | 0.547 |
+
+967 careers, 46,660 games. One game buys a third of the correlation that half a
+career does. This is the number the agent track is really competing with.
 
 ### Also established
 

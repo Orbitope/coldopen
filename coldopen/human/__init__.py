@@ -19,6 +19,7 @@ LOADERS = {
     # Lichess is parsed into the common representation at ingest, since the
     # work is in reading PGN rather than in reshaping the result.
     "lichess": lambda blob: blob["rows"],
+    "nethack": lambda blob: blob["rows"],
 }
 
 

@@ -1,6 +1,7 @@
 {
   "games": [
     "lichess",
+    "nethack",
     "skillcraft",
     "tetrio"
   ],
@@ -10,6 +11,12 @@
       "players": 6917,
       "spearman": 0.3553501585508746,
       "mae_percentile": 0.21314071184677477
+    },
+    "nethack": {
+      "n": 967,
+      "players": 967,
+      "spearman": 0.5800690137612939,
+      "mae_percentile": 0.2484927059693513
     },
     "skillcraft": {
       "n": 3395,
@@ -25,6 +32,15 @@
     }
   },
   "transfer": {
+    "lichess->nethack": {
+      "n": 967,
+      "spearman": 0.6549411732918036,
+      "mae_percentile": 0.2812413315706597,
+      "coefficients": {
+        "speed": 0.00011080220847174594,
+        "efficiency": 0.1017606525029905
+      }
+    },
     "lichess->skillcraft": {
       "n": 3395,
       "spearman": 0.4364731839461624,
@@ -43,10 +59,46 @@
         "efficiency": 0.1017606525029905
       }
     },
+    "nethack->lichess": {
+      "n": 6917,
+      "spearman": 0.35678254000224746,
+      "mae_percentile": 0.41008090237905903,
+      "coefficients": {
+        "speed": 0.08000891612654393,
+        "efficiency": 0.597482638876079
+      }
+    },
+    "nethack->skillcraft": {
+      "n": 3395,
+      "spearman": 0.48580154770503864,
+      "mae_percentile": 0.4300622379750876,
+      "coefficients": {
+        "speed": 0.08000891612654393,
+        "efficiency": 0.597482638876079
+      }
+    },
+    "nethack->tetrio": {
+      "n": 450,
+      "spearman": 0.9437707182093081,
+      "mae_percentile": 0.253808538785565,
+      "coefficients": {
+        "speed": 0.08000891612654393,
+        "efficiency": 0.597482638876079
+      }
+    },
     "skillcraft->lichess": {
       "n": 6917,
       "spearman": 0.07319311662417499,
       "mae_percentile": 0.2612275152662221,
+      "coefficients": {
+        "speed": 0.19257421414796394,
+        "efficiency": -0.01125733920204416
+      }
+    },
+    "skillcraft->nethack": {
+      "n": 967,
+      "spearman": 0.1577613979351557,
+      "mae_percentile": 0.2835038406120887,
       "coefficients": {
         "speed": 0.19257421414796394,
         "efficiency": -0.01125733920204416
@@ -65,6 +117,15 @@
       "n": 6917,
       "spearman": 0.31695661138046677,
       "mae_percentile": 0.24634647394197454,
+      "coefficients": {
+        "speed": 0.15926004273007102,
+        "efficiency": 0.19040420567201236
+      }
+    },
+    "tetrio->nethack": {
+      "n": 967,
+      "spearman": 0.36685991924781064,
+      "mae_percentile": 0.2673655486951687,
       "coefficients": {
         "speed": 0.15926004273007102,
         "efficiency": 0.19040420567201236
@@ -89,11 +150,13 @@
       "within": {
         "speed": {
           "lichess": 0.1021173358530413,
+          "nethack": 0.1725423923514265,
           "tetrio": 0.9261045239729581,
           "skillcraft": 0.661188465608109
         },
         "efficiency": {
           "lichess": 0.35788991721224517,
+          "nethack": 0.6541728909673451,
           "tetrio": 0.9268039183732595,
           "skillcraft": 0.4360167262069504
         }
@@ -103,45 +166,66 @@
     "speed_only": {
       "within": {
         "lichess": 0.08657455866014284,
+        "nethack": 0.16453273194304296,
         "tetrio": 0.924343066714733,
         "skillcraft": 0.6607842323394288
       },
       "transfer": {
+        "lichess->nethack": 0.1725423923514265,
         "lichess->tetrio": 0.9261045239729581,
         "lichess->skillcraft": 0.661188465608109,
+        "nethack->lichess": 0.10211522972657897,
+        "nethack->tetrio": 0.9261045239729581,
+        "nethack->skillcraft": 0.661188465608109,
         "tetrio->lichess": 0.10211512127288691,
+        "tetrio->nethack": 0.1725423923514265,
         "tetrio->skillcraft": 0.661188465608109,
         "skillcraft->lichess": 0.10211258760463823,
+        "skillcraft->nethack": 0.1725423923514265,
         "skillcraft->tetrio": 0.9261045239729581
       }
     },
     "efficiency_only": {
       "within": {
         "lichess": 0.3562230444109227,
+        "nethack": 0.6455808478199558,
         "tetrio": 0.926133626997335,
         "skillcraft": 0.4352480783788966
       },
       "transfer": {
+        "lichess->nethack": 0.6541728909673451,
         "lichess->tetrio": 0.9268039183732595,
         "lichess->skillcraft": 0.4360167262069504,
+        "nethack->lichess": 0.3578904492553823,
+        "nethack->tetrio": 0.9268039183732595,
+        "nethack->skillcraft": 0.4360167262069504,
         "tetrio->lichess": 0.3578909946784635,
+        "tetrio->nethack": 0.6541728909673451,
         "tetrio->skillcraft": 0.4360167262069504,
         "skillcraft->lichess": 0.35789122739521223,
+        "skillcraft->nethack": 0.6541728909673451,
         "skillcraft->tetrio": 0.9268039183732595
       }
     },
     "both": {
       "within": {
         "lichess": 0.3553501585508746,
+        "nethack": 0.5800690137612939,
         "tetrio": 0.9741638888751716,
         "skillcraft": 0.6580114235735512
       },
       "transfer": {
+        "lichess->nethack": 0.6549411732918036,
         "lichess->tetrio": 0.9269674747365009,
         "lichess->skillcraft": 0.4364731839461624,
+        "nethack->lichess": 0.35678254000224746,
+        "nethack->tetrio": 0.9437707182093081,
+        "nethack->skillcraft": 0.48580154770503864,
         "tetrio->lichess": 0.31695661138046677,
+        "tetrio->nethack": 0.36685991924781064,
         "tetrio->skillcraft": 0.6057769450816969,
         "skillcraft->lichess": 0.07319311662417499,
+        "skillcraft->nethack": 0.1577613979351557,
         "skillcraft->tetrio": 0.9108048928636686
       }
     }
@@ -189,6 +273,50 @@
         "players": 6917,
         "spearman": 0.3553501585508746,
         "mae_percentile": 0.21314071184677477
+      }
+    ],
+    "nethack": [
+      {
+        "budget": 1,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.3030608350819591,
+        "mae_percentile": 0.2744142698334909
+      },
+      {
+        "budget": 2,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.3342342234979094,
+        "mae_percentile": 0.27163564184318956
+      },
+      {
+        "budget": 3,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.368819217006022,
+        "mae_percentile": 0.26893970119450866
+      },
+      {
+        "budget": 5,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.40869868591500635,
+        "mae_percentile": 0.26349392648522163
+      },
+      {
+        "budget": 10,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.49672163533030655,
+        "mae_percentile": 0.25888614711326524
+      },
+      {
+        "budget": null,
+        "n": 967,
+        "players": 967,
+        "spearman": 0.5800690137612939,
+        "mae_percentile": 0.2484927059693513
       }
     ],
     "tetrio": [
