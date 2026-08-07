@@ -97,7 +97,14 @@ def epsilon_actions(net, obs, legal, epsilon, generator, device):
     ``generator`` lives on the CPU whatever ``device`` is - Torch has no
     seedable generator for MPS, and every caller here wants a reproducible
     stream more than it wants the noise drawn on the accelerator.
+
+    A player that chooses its own way - the handicapped policies in
+    ``coldopen/handicap.py``, which sample rather than maximise - supplies an
+    ``act`` method and is delegated to. That keeps the league, the profiler and
+    the classifier unaware that anything other than a network exists.
     """
+    if hasattr(net, "act"):
+        return net.act(obs, legal, epsilon, generator, device)
     n, a = obs.shape[0], legal.shape[1]
     if net is None:
         noise = torch.rand(n, a, generator=generator).to(device)

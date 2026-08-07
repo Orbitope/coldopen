@@ -326,6 +326,55 @@ signal is in which mistakes are made rather than how many.
 **What it unblocks.** Which generator to use for TETR.IO, and whether the
 existing four-game results are an artefact of the generator.
 
+### Result: the generator matters more than the game does
+
+Three handicaps applied to the strongest Connect Four checkpoint, each swept to
+span a comparable Elo range, measured by the same league and profiled by the same
+classifier:
+
+- **epsilon** — throw the move away at random. The control, and the one computer
+  chess already knows feels least like a human, because the errors are
+  uncorrelated with the position.
+- **temperature** — sample from a softmax over action values, so mistakes stay
+  *ordered*: a slightly worse move is much likelier than a disastrous one.
+- **blindspot** — hide a band of the board before the network looks. Models
+  attention rather than decision noise.
+
+Temperature, at a 689 Elo range against the trained ladder's 736:
+
+| moves seen | undertrained | temperature-handicapped |
+|---|---|---|
+| 1 | **0.468** | 0.287 |
+| 2 | 0.575 | 0.302 |
+| 3 | 0.602 | 0.280 |
+| 16 | 0.619 | 0.384 |
+
+**At matched strength, skill is far less legible from early moves when weakness
+comes from decision noise than when it comes from an undertrained value
+function.** The curve is both lower and slower-rising, exactly as predicted.
+
+This is the most consequential result in the project so far, because the headline
+finding — most of the signal arriving on move one — turns out to be substantially
+a property of *how the ladder was built*. An undertrained network is uniformly bad
+and therefore easy to recognise from any single move. A policy that still prefers
+good moves and merely wavers between close ones is not.
+
+Human error is far more likely to resemble the second. That makes the written
+E3 prediction — that transfer to humans will compress — both more specific and
+more likely: if humans look like temperature-handicapped agents, achievable
+accuracy from one move is nearer 0.29 than 0.47.
+
+**A secondary finding.** The handicapped ladder *ranks better* than the trained
+one — concordance 0.978 against 0.912 — because the handicap dial controls
+strength directly while training only correlates with it. If the point of a
+ladder is graded strength, handicapping is the better instrument.
+
+**A limit worth recording.** Blindspot cannot reach the bottom of the ladder:
+blind to most of the board it still scores about 0.80 against random, because a
+*consistent* policy beats random play whatever it is consistent about. That is
+this project's opening trap — an untrained network beats random 85% of the time —
+reappearing as a floor on how bad attention-limitation alone can make you.
+
 ---
 
 ## E3 — Chess as the transfer sanity check
