@@ -262,10 +262,36 @@ Rocket League was considered and dropped: its telemetry is positional physics
 rather than an action rate, so the speed axis would not mean the same thing, and
 replay parsing is a project in itself.
 
-**Minesweeper remains the best fourth entry**, because `efficiency %` is
-literally board value per click — output per action, measured rather than
-proxied — and the rank ladder is a third quantity. That makes E4's scraper a
-dependency of E1 as well.
+**Minesweeper remains a good further entry**, because `efficiency %` is literally
+board value per click — output per action, measured rather than proxied — and the
+rank ladder is a third quantity. An email to `support@minesweeper.online` asking
+about an export is outstanding.
+
+**The Atari Grand Challenge dataset is not currently obtainable.** It would have
+been the best entry available — five games collected under one protocol, which
+is the only way to remove the "different game *and* different collection method"
+confound that every pair in the table above still carries. But
+`atarigrandchallenge.com` has been re-registered as an unrelated content site and
+the `/data` path is gone; the [code repository](https://github.com/yobibyte/atarigrandchallenge)
+survives but holds collection code, not data. A HyperAI mirror and a
+[processor repo](https://github.com/Rowing0914/Atari-Grand-Challenge-Processor)
+are untried leads. Worth knowing before chasing them: the trajectory format is
+`(episode, frame, reward, score, terminal, action)` with **no player identifier**,
+so it would support the cross-game shape test and a within-episode budget curve,
+but not the per-career question NetHack answers.
+
+### Where this stands
+
+E1 is answered well enough to write up. The strong hypothesis is refuted, the
+replacement rule is stated above and holds across four games spanning real-time
+and turn-based, timed and untimed. The remaining work — a fifth game, the
+single-protocol Atari corpus — would sharpen the estimate rather than change the
+conclusion.
+
+The agent track (E2 onward) is untouched and now has its baselines: **0.93 in
+Tetris, 0.65 in NetHack, 0.44 in StarCraft, 0.36 in chess**, plus the NetHack
+cold-start curve of 0.303 from a single game. E2 remains the cheapest next step
+and still runs against the Connect Four ladder that already exists.
 
 ---
 
