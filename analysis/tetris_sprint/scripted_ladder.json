@@ -2,95 +2,95 @@
   "ladders": {
     "scripted": [
       {
-        "episodes": 16,
-        "mean_lines": 40.0,
-        "finish_rate": 0.9375,
-        "time_s": 15.7458,
-        "inputs_per_piece": 3.185304090199298,
-        "quad_rate": 0.5995162823287823,
-        "holds_per_piece": 0.0827925619996916,
-        "max_b2b": 4.3125,
-        "pps": 7.647218709077007,
+        "episodes": 20,
+        "mean_lines": 39.85,
+        "finish_rate": 0.9,
+        "time_s": 15.387222222222222,
+        "inputs_per_piece": 3.28706552969361,
+        "quad_rate": 0.6900412822471645,
+        "holds_per_piece": 0.23702293671477861,
+        "max_b2b": 5.4,
+        "pps": 7.567314227484346,
         "rung": "skill_1",
         "dial": 1.0
       },
       {
-        "episodes": 16,
-        "mean_lines": 37.875,
-        "finish_rate": 0.75,
-        "time_s": 35.00925,
-        "inputs_per_piece": 3.5416381441250433,
-        "quad_rate": 0.607176504051504,
-        "holds_per_piece": 0.1067969264871866,
-        "max_b2b": 4.0625,
-        "pps": 3.52833581086786,
-        "rung": "skill_0.85",
-        "dial": 0.85
+        "episodes": 20,
+        "mean_lines": 39.2,
+        "finish_rate": 0.9,
+        "time_s": 22.656,
+        "inputs_per_piece": 3.432333993066204,
+        "quad_rate": 0.5498699543920132,
+        "holds_per_piece": 0.1877629578092604,
+        "max_b2b": 3.5,
+        "pps": 5.048737509222791,
+        "rung": "skill_0.9",
+        "dial": 0.9
       },
       {
-        "episodes": 16,
-        "mean_lines": 26.0,
-        "finish_rate": 0.25,
-        "time_s": 75.0295,
-        "inputs_per_piece": 3.877296119510012,
-        "quad_rate": 0.368786075036075,
-        "holds_per_piece": 0.18110156389925974,
-        "max_b2b": 2.0,
-        "pps": 1.6497215285172169,
+        "episodes": 20,
+        "mean_lines": 38.25,
+        "finish_rate": 0.9,
+        "time_s": 36.294666666666664,
+        "inputs_per_piece": 3.5654452310527334,
+        "quad_rate": 0.5617489495798319,
+        "holds_per_piece": 0.08873587164037444,
+        "max_b2b": 3.6,
+        "pps": 3.1215319230188605,
+        "rung": "skill_0.8",
+        "dial": 0.8
+      },
+      {
+        "episodes": 20,
+        "mean_lines": 40.95,
+        "finish_rate": 1.0,
+        "time_s": 65.1385,
+        "inputs_per_piece": 3.7412000514945682,
+        "quad_rate": 0.27380073959408324,
+        "holds_per_piece": 0.06680556654369976,
+        "max_b2b": 2.25,
+        "pps": 1.7037205934321733,
         "rung": "skill_0.7",
         "dial": 0.7
       },
       {
-        "episodes": 16,
-        "mean_lines": 11.4375,
-        "finish_rate": 0.0625,
-        "time_s": 136.536,
-        "inputs_per_piece": 4.216068579096998,
-        "quad_rate": 0.1935749299719888,
-        "holds_per_piece": 0.1951020124788903,
-        "max_b2b": 0.625,
-        "pps": 0.8680561189920837,
-        "rung": "skill_0.55",
-        "dial": 0.55
+        "episodes": 20,
+        "mean_lines": 38.2,
+        "finish_rate": 0.9,
+        "time_s": 124.72716666666668,
+        "inputs_per_piece": 3.9399151491148623,
+        "quad_rate": 0.17151055958407216,
+        "holds_per_piece": 0.05758934981893973,
+        "max_b2b": 1.7,
+        "pps": 0.8712372338785016,
+        "rung": "skill_0.6",
+        "dial": 0.6
       },
       {
-        "episodes": 16,
-        "mean_lines": 8.0,
-        "finish_rate": 0.0,
-        "time_s": null,
-        "inputs_per_piece": 4.463012246053484,
-        "quad_rate": 0.109375,
-        "holds_per_piece": 0.2290274300544649,
-        "max_b2b": 0.3125,
-        "pps": 0.5216737613189717,
+        "episodes": 20,
+        "mean_lines": 37.25,
+        "finish_rate": 0.75,
+        "time_s": 188.6866,
+        "inputs_per_piece": 4.116963879665525,
+        "quad_rate": 0.11939620336825547,
+        "holds_per_piece": 0.04808565592460039,
+        "max_b2b": 1.45,
+        "pps": 0.5806013674806307,
+        "rung": "skill_0.5",
+        "dial": 0.5
+      },
+      {
+        "episodes": 20,
+        "mean_lines": 35.75,
+        "finish_rate": 0.75,
+        "time_s": 269.8763333333333,
+        "inputs_per_piece": 4.378657044179505,
+        "quad_rate": 0.06754946100598275,
+        "holds_per_piece": 0.04141296516097682,
+        "max_b2b": 0.95,
+        "pps": 0.39613085631901296,
         "rung": "skill_0.4",
         "dial": 0.4
-      },
-      {
-        "episodes": 16,
-        "mean_lines": 3.1875,
-        "finish_rate": 0.0,
-        "time_s": null,
-        "inputs_per_piece": 4.838304951430656,
-        "quad_rate": 0.078125,
-        "holds_per_piece": 0.2637689777041567,
-        "max_b2b": 0.125,
-        "pps": 0.3150589138573787,
-        "rung": "skill_0.25",
-        "dial": 0.25
-      },
-      {
-        "episodes": 16,
-        "mean_lines": 1.625,
-        "finish_rate": 0.0,
-        "time_s": null,
-        "inputs_per_piece": 5.251871807852334,
-        "quad_rate": 0.0625,
-        "holds_per_piece": 0.27757228194885575,
-        "max_b2b": 0.0625,
-        "pps": 0.21091224981226048,
-        "rung": "skill_0.1",
-        "dial": 0.1
       }
     ]
   },
@@ -100,12 +100,12 @@
       "human_strongest_rank_mean": 2.806428276621099,
       "lower_is_better": true,
       "scripted": {
-        "min": 3.185304090199298,
-        "max": 5.251871807852334,
+        "min": 3.28706552969361,
+        "max": 4.378657044179505,
         "off_manifold_share": 0.0,
         "rank_span": [
-          0,
-          16
+          4,
+          15
         ]
       }
     },
@@ -114,12 +114,12 @@
       "human_strongest_rank_mean": 0.6888004218004217,
       "lower_is_better": false,
       "scripted": {
-        "min": 0.0625,
-        "max": 0.607176504051504,
+        "min": 0.06754946100598275,
+        "max": 0.6900412822471645,
         "off_manifold_share": 0.0,
         "rank_span": [
           1,
-          15
+          17
         ]
       }
     },
@@ -128,12 +128,12 @@
       "human_strongest_rank_mean": 0.30546054655019605,
       "lower_is_better": false,
       "scripted": {
-        "min": 0.0827925619996916,
-        "max": 0.27757228194885575,
+        "min": 0.04141296516097682,
+        "max": 0.23702293671477861,
         "off_manifold_share": 0.0,
         "rank_span": [
           0,
-          13
+          11
         ]
       }
     },
@@ -142,12 +142,12 @@
       "human_strongest_rank_mean": 7.96,
       "lower_is_better": false,
       "scripted": {
-        "min": 0.0625,
-        "max": 4.3125,
+        "min": 0.95,
+        "max": 5.4,
         "off_manifold_share": 0.0,
         "rank_span": [
-          0,
-          9
+          1,
+          13
         ]
       }
     },
@@ -156,12 +156,12 @@
       "human_strongest_rank_mean": 6.014623924339959,
       "lower_is_better": false,
       "scripted": {
-        "min": 0.21091224981226048,
-        "max": 7.647218709077007,
+        "min": 0.39613085631901296,
+        "max": 7.567314227484346,
         "off_manifold_share": 0.1428571428571429,
         "rank_span": [
           1,
-          15
+          16
         ]
       }
     }
@@ -171,78 +171,78 @@
       {
         "rung": "skill_1",
         "implied": {
-          "inputs_per_piece": 16,
-          "quad_rate": 15,
-          "holds_per_piece": 0,
-          "max_b2b": 9
+          "inputs_per_piece": 15,
+          "quad_rate": 17,
+          "holds_per_piece": 11,
+          "max_b2b": 13
         },
-        "spread": 16
+        "spread": 6
       },
       {
-        "rung": "skill_0.85",
+        "rung": "skill_0.9",
         "implied": {
-          "inputs_per_piece": 13,
-          "quad_rate": 15,
-          "holds_per_piece": 2,
+          "inputs_per_piece": 14,
+          "quad_rate": 11,
+          "holds_per_piece": 7,
+          "max_b2b": 6,
+          "pps": 16
+        },
+        "spread": 10
+      },
+      {
+        "rung": "skill_0.8",
+        "implied": {
+          "inputs_per_piece": 12,
+          "quad_rate": 11,
+          "holds_per_piece": 1,
           "max_b2b": 9,
-          "pps": 15
+          "pps": 14
         },
         "spread": 13
       },
       {
         "rung": "skill_0.7",
         "implied": {
-          "inputs_per_piece": 8,
-          "quad_rate": 12,
-          "holds_per_piece": 6,
-          "max_b2b": 5,
-          "pps": 9
+          "inputs_per_piece": 10,
+          "quad_rate": 6,
+          "holds_per_piece": 0,
+          "max_b2b": 3,
+          "pps": 10
         },
-        "spread": 7
+        "spread": 10
       },
       {
-        "rung": "skill_0.55",
+        "rung": "skill_0.6",
         "implied": {
-          "inputs_per_piece": 5,
-          "quad_rate": 5,
-          "holds_per_piece": 7,
-          "max_b2b": 0,
+          "inputs_per_piece": 8,
+          "quad_rate": 3,
+          "holds_per_piece": 0,
+          "max_b2b": 5,
           "pps": 2
         },
-        "spread": 7
+        "spread": 8
+      },
+      {
+        "rung": "skill_0.5",
+        "implied": {
+          "inputs_per_piece": 5,
+          "quad_rate": 2,
+          "holds_per_piece": 0,
+          "max_b2b": 2,
+          "pps": 1
+        },
+        "spread": 5
       },
       {
         "rung": "skill_0.4",
         "implied": {
           "inputs_per_piece": 4,
-          "quad_rate": 2,
-          "holds_per_piece": 11,
-          "max_b2b": 0,
-          "pps": 1
-        },
-        "spread": 11
-      },
-      {
-        "rung": "skill_0.25",
-        "implied": {
-          "inputs_per_piece": 0,
           "quad_rate": 1,
-          "holds_per_piece": 13,
-          "max_b2b": 0,
+          "holds_per_piece": 0,
+          "max_b2b": 1,
           "pps": 1
         },
-        "spread": 13
-      },
-      {
-        "rung": "skill_0.1",
-        "implied": {
-          "inputs_per_piece": 2,
-          "quad_rate": 1,
-          "holds_per_piece": 13,
-          "max_b2b": 0,
-          "pps": 1
-        },
-        "spread": 13
+        "spread": 4
       }
     ]
   }

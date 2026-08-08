@@ -842,6 +842,56 @@ meaningless**. It was 98.6% while the policy was unusable. The number worth
 watching is agreement on the student's own states, which is cheap to compute
 and was off by a factor of four.
 
+### The cold-start ladder against real players: the first honest reading
+
+Seven rungs, no constant fitted to human data, measured against all 396
+records. **Coverage** first, since that is the gate Othello failed:
+
+| feature | agent range | looks like human ranks | off-manifold |
+|---|---|---|---|
+| inputs per piece | 3.29 – 4.38 | c+ … u | 0% |
+| quad rate | 0.07 – 0.69 | d+ … x+ | 0% |
+| holds per piece | 0.04 – 0.24 | d … s− | 0% |
+| max B2B | 0.95 – 5.40 | d+ … s+ | 0% |
+| pps | 0.40 – 7.57 | d+ … x | 14% |
+
+This is the result E5 was built to get. Every feature now traverses most of the
+human ladder and essentially nothing falls outside it, against a v1 that had
+quad rate pinned at rank d and hold usage below every human alive. Sprint
+telemetry from agents and from people occupies the same region — which is what
+Othello could not manage, and it is the precondition for anything downstream.
+
+**Coherence** is where it is still wrong: median disagreement 8.0 ranks,
+unchanged from v1. But the *structure* changed completely, and a
+leave-one-out pass names the culprits:
+
+| feature | mean signed deviation from its rung's median rank | cost to coherence |
+|---|---|---|
+| holds per piece | **−4.1 ranks** | 3.0 |
+| inputs per piece | **+2.9 ranks** | 2.0 |
+| pps | +1.7 | 0.0 |
+| max B2B | −1.3 | 0.0 |
+| quad rate | **+0.4** | 0.0 |
+
+Quad rate — the feature v1 got most wrong and the hardest strategic one — is
+now the best-calibrated of the five, at +0.4 ranks, with nothing fitted to
+achieve it. The two that miss are both "the agent is a machine" artefacts
+rather than strategy errors:
+
+* **Finesse is too good** (+2.9). The emitter computes the exact keystroke
+  sequence for its chosen placement, so even weak rungs have better finesse
+  than the humans they otherwise resemble. Real weak players are sloppy in a
+  way a correct emitter is not.
+* **Hold usage is too low** (−4.1). The bot's hold policy is a one-ply greedy
+  comparison — swap if the other piece places better right now. Humans use the
+  hold slot to *plan*, which a one-ply check cannot express, and their usage
+  stays high all the way down to rank d (0.070/piece).
+
+Note that the hold gap is exactly the constant that was fitted and reverted
+above. Left un-fitted, it is the ladder's single largest mismatch — which is
+the honest version of the finding and a specific, mechanical thing to fix
+(a deeper hold policy), rather than a number to tune.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails

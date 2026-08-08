@@ -349,6 +349,12 @@ class SprintBot:
         self.markov = markov
         self.plans = [[] for _ in range(env.n)]
         self._rng = np.random.default_rng(0)
+        #: Markov mode re-derives the target placement on every keystroke, but
+        #: the target depends only on (board, piece) and neither changes while
+        #: a piece is falling. Memoising it per instance turns ~4 searches per
+        #: piece back into 1, with no semantic change: the cache is pure
+        #: memoisation of a deterministic function of observable state.
+        self._target_cache = [None] * env.n
 
     @property
     def _dials(self):
@@ -394,13 +400,19 @@ class SprintBot:
         dials = self._dials
         if self.markov:
             for i in range(env.n):
-                if self._wants_hold(boards[i], pieces[i], holds[i],
-                                    hold_used[i], int(queue[i][0]), dials):
-                    actions[i] = HOLD
-                    continue
-                _, t_rot, t_x = best_placement(
-                    boards[i], pieces[i], noise=dials["noise"],
-                    rng=self._rng, strategy=dials["strategy"])
+                key = (boards[i].tobytes(), pieces[i])
+                cached = self._target_cache[i]
+                if cached is None or cached[0] != key:
+                    if self._wants_hold(boards[i], pieces[i], holds[i],
+                                        hold_used[i], int(queue[i][0]), dials):
+                        actions[i] = HOLD
+                        self._target_cache[i] = None
+                        continue
+                    _, t_rot, t_x = best_placement(
+                        boards[i], pieces[i], noise=dials["noise"],
+                        rng=self._rng, strategy=dials["strategy"])
+                    self._target_cache[i] = (key, t_rot, t_x)
+                _, t_rot, t_x = self._target_cache[i]
                 actions[i] = markov_action(boards[i], pieces[i], rots[i],
                                            xs[i], t_rot, t_x)
             return actions
