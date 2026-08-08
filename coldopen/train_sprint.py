@@ -103,7 +103,7 @@ class BoolReplay:
                 self.next_mask[i].to(device))
 
 
-def evaluate(net, device, episodes=32, latency=100, seed=123):
+def evaluate(net, device, episodes=24, latency=100, seed=123):
     """Greedy telemetry rollout — the unshaped truth about the policy."""
     env = TetrisSprintBatched(min(episodes, 32), latency=latency)
 
@@ -113,8 +113,10 @@ def evaluate(net, device, episodes=32, latency=100, seed=123):
         q = q.masked_fill(~action_mask(env), -1e9)
         return q.argmax(dim=1)
 
+    # A stalling policy runs every episode to the horizon; cap the eval
+    # budget so a bad checkpoint costs seconds, not minutes.
     rows = rollout(env, greedy, total_episodes=episodes, seed=seed,
-                   max_steps=episodes * HORIZON * 2)
+                   max_steps=episodes * HORIZON)
     if not rows:
         return {"episodes": 0}
     mean = lambda k: sum(r[k] for r in rows) / len(rows)
@@ -138,6 +140,18 @@ def train(args):
 
     net = BoardNet(OBS_SHAPE, N_ACTIONS, args.channels).to(device)
     target = BoardNet(OBS_SHAPE, N_ACTIONS, args.channels).to(device)
+    resumed_from = 0
+    if args.resume:
+        # Continue from the newest checkpoint in the output directory. The
+        # replay buffer and epsilon restart cold - a brief re-exploration
+        # bump, visible in the log, cheaper than serializing a 600MB buffer.
+        ckpts = sorted(out.glob("ckpt_*.pt"))
+        if ckpts:
+            blob = torch.load(ckpts[-1], map_location=device)
+            net.load_state_dict(blob["state"])
+            resumed_from = int(blob["steps"])
+            print(f"resumed from {ckpts[-1].name} ({resumed_from:,} steps)",
+                  flush=True)
     target.load_state_dict(net.state_dict())
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
 
@@ -150,8 +164,11 @@ def train(args):
 
     obs = env.observe()
     phi = potential(env.board)
-    pending = checkpoint_schedule(args.steps, lo=2_000)
-    log, updates, steps = [], 0, 0
+    pending = [c for c in checkpoint_schedule(args.steps, lo=2_000)
+               if c > resumed_from]
+    log, updates, steps = [], 0, resumed_from
+    if resumed_from and (out / "train_log.json").exists():
+        log = json.loads((out / "train_log.json").read_text())
     started = time.time()
 
     def save(tag):
@@ -173,7 +190,7 @@ def train(args):
         save(pending.pop(0))
 
     while steps < args.steps:
-        frac = min(1.0, steps / args.eps_decay)
+        frac = min(1.0, (steps - resumed_from) / args.eps_decay)
         eps = args.eps_start + frac * (args.eps_end - args.eps_start)
 
         mask = action_mask(env)
@@ -245,6 +262,8 @@ def main():
     p.add_argument("--target-sync", type=int, default=2_000)
     p.add_argument("--device", default="mps" if torch.backends.mps.is_available() else "cpu")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--resume", action="store_true",
+                   help="continue from the newest checkpoint in --out")
     p.add_argument("--out", default="coldopen/ladders/tetris_sprint")
     args = p.parse_args()
     print(f"tetris_sprint DQN: {args.steps:,} env steps on {args.device}, "
