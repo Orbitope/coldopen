@@ -649,6 +649,45 @@ interchangeable. All are C++/JS, so they are references rather than drop-ins.
 differential-test the simulator's computed statistics against real API records
 before trusting any comparison built on them.
 
+### Status: simulator built and validated
+
+`envs/tetris_sprint/` — spec, readable reference, batched torch implementation,
+full simulacrum battery **PASS** (bit-exact differential over 8 seeds × 300
+steps, batch independence, twelve invariants swept, auto-reset, determinism,
+replay, compiled-parity).
+
+The design changed once during speccing, for the better: instead of a timeless
+input-level game, the env runs a **virtual clock** — every keystroke costs a
+declared number of integer milliseconds plus a per-agent LATENCY parameter, and
+gravity (1 cell/s) and guideline lock delay (500 ms, 15 move-resets) run on
+that clock. Consequences: sprint time and PPS are real quantities for agents;
+the reward (clear bonus − elapsed ms) *is* the human sprint objective; the
+speed/accuracy coupling emerges from physics (a high-latency agent should plan
+more per keypress); and hesitation-drift misdrops — the weak-human error the
+timeless design could not produce — exist. The whole env is integer arithmetic:
+no `x-atol` anywhere, bit-exact everywhere.
+
+One spec bug was found by the invariant sweep, not by the differential test —
+both implementations had faithfully implemented the same broken rule (a piece
+lifted off a ledge at the lock-delay reset cap kept stale lock delay). Fixed in
+the spec first, then in both implementations. That is the division of labour
+working as designed: differential testing catches divergent readings, invariant
+sweeps catch consistent misreadings.
+
+Throughput, measured honestly: the harness's headline "1× vs reference" is an
+artifact — its reference loop skips observation building, which training needs
+every step. With observations included the reference does 13.8k steps/s and the
+batched env 63k eager / 74k compiled at n=1024: a **~5× training-shape
+speedup**, dispatch-bound on CPU (the fixed-trip ghost/DAS/kick/physics probes
+are ~500 small tensor ops per step). Not the 100× of Connect Four, and not a
+bottleneck either: the c4 ladder trained at ~7k plies/s wall rate, an order of
+magnitude below what this env sustains. If it ever binds, the known lever is
+the 24-trip ghost probe (cache it between step and observe, or height-map the
+no-overhang case).
+
+Next: finesse/quad-rate telemetry from trajectories, then the ladder — LATENCY
+as the coupled dial, plus distillation from a strong sprint policy.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails

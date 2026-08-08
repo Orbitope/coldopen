@@ -95,7 +95,7 @@ def parse_games(blob):
     return out
 
 
-def replay(game, batch, reference=None, max_moves=20, seed=0):
+def replay(game, batch, reference=None, max_moves=60, seed=0):
     """Replay a batch of games, collecting each player's own move features.
 
     Games are stepped in lockstep so the environment work is batched; the only
@@ -149,13 +149,16 @@ def replay(game, batch, reference=None, max_moves=20, seed=0):
 
         mover = game.current_player(state)
         for i in range(size):
-            if alive[i] and not passing[i] and len(rows[i]) < max_moves:
-                # Pgx seats the first player randomly, so who is "black" is read
-                # from the seat rather than assumed.
-                side = "black" if int(mover[i]) == 0 else "white"
-                rows[i].append((side, stacked[i].tolist()))
-                pointer[i] += 1
-            elif alive[i] and not passing[i]:
+            if alive[i] and not passing[i]:
+                if len(rows[i]) < max_moves:
+                    # Pgx seats the first player randomly, so who is "black" is
+                    # read from the seat rather than assumed. The move index is
+                    # kept because Othello's discriminating features fire late -
+                    # corners are contested in the endgame - so the observation
+                    # window has to be chosen from measurement, not assumed to
+                    # start at move one.
+                    side = "black" if int(mover[i]) == 0 else "white"
+                    rows[i].append((side, pointer[i], stacked[i].tolist()))
                 pointer[i] += 1
 
         key, sub = jax.random.split(key)
@@ -195,6 +198,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--years", default="2010-2024")
     ap.add_argument("--max-games", type=int, default=8000)
+    ap.add_argument("--max-moves", type=int, default=60,
+                    help="moves per player to record; the window is chosen later")
     ap.add_argument("--min-games-per-player", type=int, default=15)
     ap.add_argument("--batch", type=int, default=256)
     ap.add_argument("--reference", default="coldopen/ladders/othello_reference")
@@ -238,14 +243,16 @@ def main():
     rows, names = [], None
     for start_index in range(0, len(games), args.batch):
         chunk = games[start_index:start_index + args.batch]
-        replayed, names = replay(game_env, chunk, reference=reference)
+        replayed, names = replay(game_env, chunk, reference=reference,
+                                 max_moves=args.max_moves)
         for game, moves in zip(chunk, replayed):
-            for side, values in moves:
+            for side, ply, values in moves:
                 who = game["black"] if side == "black" else game["white"]
                 rows.append({
                     "player": pseudonymise(f"wthor-{who}"),
                     "group": f"{game['black']}v{game['white']}",
                     "skill": ratings[who],
+                    "ply": ply,
                     "features": values,
                 })
         if (start_index // args.batch) % 5 == 0:
