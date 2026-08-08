@@ -135,32 +135,100 @@ def human_bands(path="data/human/tetrio_sprint.json"):
     return rows
 
 
-def overlap(ladders, human_rows):
-    """Per-feature coverage: does the agent range sit inside the human range?
+#: Features where a HIGHER value means a WEAKER player (all others: higher is
+#: stronger). Needed to put every feature on one "which rank does this look
+#: like" scale.
+LOWER_IS_BETTER = {"inputs_per_piece"}
 
-    Reported before any accuracy number. A generator whose features fall
-    outside the human span cannot be tested for transfer no matter how well
-    its own tiers separate — the Othello lesson, made routine.
+
+def rank_of(feature, value, human_rows):
+    """The human rank whose mean `feature` is closest to `value`.
+
+    Answers the only question that matters for transfer: if a person produced
+    this number, roughly how good would they be? Returns a rank index in
+    [0, 17], or None when the value is outside the human span entirely — which
+    is itself the answer, and the one a range check hides.
+    """
+    means = {}
+    for row in human_rows:
+        if row.get(feature) is not None:
+            means.setdefault(row["rank_index"], []).append(row[feature])
+    table = {k: float(np.mean(v)) for k, v in means.items()}
+    lo, hi = min(table.values()), max(table.values())
+    if value < lo - 0.15 * abs(hi - lo) or value > hi + 0.15 * abs(hi - lo):
+        return None
+    return min(table, key=lambda k: abs(table[k] - value))
+
+
+def overlap(ladders, human_rows):
+    """Where each agent rung sits on the human ladder, feature by feature.
+
+    A range check is not enough and was actively misleading: pooled human
+    quad_rate spans 0.00 to 1.00, so an agent pinned at 0.00 scores "100%
+    inside the human range" while in truth sitting below every human alive.
+
+    So this maps each rung's value to the human rank that produces it, and
+    reports two things: **coverage** (do the rungs traverse the human ladder?)
+    and **coherence** (do a rung's features agree about which rank it is?). A
+    coherent agent looks like one player; an incoherent one has the finesse of
+    an expert and the stacking of a beginner, which is a shape no human has.
     """
     report = {}
     for feature in HUMAN_COMPARABLE:
         values = [r[feature] for r in human_rows if r.get(feature) is not None]
         if not values:
             continue
-        low, high = float(np.percentile(values, 2)), float(np.percentile(values, 98))
-        entry = {"human_p2": low, "human_p98": high,
-                 "human_median": float(np.median(values))}
+        by_rank = {}
+        for row in human_rows:
+            if row.get(feature) is not None:
+                by_rank.setdefault(row["rank_index"], []).append(row[feature])
+        entry = {
+            "human_weakest_rank_mean": float(np.mean(by_rank[min(by_rank)])),
+            "human_strongest_rank_mean": float(np.mean(by_rank[max(by_rank)])),
+            "lower_is_better": feature in LOWER_IS_BETTER,
+        }
         for name, rungs in ladders.items():
             agent = [r[feature] for r in rungs if r.get(feature) is not None]
             if not agent:
                 continue
-            inside = [v for v in agent if low <= v <= high]
+            ranks = [rank_of(feature, v, human_rows) for v in agent]
+            placed = [r for r in ranks if r is not None]
             entry[name] = {
                 "min": float(min(agent)), "max": float(max(agent)),
-                "share_inside_human_range": len(inside) / len(agent),
+                "off_manifold_share": 1.0 - len(placed) / len(ranks),
+                "rank_span": [min(placed), max(placed)] if placed else None,
             }
         report[feature] = entry
     return report
+
+
+def coherence(ladders, human_rows):
+    """Per rung: does every feature agree about which human rank this is?
+
+    Reported as the spread (max - min) of the implied rank across features.
+    Zero means the rung looks like a single coherent player; a wide spread
+    means it looks like nobody, however well each feature scores alone.
+    """
+    out = {}
+    for name, rungs in ladders.items():
+        rows = []
+        for rung in rungs:
+            implied = {}
+            for feature in HUMAN_COMPARABLE:
+                value = rung.get(feature)
+                if value is None:
+                    continue
+                rank = rank_of(feature, value, human_rows)
+                if rank is not None:
+                    implied[feature] = rank
+            rows.append({
+                "rung": rung["rung"],
+                "implied": implied,
+                "spread": (max(implied.values()) - min(implied.values())
+                           if len(implied) > 1 else None),
+            })
+        out[name] = rows
+    return out
 
 
 def main():
@@ -176,24 +244,39 @@ def main():
     human_rows = human_bands(args.human)
     report = overlap(ladders, human_rows)
 
-    print(f"\noverlap with {len(human_rows)} human sprint records:")
-    print(f"  {'feature':18} {'human p2-p98':>20}   " +
-          "  ".join(f"{name:>22}" for name in ladders))
+    coh = coherence(ladders, human_rows)
+
+    print(f"\noverlap with {len(human_rows)} human sprint records")
+    print("  (rank span = which human ranks the rungs look like, 0=d .. 17=x+;"
+          " off = share outside the human span entirely)")
     for feature, entry in report.items():
-        line = (f"  {feature:18} "
-                f"{entry['human_p2']:9.2f}-{entry['human_p98']:<9.2f} ")
+        direction = "lower better" if entry["lower_is_better"] else "higher better"
+        print(f"\n  {feature}  [human d={entry['human_weakest_rank_mean']:.2f} "
+              f"-> x+={entry['human_strongest_rank_mean']:.2f}, {direction}]")
         for name in ladders:
             got = entry.get(name)
-            line += (f"  {got['min']:7.2f}-{got['max']:<7.2f}"
-                     f"{got['share_inside_human_range']*100:4.0f}%"
-                     if got else f"  {'-':>22}")
-        print(line)
+            if not got:
+                continue
+            span = (f"ranks {got['rank_span'][0]:>2}-{got['rank_span'][1]:<2}"
+                    if got["rank_span"] else "none placed")
+            print(f"    {name:10} {got['min']:8.2f}-{got['max']:<8.2f} "
+                  f"{span}   off {got['off_manifold_share']*100:3.0f}%")
+
+    print("\ncoherence — does a rung's features agree on which rank it is?")
+    for name, rows in coh.items():
+        spreads = [r["spread"] for r in rows if r["spread"] is not None]
+        if not spreads:
+            print(f"  {name:10} no rung placed on 2+ features")
+            continue
+        print(f"  {name:10} median rank disagreement {np.median(spreads):.1f} "
+              f"ranks (max {max(spreads)})")
 
     path = pathlib.Path(args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     slim = {name: [{k: v for k, v in r.items() if k != "rows"} for r in rungs]
             for name, rungs in ladders.items()}
-    path.write_text(json.dumps({"ladders": slim, "overlap": report}, indent=2))
+    path.write_text(json.dumps(
+        {"ladders": slim, "overlap": report, "coherence": coh}, indent=2))
     print(f"\nwrote {path}")
 
 

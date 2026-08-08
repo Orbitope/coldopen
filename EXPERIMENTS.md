@@ -707,6 +707,65 @@ thinking ahead — which makes it a fifth human-comparable feature with no speed
 component. This table is the manifold the agent ladders must land on, and the
 overlap check against it comes before any accuracy claim (the Othello lesson).
 
+### The overlap check was measuring the wrong thing
+
+The first agent-versus-human comparison reported every generator as "100%
+inside the human range" on quad rate, hold usage and B2B. All three were
+false, and the metric was the reason: it asked whether agent values fell
+between the human p2 and p98, and the *pooled* human quad rate spans 0.00 to
+1.00. An agent pinned at 0.00 — below every human alive — passes that test.
+A range check cannot detect degeneracy inside a wide range.
+
+Replaced with two questions that have answers:
+
+* **coverage** — map each rung's value to the human rank that produces it
+  (`rank_of` in `coldopen/sprint_ladders.py`). Values outside the human span
+  return no rank at all, which is reported as `off_manifold_share` rather than
+  silently clamped.
+* **coherence** — for one rung, do all five features agree about which rank it
+  is? Reported as the spread of implied ranks. A real player is one player;
+  an agent that implies rank 16 on one feature and rank 0 on another is a
+  shape nobody has, however well each feature scores alone.
+
+Coherence is the sharper instrument, and it is not Tetris-specific — any
+multi-feature agent-versus-human comparison can run it. On the v1 sprint bot
+it read **8.0 ranks of median disagreement**: finesse spanning human ranks
+0–16 while quad rate, B2B and hold usage sat at rank 0 or below it.
+
+### The v1 teacher's strategy was not a human strategy
+
+The gap was in the objective, not the search. `W_LINES = 6.0` paid for any
+immediate clear, so the bot cashed singles the moment one appeared and never
+stacked four rows. Its finesse was excellent and its stacking was a beginner's
+— exactly the incoherent shape coherence was built to catch.
+
+Two further faults surfaced on reading the code rather than from any failing
+test:
+
+* **Column 9 was unreachable.** The placement search ran `x in range(-2, 9)`,
+  but a piece whose cells all sit at `dx = 0` — a vertical I, S, Z, L, J or T
+  — needs `x = 9` to reach the rightmost column. The single move quad play is
+  built around was not in the search space.
+* **No hold logic**, leaving holds-per-piece at 0.0, below the weakest human
+  rank's 0.07.
+
+v2 keeps a well at column 9, pays `W_QUAD` for four-row clears, charges for
+partial clears while the stack is safe, and holds when the swap scores
+materially better. A danger valve re-enables partial clears above
+`DANGER_HEIGHT`, without which the bot defends the well to the death.
+
+That valve's price is the one parameter that mattered. Swept over
+`DANGER_HEIGHT × W_PARTIAL × W_WELL_FILL × W_HOLES`:
+
+| well-fill penalty | lines | finish | quad rate |
+|---|---|---|---|
+| −14 | 10.2 | 0.00 | 0.62 |
+| −6 | 41.4 | 1.00 | 0.61 |
+
+At −14 the bot would rather top out than fill its own well; at −6 it finishes
+every sprint with the same quad rate. The strategy was never the problem — the
+refusal to abandon it was.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails

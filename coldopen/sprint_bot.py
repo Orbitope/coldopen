@@ -17,9 +17,30 @@ hard drop. It replans only when a new piece appears, so its actions per piece
 are exactly the plan length: finesse is a property of the emitter, not the
 search.
 
-No hold logic in v1 — the bot's holds_per_piece is 0.0, which sits BELOW the
-whole human range (weakest humans hold 0.07/piece). Recorded as a known
-manifold gap rather than papered over.
+**v2 plays for quads, because v1's strategy was not a human strategy.**
+Measured against 396 real sprint records: v1 sat at quad_rate 0.01 and max_b2b
+0.31 at *every* skill setting, while humans run 0.03 (rank d) to 0.69 (rank
+x+). Its finesse spanned 16 human ranks and its stacking spanned none, so a
+top rung looked like an x-rank player by one feature and a d-rank player by
+another — a shape no human has (median rank disagreement: 8 ranks).
+
+The cause was the objective, not the search. `W_LINES = 6.0` paid for any
+immediate clear, so the bot cashed singles the instant one appeared and never
+held four rows. v2 keeps a **well** (column 9) open, pays heavily for quads,
+and charges for partial clears while the stack is safe — the classical sprint
+strategy, and the one humans are ranked on. A danger valve re-enables partial
+clears when the stack gets tall, or the bot would top out defending a well.
+
+Two other v1 faults fixed here, both found by reading rather than by a failing
+test:
+
+* **Column 9 was unreachable.** The placement search ran `x in range(-2, 9)`,
+  but a piece whose cells all sit at `dx = 0` — a vertical I, S, Z, L, J or T
+  — needs `x = 9` to occupy the rightmost column. The single most important
+  move in quad play was not in the search space.
+* **No hold.** v1's holds_per_piece was 0.0, *below every human alive* (the
+  weakest rank holds 0.07/piece). v2 holds when the swap scores materially
+  better, which both improves play and puts the feature on the manifold.
 """
 
 from __future__ import annotations
@@ -32,14 +53,33 @@ from tetris_sprint.fast import _CELLS, _SPAWN
 TAP_LEFT, TAP_RIGHT, DAS_LEFT, DAS_RIGHT = 0, 1, 2, 3
 ROTATE_CW, ROTATE_CCW, ROTATE_180 = 4, 5, 6
 HARD_DROP = 8
+HOLD = 9
 
-#: Board-quality weights, hand-chosen in the Dellacherie tradition. Holes are
-#: catastrophic in sprint (they bury lines), height is pressure, bumpiness
-#: blocks flat stacking, clears are the goal.
-W_LINES = 6.0
+#: Board-quality weights in the Dellacherie tradition, retuned for quad play.
+#: Holes are catastrophic in sprint (they bury lines), height is pressure,
+#: bumpiness blocks flat stacking.
 W_HOLES = -8.0
 W_HEIGHT = -0.8
 W_BUMP = -1.0
+
+#: The well: one column kept deliberately empty so a vertical I can clear four
+#: rows at once. Column 9 by convention (right-handed players' habit, and it
+#: keeps the well away from spawn).
+WELL_COLUMN = 9
+W_QUAD = 40.0        # four rows at once: the goal
+W_PARTIAL = -4.0     # per line, for cashing 1-3 rows while the stack is safe
+#: Per cell dropped into the well. Swept: at -14 the bot defended the well to
+#: the death (10 lines, 0% finish) because filling it in was never worth
+#: surviving; at -6 it finishes every sprint and still quads at 0.61.
+W_WELL_FILL = -6.0
+W_WELL_DEPTH = 1.2   # per row the well is open below the surrounding stack
+
+#: Above this stack height the well is a luxury: take any clear on offer. Set
+#: below the 20-row visible field so the valve opens before a topout, not after.
+DANGER_HEIGHT = 12
+
+#: Hold only when it is clearly better, so the bot does not thrash the slot.
+HOLD_MARGIN = 3.0
 
 
 def _score_after(board, piece, rot, x):
@@ -69,6 +109,8 @@ def _score_after(board, piece, rot, x):
     if rows.max() > 23:
         return None
 
+    well_fill = int((cols == WELL_COLUMN).sum())
+
     trial = board.copy()
     trial[rows, cols] = 1
     full = trial.sum(axis=1) == 10
@@ -85,23 +127,46 @@ def _score_after(board, piece, rot, x):
             top = filled.max()
             new_heights[c] = top + 1
             holes += int(top + 1 - len(filled))
-    bump = int(np.abs(np.diff(new_heights)).sum())
+    # Bumpiness EXCLUDES the well: the whole point of a well is to be a step
+    # down from its neighbour, and charging for that would close it.
+    stack = np.delete(new_heights, WELL_COLUMN)
+    bump = int(np.abs(np.diff(stack)).sum())
 
-    score = (W_LINES * lines + W_HOLES * holes
+    danger = int(stack.max()) >= DANGER_HEIGHT
+    if lines >= 4:
+        clear_score = W_QUAD
+    elif lines:
+        # While the stack is safe, cashing rows costs the quad they were being
+        # saved for. Once it is not safe, survival outranks efficiency.
+        clear_score = (6.0 * lines) if danger else (W_PARTIAL * lines)
+    else:
+        clear_score = 0.0
+
+    # Reward the well being open BELOW its neighbours - that gap is where the
+    # I piece goes. Only counted while defending; in danger it is dead weight.
+    depth = int(stack.min()) - int(new_heights[WELL_COLUMN])
+    well_score = 0.0 if danger else W_WELL_DEPTH * max(0, min(depth, 4))
+    if lines < 4:
+        well_score += W_WELL_FILL * well_fill
+
+    score = (clear_score + well_score + W_HOLES * holes
              + W_HEIGHT * int(new_heights.sum()) + W_BUMP * bump)
     return score, y
 
 
-def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0):
-    """The action list for the best placement of the current piece.
+def best_placement(board, piece, noise=0.0, rng=None):
+    """(score, rot, x) for the best drop of `piece`, or (None, None, None).
 
-    `noise` perturbs each candidate's score (weak judgement); `fumble` is the
-    probability of adding a wasted tap-and-return pair (weak execution).
+    The x sweep runs to 10, not 9: a piece whose cells all sit at `dx = 0` —
+    a vertical I, S, Z, L, J or T — needs `x = 9` to occupy the rightmost
+    column. v1 stopped at 8 and so could never put a vertical I in the well,
+    which is the one move quad play is built around. `_score_after` rejects
+    genuinely off-board offsets, so widening the sweep is safe.
     """
-    best, best_target = None, None
+    best, best_target = None, (None, None)
     n_rots = 1 if piece == 1 else 4  # O has one distinct rotation
     for rot in range(n_rots):
-        for x in range(-2, 9):
+        for x in range(-2, 11):
             scored = _score_after(board, piece, rot, x)
             if scored is None:
                 continue
@@ -110,9 +175,18 @@ def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0):
                 score = score + float(rng.normal(0.0, noise))
             if best is None or score > best:
                 best, best_target = score, (rot, x)
-    if best_target is None:  # nowhere to go; drop in place
+    return best, best_target[0], best_target[1]
+
+
+def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0):
+    """The action list for the best placement of the current piece.
+
+    `noise` perturbs each candidate's score (weak judgement); `fumble` is the
+    probability of adding a wasted tap-and-return pair (weak execution).
+    """
+    best, rot, x = best_placement(board, piece, noise=noise, rng=rng)
+    if best is None:  # nowhere to go; drop in place
         return [HARD_DROP]
-    rot, x = best_target
 
     actions = []
     # Rotations first (kicks are irrelevant on the open board top).
@@ -172,11 +246,30 @@ class SprintBot:
       feature with the widest measured spread.
     """
 
-    def __init__(self, env, skill=1.0):
+    def __init__(self, env, skill=1.0, use_hold=True):
         self.env = env
         self.skill = float(skill)
+        self.use_hold = use_hold
         self.plans = [[] for _ in range(env.n)]
         self._rng = np.random.default_rng(0)
+
+    def _wants_hold(self, board, piece, hold, hold_used, queue_head, noise):
+        """True when swapping the active piece scores materially better.
+
+        The alternative to the current piece is whatever hold would hand over:
+        the stored piece, or the next one from the queue if the slot is empty.
+        A plain greedy comparison, gated by `HOLD_MARGIN` so the bot does not
+        burn the swap on a coin-flip. One hold per piece is enforced by the
+        env's own mask (`hold_used`), so this cannot loop.
+        """
+        if not self.use_hold or hold_used:
+            return False
+        other = queue_head if hold < 0 else hold
+        if other is None or other < 0:
+            return False
+        mine, _, _ = best_placement(board, piece, noise=noise, rng=self._rng)
+        theirs, _, _ = best_placement(board, other, noise=noise, rng=self._rng)
+        return mine is not None and theirs is not None and theirs > mine + HOLD_MARGIN
 
     def __call__(self, obs, env):
         boards = env.board.cpu().numpy()
@@ -184,14 +277,24 @@ class SprintBot:
         rots = env.rot.cpu().tolist()
         xs = env.x.cpu().tolist()
         ts = env.t.cpu().tolist()
+        holds = env.hold.cpu().tolist()
+        hold_used = env.hold_used.cpu().tolist()
+        queue = env.queue.cpu().numpy()
         actions = torch.zeros(env.n, dtype=torch.int64)
         for i in range(env.n):
             if ts[i] == 0:
                 self.plans[i] = []  # auto-reset: the old plan is meaningless
             if not self.plans[i]:
                 weak = 1.0 - self.skill
-                self.plans[i] = plan_keystrokes(
-                    boards[i], pieces[i], rots[i], xs[i],
-                    noise=8.0 * weak, rng=self._rng, fumble=0.55 * weak)
+                noise = 8.0 * weak
+                if self._wants_hold(boards[i], pieces[i], holds[i],
+                                    hold_used[i], int(queue[i][0]), noise):
+                    # A one-action plan: it exhausts immediately, so the next
+                    # call replans for whichever piece the swap handed over.
+                    self.plans[i] = [HOLD]
+                else:
+                    self.plans[i] = plan_keystrokes(
+                        boards[i], pieces[i], rots[i], xs[i],
+                        noise=noise, rng=self._rng, fumble=0.55 * weak)
             actions[i] = self.plans[i].pop(0)
         return actions
