@@ -803,6 +803,45 @@ telemetry matches human telemetry and then reporting the overlap is circular —
 it proves the tuning worked, not that the method transfers. The Othello
 failure (E6a) is only informative *because* nothing had been fitted to it.
 
+### Distillation failed, and agreement was the wrong thing to watch
+
+The distilled generator — the one E2 nominated as closest to how people are
+bad — does not work here. Every symptom pointed away from the cause:
+
+| what was measured | value |
+|---|---|
+| agreement on the **teacher's** states | 0.986 |
+| agreement on the **student's own** states | 0.258 |
+| lines cleared | 1.8 |
+| inputs per piece | 60.2 |
+
+Sixty inputs per piece is not a student misplacing pieces; it is a student
+never locking them. And adding DAgger rounds made it *worse* (3.2 lines
+against plain cloning's 4.3), which is the opposite of what DAgger is for.
+
+The cause is that the teacher **was not a Markov policy**. It followed a
+stored plan, so which keystroke it played depended on how far through that
+plan it was — and plan progress is not in the observation. "What would the
+teacher do in this state?" therefore had no well-defined answer, and that is
+precisely the question DAgger relabelling asks.
+
+Hold made the damage visible. The teacher re-decided to hold on every step the
+student declined to, so **39.6% of relabelled targets came back `hold`**
+against the student's 1.1% — a single persistent disagreement flooding the
+aggregated training set.
+
+The fix is `markov=True`: derive the action from observable state alone, pick
+the target placement, emit the one keystroke that moves toward it. It plays
+identically to the plan-following version (39.2 lines, in/pc 3.27, quad 0.674,
+hold 0.222 either way), so correctness here costs nothing but a re-search per
+step.
+
+The transferable lesson is about the *metric*, not about Tetris: **imitation
+agreement measured on the teacher's own state distribution is close to
+meaningless**. It was 98.6% while the policy was unusable. The number worth
+watching is agreement on the student's own states, which is cheap to compute
+and was off by a factor of four.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails
