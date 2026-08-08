@@ -16,7 +16,23 @@ Tetris literature warns about. Potential-based shaping provably preserves the
 optimal policy (Ng et al. 1999); nothing outside training ever sees the shaped
 numbers, and every reported reward or telemetry figure is unshaped.
 
+**Shaping was not enough, and that is the headline result here.** Three million
+steps from scratch produced fast, confident stacking and *zero* line clears at
+every checkpoint. The reason is structural rather than a tuning miss: a quad
+requires nine columns stacked flat and a vertical I dropped into the tenth,
+which is roughly forty correlated keystrokes. Random exploration never assembles
+that, so every trajectory scores alike and there is no gradient to climb. The
+checkpoints are kept anyway — "cannot clear a line" is the honest floor of an
+undertrained-RL ladder, not a gap to hide.
+
+`--init` is the way past it: warm start from a distilled student (see
+`distill_sprint.py`), then let RL improve on it. Behavioural cloning first and
+RL second is the standard answer to hard exploration, and it makes the rungs
+mean *RL improvement* rather than imitation progress.
+
     python -m coldopen.train_sprint --out coldopen/ladders/tetris_sprint
+    python -m coldopen.train_sprint --init coldopen/ladders/sprint_distilled/ckpt_00030000.pt \\
+        --eps-start 0.1 --eps-decay 200000 --out coldopen/ladders/sprint_warm
 """
 
 from __future__ import annotations
@@ -152,6 +168,24 @@ def train(args):
             resumed_from = int(blob["steps"])
             print(f"resumed from {ckpts[-1].name} ({resumed_from:,} steps)",
                   flush=True)
+    elif args.init:
+        # Warm start from a distilled student. DQN from scratch never cleared a
+        # line here in 3M steps - keystroke-level exploration cannot stumble
+        # onto "stack nine columns flat, then drop an I into the tenth", so
+        # every trajectory scores the same and there is no gradient to climb.
+        # Behavioural cloning first, RL second, is the standard answer to that
+        # (and how AlphaGo was bootstrapped).
+        #
+        # The student's head was trained as classification logits and is read
+        # here as Q-values, which is a scale mismatch, not a semantic one: the
+        # argmax - the only thing the policy uses - is preserved, and the
+        # Bellman updates rescale the head within a few thousand steps.
+        # Pair this with a LOW --eps-start; the default 1.0 would spend the
+        # whole decay window destroying the policy it was handed.
+        blob = torch.load(args.init, map_location=device, weights_only=False)
+        net.load_state_dict(blob["state"])
+        print(f"warm start from {args.init} "
+              f"({int(blob.get('steps', 0)):,} distillation steps)", flush=True)
     target.load_state_dict(net.state_dict())
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
 
@@ -262,6 +296,9 @@ def main():
     p.add_argument("--target-sync", type=int, default=2_000)
     p.add_argument("--device", default="mps" if torch.backends.mps.is_available() else "cpu")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--init", default=None,
+                   help="distilled checkpoint to warm start from; use a low "
+                        "--eps-start with it")
     p.add_argument("--resume", action="store_true",
                    help="continue from the newest checkpoint in --out")
     p.add_argument("--out", default="coldopen/ladders/tetris_sprint")
