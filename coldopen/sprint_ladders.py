@@ -1,23 +1,36 @@
 """Build and measure every sprint ladder, then compare them to real players.
 
-Three generators, one game, and — for the first time in this project — human
+Several generators, one game, and — for the first time in this project — human
 data for that same game:
 
-* **scripted** — the placement-search teacher on a coupled skill dial that
-  degrades judgement and speed together. Latency alone turned out to be a pure
-  speed dial (measured: identical 40-line finishes at every setting), so the
-  coupling is explicit rather than emergent.
-* **distilled** — a student snapshotted while learning to imitate the teacher.
+* **scripted** — the placement-search teacher on a `skill` dial that
+  interpolates its *objective* between expert well-and-quad play and beginner
+  take-any-clear. Latency alone turned out to be a pure speed dial (measured:
+  identical 40-line finishes from 17ms to 1400ms), and degrading judgement with
+  noise instead just killed the lower rungs, so the dial moves strategy.
+  This is the generator that works.
+* **distilled** — keystroke-level imitation. **Does not work**: peaks at 6.7
+  lines against the teacher's 41, never finishes, and is not monotone in
+  training steps. Kept as the measured negative.
 * **trained** — DQN checkpoints. Kept although the run never learned to clear
   a line: "cannot clear" is the honest floor of the undertrained-RL ladder.
+
+See `distill_placement.py` for the generator that replaces keystroke cloning.
 
 Skill needs no league here. Sprint is single-player, so a rung's ability is
 just its mean result — lines cleared, and time when it finishes. Bradley-Terry,
 round robins and the monotonicity gate all drop away.
 
-The comparison that matters is run first and reported first: **overlap**. Do
-the agents occupy the region of feature space that humans occupy? Othello
-failed exactly there, invisibly, until it was measured.
+Three things are reported, in this order, and the order is the point:
+
+1. **overlap/coverage** — do the agents occupy the region of feature space that
+   humans occupy? Othello (E6a) failed exactly there, invisibly, until it was
+   measured, so nothing downstream is worth reading until this passes.
+2. **the human noise floor** — the same coherence statistic computed on
+   held-out humans. Without it the agent number is uninterpretable: 8.0 ranks
+   of disagreement read as a failure until the humans scored 8.0 too.
+3. **per-feature deviation** — systematic bias, which spread cannot see and
+   which is what actually separates an agent from a player.
 
     python -m coldopen.sprint_ladders --out analysis/tetris_sprint
 """

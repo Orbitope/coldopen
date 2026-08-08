@@ -68,10 +68,17 @@ def decode(index):
 
 
 def collect(n_envs=64, pieces=400, latency=100, seed=0):
-    """(observation, target placement) at each moment a new piece is active.
+    """(observation, target placement) for every step of every piece's fall.
 
-    Sampled only when the teacher (re)plans, so every row is one clean
-    judgement rather than one keystroke of a plan.
+    Deliberately *not* sampled only at piece boundaries. The same (board,
+    piece) recurs with the active piece drawn at a different height each step,
+    so those rows are distinct observations carrying the same label — which is
+    exactly the invariance the policy needs, because `placement_policy`
+    re-predicts the target on every step rather than committing once. A student
+    trained only on spawn-height boards would be asked at rollout about boards
+    it had never seen.
+
+    Hold steps are skipped: the label would describe a piece on its way out.
     """
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 7919)
