@@ -41,14 +41,27 @@ from coldopen.tetris import HUMAN_COMPARABLE, rollout
 from coldopen.train_sprint import N_ACTIONS, OBS_SHAPE, action_mask
 from tetris_sprint.fast import HORIZON, TetrisSprintBatched
 
-#: (skill, latency) rungs for the scripted teacher. Latency alone was measured
-#: to be a PURE SPEED DIAL — at every setting from 17ms to 1400ms the bot still
-#: cleared 40 lines with identical finesse, because gravity only moves pieces
-#: vertically and a hard drop lands them at the bottom regardless. That yields
-#: slow-but-flawless players, which humans are not. The rungs therefore move
-#: judgement and speed together (see SprintBot.skill).
-SKILL_RUNGS = [(1.0, 17), (0.85, 60), (0.7, 140), (0.55, 260),
-               (0.4, 420), (0.25, 650), (0.1, 900)]
+#: (skill, latency) rungs for the scripted teacher.
+#:
+#: Latency alone was measured to be a PURE SPEED DIAL — at every setting from
+#: 17ms to 1400ms the bot still cleared 40 lines with identical finesse,
+#: because gravity only moves pieces vertically and a hard drop lands them at
+#: the bottom regardless. That yields slow-but-flawless players. So the rungs
+#: move `skill` too, which interpolates the bot's *objective* between expert
+#: quad play and beginner take-any-clear (see `SprintBot`).
+#:
+#: The floor is skill 0.4 / 560ms, not lower, for a reason that comes from the
+#: agent rather than from people: below it the bot stops finishing, and a
+#: ladder whose lower rungs cannot complete the task measures survival instead
+#: of skill. Latencies are spaced roughly geometrically. Measured span, with
+#: no constant fitted to human data:
+#:
+#:     skill  time    in/pc  quad   hold   b2b   pps    finish
+#:     1.00    15.4s   3.27  0.665  0.230  5.2   7.46   0.94
+#:     0.70    63.3s   3.68  0.303  0.081  2.0   1.71   1.00
+#:     0.40   272.3s   4.32  0.059  0.048  0.9   0.40   0.88
+SKILL_RUNGS = [(1.0, 17), (0.9, 34), (0.8, 68), (0.7, 136),
+               (0.6, 272), (0.5, 400), (0.4, 560)]
 
 
 def net_policy(net, device):

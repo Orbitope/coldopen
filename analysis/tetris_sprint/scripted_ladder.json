@@ -1,0 +1,249 @@
+{
+  "ladders": {
+    "scripted": [
+      {
+        "episodes": 16,
+        "mean_lines": 40.0,
+        "finish_rate": 0.9375,
+        "time_s": 15.7458,
+        "inputs_per_piece": 3.185304090199298,
+        "quad_rate": 0.5995162823287823,
+        "holds_per_piece": 0.0827925619996916,
+        "max_b2b": 4.3125,
+        "pps": 7.647218709077007,
+        "rung": "skill_1",
+        "dial": 1.0
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 37.875,
+        "finish_rate": 0.75,
+        "time_s": 35.00925,
+        "inputs_per_piece": 3.5416381441250433,
+        "quad_rate": 0.607176504051504,
+        "holds_per_piece": 0.1067969264871866,
+        "max_b2b": 4.0625,
+        "pps": 3.52833581086786,
+        "rung": "skill_0.85",
+        "dial": 0.85
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 26.0,
+        "finish_rate": 0.25,
+        "time_s": 75.0295,
+        "inputs_per_piece": 3.877296119510012,
+        "quad_rate": 0.368786075036075,
+        "holds_per_piece": 0.18110156389925974,
+        "max_b2b": 2.0,
+        "pps": 1.6497215285172169,
+        "rung": "skill_0.7",
+        "dial": 0.7
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 11.4375,
+        "finish_rate": 0.0625,
+        "time_s": 136.536,
+        "inputs_per_piece": 4.216068579096998,
+        "quad_rate": 0.1935749299719888,
+        "holds_per_piece": 0.1951020124788903,
+        "max_b2b": 0.625,
+        "pps": 0.8680561189920837,
+        "rung": "skill_0.55",
+        "dial": 0.55
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 8.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 4.463012246053484,
+        "quad_rate": 0.109375,
+        "holds_per_piece": 0.2290274300544649,
+        "max_b2b": 0.3125,
+        "pps": 0.5216737613189717,
+        "rung": "skill_0.4",
+        "dial": 0.4
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 3.1875,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 4.838304951430656,
+        "quad_rate": 0.078125,
+        "holds_per_piece": 0.2637689777041567,
+        "max_b2b": 0.125,
+        "pps": 0.3150589138573787,
+        "rung": "skill_0.25",
+        "dial": 0.25
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 1.625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 5.251871807852334,
+        "quad_rate": 0.0625,
+        "holds_per_piece": 0.27757228194885575,
+        "max_b2b": 0.0625,
+        "pps": 0.21091224981226048,
+        "rung": "skill_0.1",
+        "dial": 0.1
+      }
+    ]
+  },
+  "overlap": {
+    "inputs_per_piece": {
+      "human_weakest_rank_mean": 4.8551670718433435,
+      "human_strongest_rank_mean": 2.806428276621099,
+      "lower_is_better": true,
+      "scripted": {
+        "min": 3.185304090199298,
+        "max": 5.251871807852334,
+        "off_manifold_share": 0.0,
+        "rank_span": [
+          0,
+          16
+        ]
+      }
+    },
+    "quad_rate": {
+      "human_weakest_rank_mean": 0.02873350361856109,
+      "human_strongest_rank_mean": 0.6888004218004217,
+      "lower_is_better": false,
+      "scripted": {
+        "min": 0.0625,
+        "max": 0.607176504051504,
+        "off_manifold_share": 0.0,
+        "rank_span": [
+          1,
+          15
+        ]
+      }
+    },
+    "holds_per_piece": {
+      "human_weakest_rank_mean": 0.07017029274538468,
+      "human_strongest_rank_mean": 0.30546054655019605,
+      "lower_is_better": false,
+      "scripted": {
+        "min": 0.0827925619996916,
+        "max": 0.27757228194885575,
+        "off_manifold_share": 0.0,
+        "rank_span": [
+          0,
+          13
+        ]
+      }
+    },
+    "max_b2b": {
+      "human_weakest_rank_mean": 0.6,
+      "human_strongest_rank_mean": 7.96,
+      "lower_is_better": false,
+      "scripted": {
+        "min": 0.0625,
+        "max": 4.3125,
+        "off_manifold_share": 0.0,
+        "rank_span": [
+          0,
+          9
+        ]
+      }
+    },
+    "pps": {
+      "human_weakest_rank_mean": 0.8382240645000957,
+      "human_strongest_rank_mean": 6.014623924339959,
+      "lower_is_better": false,
+      "scripted": {
+        "min": 0.21091224981226048,
+        "max": 7.647218709077007,
+        "off_manifold_share": 0.1428571428571429,
+        "rank_span": [
+          1,
+          15
+        ]
+      }
+    }
+  },
+  "coherence": {
+    "scripted": [
+      {
+        "rung": "skill_1",
+        "implied": {
+          "inputs_per_piece": 16,
+          "quad_rate": 15,
+          "holds_per_piece": 0,
+          "max_b2b": 9
+        },
+        "spread": 16
+      },
+      {
+        "rung": "skill_0.85",
+        "implied": {
+          "inputs_per_piece": 13,
+          "quad_rate": 15,
+          "holds_per_piece": 2,
+          "max_b2b": 9,
+          "pps": 15
+        },
+        "spread": 13
+      },
+      {
+        "rung": "skill_0.7",
+        "implied": {
+          "inputs_per_piece": 8,
+          "quad_rate": 12,
+          "holds_per_piece": 6,
+          "max_b2b": 5,
+          "pps": 9
+        },
+        "spread": 7
+      },
+      {
+        "rung": "skill_0.55",
+        "implied": {
+          "inputs_per_piece": 5,
+          "quad_rate": 5,
+          "holds_per_piece": 7,
+          "max_b2b": 0,
+          "pps": 2
+        },
+        "spread": 7
+      },
+      {
+        "rung": "skill_0.4",
+        "implied": {
+          "inputs_per_piece": 4,
+          "quad_rate": 2,
+          "holds_per_piece": 11,
+          "max_b2b": 0,
+          "pps": 1
+        },
+        "spread": 11
+      },
+      {
+        "rung": "skill_0.25",
+        "implied": {
+          "inputs_per_piece": 0,
+          "quad_rate": 1,
+          "holds_per_piece": 13,
+          "max_b2b": 0,
+          "pps": 1
+        },
+        "spread": 13
+      },
+      {
+        "rung": "skill_0.1",
+        "implied": {
+          "inputs_per_piece": 2,
+          "quad_rate": 1,
+          "holds_per_piece": 13,
+          "max_b2b": 0,
+          "pps": 1
+        },
+        "spread": 13
+      }
+    ]
+  }
+}

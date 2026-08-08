@@ -766,6 +766,43 @@ At −14 the bot would rather top out than fill its own well; at −6 it finishe
 every sprint with the same quad rate. The strategy was never the problem — the
 refusal to abandon it was.
 
+### Where the cold-start line runs, and where it was crossed
+
+The rule for this project is that nothing requiring the **target game's**
+human data may be used to *build* the method; the human records are a test
+set, read once at the end. Fixing the teacher put real pressure on that rule,
+so it is worth stating exactly where the line falls.
+
+Legitimate, and kept:
+
+* **Playing for quads at all.** Well-and-quad play is standard, widely
+  documented Tetris strategy — it is in the game's own tutorials. It does not
+  require anyone's telemetry to know about.
+* **Making column 9 reachable and adding hold.** Bug fixes. A bot that cannot
+  place a vertical I in the rightmost column is broken as a Tetris player,
+  independent of what humans do.
+* **Capping evaluation noise so every rung finishes.** An agent-side
+  criterion: a ladder whose lower rungs cannot complete the task is measuring
+  survival, not skill.
+
+Crossed, and reverted:
+
+* `HOLD_MARGIN` set to 0.3/4.0 *because* human hold usage never falls below
+  0.070/piece.
+* `strategy = skill ** 0.7` *because* a linear blend put quad rate at 0.265
+  where the rank-matched humans sit at 0.487.
+
+Both were fitted to the 396-record table and both are gone; the constants now
+in `coldopen/sprint_bot.py` are round guesses, under a comment banner saying
+so. The fitted values are recorded here rather than deleted, because the gap
+between the two is itself the measurement: it is how much of the manifold
+overlap is real and how much would have been manufactured.
+
+This matters more than a tidiness point. Tuning an agent ladder until its
+telemetry matches human telemetry and then reporting the overlap is circular —
+it proves the tuning worked, not that the method transfers. The Othello
+failure (E6a) is only informative *because* nothing had been fitted to it.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails

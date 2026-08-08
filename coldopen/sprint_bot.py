@@ -68,6 +68,7 @@ W_BUMP = -1.0
 WELL_COLUMN = 9
 W_QUAD = 40.0        # four rows at once: the goal
 W_PARTIAL = -4.0     # per line, for cashing 1-3 rows while the stack is safe
+W_GREEDY = 6.0       # per line, under the beginner strategy: any clear will do
 #: Per cell dropped into the well. Swept: at -14 the bot defended the well to
 #: the death (10 lines, 0% finish) because filling it in was never worth
 #: surviving; at -6 it finishes every sprint and still quads at 0.61.
@@ -78,11 +79,42 @@ W_WELL_DEPTH = 1.2   # per row the well is open below the surrounding stack
 #: below the 20-row visible field so the valve opens before a topout, not after.
 DANGER_HEIGHT = 12
 
-#: Hold only when it is clearly better, so the bot does not thrash the slot.
-HOLD_MARGIN = 3.0
+# ---------------------------------------------------------------------------
+# NO CONSTANT BELOW THIS LINE IS FITTED TO HUMAN TETRIS DATA.
+#
+# That restriction is the point of the whole project: if the agent ladder is
+# tuned until its telemetry matches the human telemetry, then measuring the
+# overlap afterwards proves nothing. Human sprint records are the *test set*,
+# read once at the end.
+#
+# Two constants here were briefly fitted and have been reverted, because the
+# reverted values are the honest ones and the difference is worth recording:
+#
+#   * hold margins 0.3/4.0, chosen because human hold usage never falls below
+#     0.070/piece. Reverted to a round guess.
+#   * `strategy = skill ** 0.7`, chosen because a linear blend put quad rate at
+#     0.265 where the rank-matched humans sit at 0.487. Reverted to linear.
+#
+# Every constant that survives is set from a property of the *game or the
+# agent*: the rungs must finish, they must be ordered, and they must differ in
+# how they play rather than only in how fast.
+# ---------------------------------------------------------------------------
+
+#: How much better a swap must score before the bot uses hold. A strong player
+#: uses the slot whenever it helps at all; a weak one rarely thinks about it.
+#: Round guesses - not fitted.
+HOLD_MARGIN_STRONG = 0.5
+HOLD_MARGIN_WEAK = 12.0
+
+#: Judgement noise and keystroke fumbles at the weak end of the dial. Noise is
+#: deliberately SMALL: at 8.0 every rung below skill 0.7 topped out instead of
+#: finishing. That bound comes from the agent, not from people - a ladder whose
+#: lower rungs cannot complete the task is measuring survival, not skill.
+NOISE_MAX = 2.0
+FUMBLE_MAX = 0.6
 
 
-def _score_after(board, piece, rot, x):
+def _score_after(board, piece, rot, x, strategy=1.0):
     """Score of dropping (piece, rot) at column-offset x on `board` [24,10].
 
     Returns None when the placement is off-board or blocked at spawn height.
@@ -133,28 +165,36 @@ def _score_after(board, piece, rot, x):
     bump = int(np.abs(np.diff(stack)).sum())
 
     danger = int(stack.max()) >= DANGER_HEIGHT
+
+    # The expert strategy: hold four rows, cash them with a vertical I.
     if lines >= 4:
-        clear_score = W_QUAD
+        expert = W_QUAD
     elif lines:
         # While the stack is safe, cashing rows costs the quad they were being
         # saved for. Once it is not safe, survival outranks efficiency.
-        clear_score = (6.0 * lines) if danger else (W_PARTIAL * lines)
+        expert = (W_GREEDY * lines) if danger else (W_PARTIAL * lines)
     else:
-        clear_score = 0.0
-
+        expert = 0.0
     # Reward the well being open BELOW its neighbours - that gap is where the
     # I piece goes. Only counted while defending; in danger it is dead weight.
     depth = int(stack.min()) - int(new_heights[WELL_COLUMN])
-    well_score = 0.0 if danger else W_WELL_DEPTH * max(0, min(depth, 4))
+    if not danger:
+        expert += W_WELL_DEPTH * max(0, min(depth, 4))
     if lines < 4:
-        well_score += W_WELL_FILL * well_fill
+        expert += W_WELL_FILL * well_fill
 
-    score = (clear_score + well_score + W_HOLES * holes
+    # The beginner strategy: take any clear that is going, keep no well. This
+    # is not a crippled expert - it is what human rank d measurably does
+    # (quad rate 0.029 against x+'s 0.689), and it survives perfectly well.
+    beginner = W_GREEDY * lines
+
+    clear_score = strategy * expert + (1.0 - strategy) * beginner
+    score = (clear_score + W_HOLES * holes
              + W_HEIGHT * int(new_heights.sum()) + W_BUMP * bump)
     return score, y
 
 
-def best_placement(board, piece, noise=0.0, rng=None):
+def best_placement(board, piece, noise=0.0, rng=None, strategy=1.0):
     """(score, rot, x) for the best drop of `piece`, or (None, None, None).
 
     The x sweep runs to 10, not 9: a piece whose cells all sit at `dx = 0` —
@@ -167,7 +207,7 @@ def best_placement(board, piece, noise=0.0, rng=None):
     n_rots = 1 if piece == 1 else 4  # O has one distinct rotation
     for rot in range(n_rots):
         for x in range(-2, 11):
-            scored = _score_after(board, piece, rot, x)
+            scored = _score_after(board, piece, rot, x, strategy=strategy)
             if scored is None:
                 continue
             score, _ = scored
@@ -178,13 +218,16 @@ def best_placement(board, piece, noise=0.0, rng=None):
     return best, best_target[0], best_target[1]
 
 
-def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0):
+def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0,
+                    strategy=1.0):
     """The action list for the best placement of the current piece.
 
-    `noise` perturbs each candidate's score (weak judgement); `fumble` is the
-    probability of adding a wasted tap-and-return pair (weak execution).
+    `strategy` picks the objective (see `_score_after`); `noise` perturbs each
+    candidate's score (weak judgement); `fumble` is the probability of adding a
+    wasted tap-and-return pair (weak execution).
     """
-    best, rot, x = best_placement(board, piece, noise=noise, rng=rng)
+    best, rot, x = best_placement(board, piece, noise=noise, rng=rng,
+                                  strategy=strategy)
     if best is None:  # nowhere to go; drop in place
         return [HARD_DROP]
 
@@ -225,25 +268,42 @@ class SprintBot:
     leftover keystrokes to it would place pieces by reference to a board that
     no longer exists. `t == 0` catches that.
 
-    **`skill` degrades judgement, and it has to.** Measured: dialling the
-    env's LATENCY alone changes speed and nothing else — gravity moves pieces
-    only vertically and a hard drop lands them at the bottom regardless, so a
-    slow bot still places perfectly. That produces slow-but-flawless players, a
-    combination E1 found does not exist among humans (the slowest ranks have
-    the *worst* finesse, 4.86 against 2.81 at the top). Speed and accuracy have
-    to be coupled deliberately.
+    **`skill` interpolates between two strategies, and that is the whole
+    design.** Two measurements forced it:
 
-    `skill` in [0, 1] does that with two knobs at once:
+    1. Dialling the env's LATENCY alone changes speed and nothing else —
+       gravity moves pieces only vertically and a hard drop lands them at the
+       bottom regardless, so a slow bot still places perfectly. That produces
+       slow-but-flawless players, a combination E1 found does not exist among
+       humans (the slowest ranks have the *worst* finesse, 4.86 against 2.81).
+    2. Degrading judgement with noise instead does not work either. At
+       `noise = 8` every rung below skill 0.7 topped out — 1.6 to 11.4 lines,
+       0% finish. A ladder whose lower rungs cannot complete the task is
+       measuring survival, not skill, so noise is capped where every rung
+       still finishes.
 
-    * **evaluation noise** — Gaussian noise on each candidate placement's
-      score, so a weak bot sometimes prefers a worse square. Its mistakes stay
-      *ordered* (a slightly worse placement is likelier than a disastrous one),
-      which is the property E2 found separates temperature-style degradation
-      from uniform noise.
-    * **wasted keystrokes** — a weak player fumbles the input: extra taps that
-      are walked back, costing finesse without changing the placement. This is
-      the only knob that moves inputs-per-piece, and finesse is the human
-      feature with the widest measured spread.
+    What varies with Tetris skill is the *strategy*: beginners cash singles
+    the moment one appears, experts hold four rows and cash them with a
+    vertical I. That is standard, widely documented Tetris knowledge — it is
+    in the game's own tutorials — not something inferred from this project's
+    human records, and it happens to be exactly the objective this bot shipped
+    with in v1, which survived fine on it. So the dial interpolates the
+    *objective*:
+
+    * **strategy** — `_score_after` blends the expert well-and-quad score with
+      the beginner take-any-clear score. Both are competent at staying alive;
+      they differ in what they are trying to achieve, which is what separates
+      human ranks.
+    * **hold margin** — how much better a swap must look before using it.
+      Using the hold slot well is a planning skill with no speed component, so
+      it is driven from the dial rather than left to emerge. The margins are
+      round guesses, deliberately not fitted (see the note above the
+      constants).
+    * **wasted keystrokes** — extra taps that are walked back, costing finesse
+      without changing the placement. The only knob that moves
+      inputs-per-piece.
+    * **evaluation noise** — kept, but small (`NOISE_MAX = 2.0`), so mistakes
+      stay *ordered* without becoming fatal.
     """
 
     def __init__(self, env, skill=1.0, use_hold=True):
@@ -253,23 +313,36 @@ class SprintBot:
         self.plans = [[] for _ in range(env.n)]
         self._rng = np.random.default_rng(0)
 
-    def _wants_hold(self, board, piece, hold, hold_used, queue_head, noise):
+    @property
+    def _dials(self):
+        weak = 1.0 - self.skill
+        return {
+            "strategy": self.skill,
+            "noise": NOISE_MAX * weak,
+            "fumble": FUMBLE_MAX * weak,
+            "hold_margin": (HOLD_MARGIN_STRONG * self.skill
+                            + HOLD_MARGIN_WEAK * weak),
+        }
+
+    def _wants_hold(self, board, piece, hold, hold_used, queue_head, dials):
         """True when swapping the active piece scores materially better.
 
         The alternative to the current piece is whatever hold would hand over:
         the stored piece, or the next one from the queue if the slot is empty.
-        A plain greedy comparison, gated by `HOLD_MARGIN` so the bot does not
-        burn the swap on a coin-flip. One hold per piece is enforced by the
-        env's own mask (`hold_used`), so this cannot loop.
+        A plain greedy comparison, gated by a margin that widens as skill drops
+        so weak rungs rarely hold and strong ones often do. One hold per piece
+        is enforced by the env's own mask (`hold_used`), so this cannot loop.
         """
         if not self.use_hold or hold_used:
             return False
         other = queue_head if hold < 0 else hold
         if other is None or other < 0:
             return False
-        mine, _, _ = best_placement(board, piece, noise=noise, rng=self._rng)
-        theirs, _, _ = best_placement(board, other, noise=noise, rng=self._rng)
-        return mine is not None and theirs is not None and theirs > mine + HOLD_MARGIN
+        kw = dict(noise=dials["noise"], rng=self._rng, strategy=dials["strategy"])
+        mine, _, _ = best_placement(board, piece, **kw)
+        theirs, _, _ = best_placement(board, other, **kw)
+        return (mine is not None and theirs is not None
+                and theirs > mine + dials["hold_margin"])
 
     def __call__(self, obs, env):
         boards = env.board.cpu().numpy()
@@ -281,20 +354,20 @@ class SprintBot:
         hold_used = env.hold_used.cpu().tolist()
         queue = env.queue.cpu().numpy()
         actions = torch.zeros(env.n, dtype=torch.int64)
+        dials = self._dials
         for i in range(env.n):
             if ts[i] == 0:
                 self.plans[i] = []  # auto-reset: the old plan is meaningless
             if not self.plans[i]:
-                weak = 1.0 - self.skill
-                noise = 8.0 * weak
                 if self._wants_hold(boards[i], pieces[i], holds[i],
-                                    hold_used[i], int(queue[i][0]), noise):
+                                    hold_used[i], int(queue[i][0]), dials):
                     # A one-action plan: it exhausts immediately, so the next
                     # call replans for whichever piece the swap handed over.
                     self.plans[i] = [HOLD]
                 else:
                     self.plans[i] = plan_keystrokes(
                         boards[i], pieces[i], rots[i], xs[i],
-                        noise=noise, rng=self._rng, fumble=0.55 * weak)
+                        noise=dials["noise"], rng=self._rng,
+                        fumble=dials["fumble"], strategy=dials["strategy"])
             actions[i] = self.plans[i].pop(0)
         return actions
