@@ -48,17 +48,70 @@ GRIDS = {
 }
 
 
-def build(game, strongest, kind, strengths=None):
-    """A handicapped ladder plus the uniform-random anchor the league needs."""
+#: Tier ratings every generator is compared at. Chosen inside the range all of
+#: them reach, and *fixed across generators*, because tier spacing is the main
+#: driver of how hard classification is - a first version of this experiment
+#: matched only the total Elo range, which let the trained ladder's tiers sit
+#: 1.4x further apart than the handicapped ones and made it look far more
+#: legible for reasons that had nothing to do with how it was built.
+MATCHED_ELOS = [0.0, 130.0, 260.0, 390.0, 520.0, 650.0]
+
+
+#: Generators whose rungs are checkpoints on disk rather than wrappers around
+#: one network. ``trained`` is the original undertrained ladder; ``distilled``
+#: is a student snapshotted while learning to imitate it.
+FROM_DISK = {"trained": "", "distilled": "_distilled"}
+
+
+def build(game, strongest, kind, strengths=None, trained=None, disk=None):
+    """A ladder plus the uniform-random anchor the league needs.
+
+    Checkpoint-based generators and handicap-based ones go through one code path
+    and one set of league settings. Comparing across two scripts is how tier
+    spacing got away from this experiment the first time.
+    """
+    if kind in FROM_DISK:
+        entries = list(trained) if kind == "trained" else list(disk)
+        if not any(e["net"] is None for e in entries):
+            entries = [{"id": "random", "plies": -1, "net": None}] + entries
+        return entries
     strengths = strengths or GRIDS[kind]
     rungs = handicap.ladder(strongest, kind, strengths)
     return [{"id": "random", "plies": -1, "net": None}] + rungs
 
 
-def measure(game, entries, n_games=300, seed=0, tiers=6):
+def pick_tiers_at(table, targets):
+    """The rungs closest to a fixed set of ratings, one per target.
+
+    Unlike ``pick_tiers``, which spreads tiers evenly across whatever range a
+    ladder happens to span, this puts every generator's tiers at the *same*
+    ratings so that classification difficulty is comparable between them.
+    """
+    rows = sorted(table, key=lambda r: r["elo"])
+    chosen, used = [], set()
+    for index, target in enumerate(targets):
+        candidates = [r for r in rows if r["id"] not in used]
+        if not candidates:
+            break
+        best = min(candidates, key=lambda r: abs(r["elo"] - target))
+        used.add(best["id"])
+        row = dict(best)
+        row["tier"] = ["bronze", "silver", "gold", "platinum",
+                       "diamond", "grandmaster"][index]
+        row["tier_index"] = index
+        row["target_elo"] = target
+        chosen.append(row)
+    chosen.sort(key=lambda r: r["elo"])
+    for index, row in enumerate(chosen):
+        row["tier_index"] = index
+    return chosen
+
+
+def measure(game, entries, n_games=300, seed=0, tiers=6, targets=None):
     result = run_league(game, entries, n_games=n_games, seed=seed)
     result["monotonicity"] = monotonicity(result["table"])
-    result["tiers"] = pick_tiers(result["table"], tiers)
+    result["tiers"] = (pick_tiers_at(result["table"], targets) if targets
+                       else pick_tiers(result["table"], tiers))
     return result
 
 
@@ -120,7 +173,10 @@ def error_structure(means, feature_names):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--game", default="connect_four", choices=list(game_mod.ALL_GAMES))
-    ap.add_argument("--kind", default="temperature", choices=sorted(GRIDS))
+    ap.add_argument("--kind", default="temperature",
+                    choices=sorted(GRIDS) + sorted(FROM_DISK))
+    ap.add_argument("--match-elo", action="store_true",
+                    help="put tiers at MATCHED_ELOS so generators are comparable")
     ap.add_argument("--checkpoints")
     ap.add_argument("--reference")
     ap.add_argument("--games", type=int, default=300)
@@ -132,7 +188,7 @@ def main():
 
     ckpt_dir = args.checkpoints or f"coldopen/ladders/{args.game}"
     ref_dir = args.reference or f"coldopen/ladders/{args.game}_reference"
-    out = args.out or f"analysis/{args.game}/handicap_{args.kind}.json"
+    out = args.out or f"analysis/{args.game}/gen_{args.kind}{'_matched' if args.match_elo else ''}.json"
 
     game = game_mod.make(args.game, args.device)
     trained = load_ladder(ckpt_dir, game.info, args.device)
@@ -142,11 +198,18 @@ def main():
     print(f"{args.game}: handicapping {trained[-1]['id']} by {args.kind}, "
           f"reference {'loaded' if reference is not None else 'MISSING'}", flush=True)
 
-    entries = build(game, strongest, args.kind)
-    league = measure(game, entries, n_games=args.games, seed=args.seed)
+    disk = None
+    if args.kind in FROM_DISK and args.kind != "trained":
+        disk = load_ladder(ckpt_dir + FROM_DISK[args.kind], game.info, args.device)
+    entries = build(game, strongest, args.kind, trained=trained, disk=disk)
+    league = measure(game, entries, n_games=args.games, seed=args.seed,
+                     targets=MATCHED_ELOS if args.match_elo else None)
     m = league["monotonicity"]
+    elos = [t["elo"] for t in league["tiers"]]
+    gaps = [b - a for a, b in zip(elos, elos[1:])]
     print(f"\nladder: range {m['elo_range']:.0f} Elo  "
-          f"concordance {m['rank_concordance']:.3f}", flush=True)
+          f"concordance {m['rank_concordance']:.3f}  "
+          f"mean tier gap {sum(gaps) / len(gaps):.0f}", flush=True)
     print("tiers: " + ", ".join(f"{t['tier']}={t['id']}({t['elo']:.0f})"
                                for t in league["tiers"]), flush=True)
 
