@@ -688,6 +688,25 @@ no-overhang case).
 Next: finesse/quad-rate telemetry from trajectories, then the ladder — LATENCY
 as the coupled dial, plus distillation from a strong sprint policy.
 
+### The human target, measured
+
+396 best-40L records across all 18 ranks (~22 per rank), via the documented
+public API. Every feature is monotone or near-monotone in rank:
+
+| rank | in/pc | quad rate | holds/pc | max b2b | pps | time |
+|---|---|---|---|---|---|---|
+| d | 4.86 | 0.03 | 0.070 | 0.6 | 0.84 | 134.6s |
+| c+ | 4.48 | 0.22 | 0.136 | 2.8 | 1.00 | 109.8s |
+| b+ | 4.06 | 0.43 | 0.185 | 4.5 | 1.41 | 78.0s |
+| s+ | 3.49 | 0.49 | 0.272 | 5.8 | 2.40 | 43.6s |
+| x+ | 2.81 | 0.69 | 0.305 | 8.0 | 6.01 | 17.1s |
+
+An unpredicted find: **hold usage rises ~4× with skill**. Holds-per-piece is a
+pure planning signal — the hold slot is free to use but only useful if you are
+thinking ahead — which makes it a fifth human-comparable feature with no speed
+component. This table is the manifold the agent ladders must land on, and the
+overlap check against it comes before any accuracy claim (the Othello lesson).
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails
