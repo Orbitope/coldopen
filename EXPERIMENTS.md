@@ -849,6 +849,58 @@ meaningless**. It was 98.6% while the policy was unusable. The number worth
 watching is agreement on the student's own states, which is cheap to compute
 and was off by a factor of four.
 
+#### A second measurement error, and the verdict after fixing it
+
+The Markov teacher fixed the labels but not the students, and for a while it
+looked like it had not fixed anything — because **every distilled number logged
+up to this point was also wrong**. `evaluate` took the argmax over Q, and a
+deterministic policy here falls into a **limit cycle**: tap left, the new
+state's argmax is tap right, oscillate until gravity locks the piece somewhere
+arbitrary. Same checkpoint, only the action rule changed:
+
+| policy | lines | inputs per piece |
+|---|---|---|
+| argmax | 0.7 | 138.0 |
+| T = 1.0 sampling | 5.1 | 13.7 |
+
+138 keystrokes for a piece the teacher places in 3.3 is a policy *stuck*, not a
+policy misplacing pieces. This can happen to any deterministic policy over
+reversible actions and is worth checking for by default.
+
+Re-scored with sampling, the keystroke ladder is a clean negative:
+
+| steps | 362 | 1,380 | 3,364 | 8,203 | 20,000 |
+|---|---|---|---|---|---|
+| lines | 2.0 | **6.7** | 2.9 | 3.2 | 2.1 |
+
+It peaks at 6.7 lines against the teacher's 41, never finishes a sprint, and is
+**not monotone** — so it fails as a *ladder* as well as a policy. Keystroke-level
+cloning does not work in this environment.
+
+#### Why, and what replaces it
+
+Predicting the next keystroke asks one network to do two jobs: run a 44-way
+placement search, *and* track whether the piece has already arrived at a column
+it must itself have computed. Getting the second slightly wrong is
+unrecoverable — the piece never reaches the exact state where the teacher says
+"hard drop", so the student taps forever.
+
+`coldopen/distill_placement.py` splits them, the same way they come apart in
+people:
+
+* **placement judgement** is learned — a 44-way classification over
+  (rotation, column), which is a spatial question about a board picture and the
+  kind of thing conv nets are good at;
+* **motor execution** uses the teacher's own emitter, with `fumble` as an
+  explicit dial.
+
+The cost is stated rather than hidden: the rungs then vary in *judgement*, and
+finesse is imposed instead of learned. That is a real step down from the
+scripted ladder, where both fall out of one `skill` number. It is accepted
+because the E2 question this generator exists to answer — *is a part-trained
+imitator a distinct kind of bad?* — is a question about judgement, and because
+the alternative is a generator that does not work at all.
+
 ### The cold-start ladder against real players: the first honest reading
 
 Seven rungs, no constant fitted to human data, measured against all 396
