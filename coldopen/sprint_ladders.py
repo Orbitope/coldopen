@@ -244,6 +244,66 @@ def coherence(ladders, human_rows):
     return out
 
 
+def human_noise_floor(human_rows):
+    """Run the coherence metric on the humans themselves, leave-one-out.
+
+    Without this the coherence number is uninterpretable, and reading it alone
+    is actively misleading: the agent ladder scored 8.0 ranks of median
+    disagreement, which looked like a failure until a single *human* sprint
+    record scored 8.0 as well. One 40-line run is a small sample and any real
+    player's five features disagree about their rank by a median of eight
+    ranks. 8.0 is the floor of the metric, not the agent's error.
+
+    Each record is scored against rank means computed WITHOUT it, so nothing is
+    compared to a table it helped build.
+
+    Returns the spread distribution plus per-feature signed deviation from each
+    record's own median implied rank — the second is what actually
+    discriminates, because systematic bias survives a control that spread does
+    not.
+    """
+    spreads, deviation, accuracy = [], {}, []
+    for i, row in enumerate(human_rows):
+        others = human_rows[:i] + human_rows[i + 1:]
+        implied = {}
+        for feature in HUMAN_COMPARABLE:
+            if row.get(feature) is None:
+                continue
+            rank = rank_of(feature, row[feature], others)
+            if rank is not None:
+                implied[feature] = rank
+        if len(implied) < 2:
+            continue
+        values = list(implied.values())
+        spreads.append(max(values) - min(values))
+        median = float(np.median(values))
+        accuracy.append(median - row["rank_index"])
+        for feature, rank in implied.items():
+            deviation.setdefault(feature, []).append(rank - median)
+    return {
+        "n": len(spreads),
+        "median_spread": float(np.median(spreads)),
+        "spread_quartiles": [float(np.percentile(spreads, q)) for q in (25, 50, 75)],
+        "mean_abs_rank_error": float(np.mean(np.abs(accuracy))),
+        "feature_deviation": {k: float(np.mean(v)) for k, v in deviation.items()},
+    }
+
+
+def agent_deviation(ladders, human_rows):
+    """Per-feature signed deviation, agent side, to compare with the floor."""
+    out = {}
+    for name, rungs in coherence(ladders, human_rows).items():
+        per = {}
+        for row in rungs:
+            if len(row["implied"]) < 2:
+                continue
+            median = float(np.median(list(row["implied"].values())))
+            for feature, rank in row["implied"].items():
+                per.setdefault(feature, []).append(rank - median)
+        out[name] = {k: float(np.mean(v)) for k, v in per.items()}
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--episodes", type=int, default=24)
@@ -275,7 +335,14 @@ def main():
             print(f"    {name:10} {got['min']:8.2f}-{got['max']:<8.2f} "
                   f"{span}   off {got['off_manifold_share']*100:3.0f}%")
 
+    floor = human_noise_floor(human_rows)
+    dev = agent_deviation(ladders, human_rows)
+
     print("\ncoherence — does a rung's features agree on which rank it is?")
+    print(f"  {'HUMAN FLOOR':10} median rank disagreement "
+          f"{floor['median_spread']:.1f} ranks  "
+          f"(quartiles {'/'.join(f'{q:.0f}' for q in floor['spread_quartiles'])}, "
+          f"n={floor['n']}) <- the metric's noise floor, not a target")
     for name, rows in coh.items():
         spreads = [r["spread"] for r in rows if r["spread"] is not None]
         if not spreads:
@@ -284,12 +351,25 @@ def main():
         print(f"  {name:10} median rank disagreement {np.median(spreads):.1f} "
               f"ranks (max {max(spreads)})")
 
+    # Spread cannot see systematic bias, and systematic bias is what actually
+    # separates an agent from a player. This is the discriminating table.
+    print("\nper-feature signed deviation from the record's own median rank")
+    print(f"  {'feature':18} {'human':>7} " +
+          " ".join(f"{name:>10}" for name in dev))
+    for feature in HUMAN_COMPARABLE:
+        line = f"  {feature:18} {floor['feature_deviation'].get(feature, 0.0):+7.1f} "
+        for name in dev:
+            value = dev[name].get(feature)
+            line += f"{value:+10.1f} " if value is not None else f"{'-':>10} "
+        print(line)
+
     path = pathlib.Path(args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     slim = {name: [{k: v for k, v in r.items() if k != "rows"} for r in rungs]
             for name, rungs in ladders.items()}
     path.write_text(json.dumps(
-        {"ladders": slim, "overlap": report, "coherence": coh}, indent=2))
+        {"ladders": slim, "overlap": report, "coherence": coh,
+         "human_noise_floor": floor, "feature_deviation": dev}, indent=2))
     print(f"\nwrote {path}")
 
 

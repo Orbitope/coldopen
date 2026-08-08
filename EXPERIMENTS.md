@@ -861,36 +861,57 @@ quad rate pinned at rank d and hold usage below every human alive. Sprint
 telemetry from agents and from people occupies the same region — which is what
 Othello could not manage, and it is the precondition for anything downstream.
 
-**Coherence** is where it is still wrong: median disagreement 8.0 ranks,
-unchanged from v1. But the *structure* changed completely, and a
-leave-one-out pass names the culprits:
+**Coherence** read 8.0 ranks of median disagreement, unchanged from v1, and
+the first instinct was to call that a failure. It is not — the metric needed
+a control, and the control changes the reading entirely.
 
-| feature | mean signed deviation from its rung's median rank | cost to coherence |
-|---|---|---|
-| holds per piece | **−4.1 ranks** | 3.0 |
-| inputs per piece | **+2.9 ranks** | 2.0 |
-| pps | +1.7 | 0.0 |
-| max B2B | −1.3 | 0.0 |
-| quad rate | **+0.4** | 0.0 |
+Score each of the 396 human records the same way, leave-one-out (so a record
+is never compared against a rank table it helped build):
 
-Quad rate — the feature v1 got most wrong and the hardest strategic one — is
-now the best-calibrated of the five, at +0.4 ranks, with nothing fitted to
-achieve it. The two that miss are both "the agent is a machine" artefacts
-rather than strategy errors:
+| | median rank disagreement |
+|---|---|
+| a single **human** sprint record | **8.0** (quartiles 5 / 8 / 11) |
+| the agent ladder | **8.0** |
 
-* **Finesse is too good** (+2.9). The emitter computes the exact keystroke
-  sequence for its chosen placement, so even weak rungs have better finesse
-  than the humans they otherwise resemble. Real weak players are sloppy in a
-  way a correct emitter is not.
-* **Hold usage is too low** (−4.1). The bot's hold policy is a one-ply greedy
-  comparison — swap if the other piece places better right now. Humans use the
-  hold slot to *plan*, which a one-ply check cannot express, and their usage
-  stays high all the way down to rank d (0.070/piece).
+**8.0 is the noise floor of the metric, not the agent's error.** One 40-line
+sprint is a small sample, and any single player's five features disagree about
+their rank by a median of eight ranks. The agent rungs are no less internally
+coherent than a real game is. (Sanity check on the same pass: the median
+implied rank of a human record is unbiased against its true rank, mean
+absolute error 2.2 ranks.)
 
-Note that the hold gap is exactly the constant that was fitted and reverted
-above. Left un-fitted, it is the ladder's single largest mismatch — which is
-the honest version of the finding and a specific, mechanical thing to fix
-(a deeper hold policy), rather than a number to tune.
+What survives the control is *systematic per-feature bias*, which spread
+cannot see. Comparing each feature's signed deviation from its own record's
+median implied rank, agents against the human baseline:
+
+| feature | human control | agent ladder | verdict |
+|---|---|---|---|
+| quad rate | −1.0 | +0.4 | within human spread |
+| max B2B | −0.3 | −1.3 | within human spread |
+| pps | +0.4 | +1.7 | within human spread |
+| inputs per piece | +1.1 | +2.9 | off by +1.8 |
+| holds per piece | +0.3 | **−4.1** | **off by −4.4** |
+
+So the honest result is: **four of five features are inside the spread real
+players show, and exactly one is genuinely off-distribution.**
+
+* **Hold usage** (−4.4 against control) is the real gap. The bot's hold policy
+  is a one-ply greedy comparison — swap if the other piece places better right
+  now. Humans use the hold slot to *plan*, which one ply cannot express, and
+  their usage stays meaningful all the way down to rank d (0.070/piece). This
+  is exactly the constant that was fitted and reverted above; left un-fitted it
+  is a specific mechanical thing to fix (a deeper hold policy), not a number to
+  tune.
+* **Finesse** (+1.8) is mild and has an obvious cause: the emitter computes the
+  exact keystroke sequence for its chosen placement, so even weak rungs are
+  tidier than the humans they otherwise resemble.
+* **Quad rate** — the feature v1 got most wrong, and the hardest strategic one
+  — is the best calibrated of the five, with nothing fitted to achieve it.
+
+The methodological point generalises past Tetris: **a coherence or overlap
+statistic is uninterpretable without running it on held-out humans first.**
+Reported alone, 8.0 looked like a failure; against its control it is the
+noise floor, and the single real defect was hiding underneath it.
 
 ---
 
