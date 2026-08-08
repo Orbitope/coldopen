@@ -582,6 +582,73 @@ targets from the start.
 only recent matches, the honest framing becomes "N rounds from an established
 account" rather than literal cold start.
 
+### Scoped down: single-player sprint, not versus
+
+The versus engine is the expensive part — SRS-X kick tables, T-spin corner
+rules, garbage cancelling order, the multiplier combo system, the eight-line
+garbage cap — and it is days of work in which a subtle error silently voids the
+comparison rather than raising one.
+
+It is also not needed. A **40 LINES** record already carries everything the
+experiment wants:
+
+```
+pps 7.088   inputs 256   piecesplaced 103   holds 13
+clears: singles 7, doubles 5, triples 1, quads 5   topbtb 5
+```
+
+`inputs / piecesplaced` is **finesse** — keystrokes spent per piece against the
+minimum the placement needed. It is rules-derived, needs no opponent, no attack
+table and no engine, and it is the same class of feature as `missed_win`:
+decidable from the rules, so no agent's opinion can leak into it.
+
+Measured across the ladder (3 players per rank, 47 of 54 have a sprint record,
+coverage at every rank):
+
+| rank | inputs/piece | quad rate |
+|---|---|---|
+| d | 6.71 | 0.14 |
+| c | 4.23 | 0.35 |
+| b+ | 3.52 | 0.44 |
+| s+ | 3.20 | 0.36 |
+| x | 2.86 | 0.60 |
+| x+ | **2.60** | **0.76** |
+
+Finesse spans 2.6×, quad rate 5×, both monotone.
+
+**The design this permits avoids every trap hit so far:**
+
+- **Label from versus, features from sprint.** Skill is league TR, earned in a
+  different game mode from the one the features come from, so the label cannot
+  be a restatement of the features. This is what disqualified Jstris, where a
+  sprint rating *is* the completion time.
+- **No yardstick.** Finesse and quad rate need only the rules, so the inverted
+  reference that broke Othello cannot occur.
+- **Features fire from the first piece**, so the window mismatch that broke
+  Othello cannot occur either.
+
+**What is given up** is the garbage and versus dynamics, and specifically
+`VS / APM` — the downstacking signal. E1 already measured that as flat across
+every rank, carrying no information beyond APM. The part sacrificed is the part
+already shown to be inert.
+
+**One design consequence.** The simulator must be **input-level, not
+placement-level**: finesse only exists if the agent emits keystrokes rather than
+teleporting pieces into place. That also makes the handicap axis natural, since
+"does not know finesse" is exactly "spends more keystrokes than the placement
+needs".
+
+**Reference implementations** for the parts that are easy to get subtly wrong:
+[MisaMino-Tetrio](https://github.com/chouhy/MisaMino-Tetrio) already carries
+TETR.IO's attack table and garbage cap,
+[OpenSolver](https://github.com/MochBot/OpenSolver) is an open-source TETR.IO
+engine, and MinusKelvin's Tetris Bot Protocol makes boards and bots
+interchangeable. All are C++/JS, so they are references rather than drop-ins.
+
+**Validation gate**, in the same discipline as `c4.py` against PettingZoo:
+differential-test the simulator's computed statistics against real API records
+before trusting any comparison built on them.
+
 ---
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails
