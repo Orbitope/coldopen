@@ -584,6 +584,72 @@ account" rather than literal cold start.
 
 ---
 
+## E6a — Othello: the first agent-versus-human comparison, and it fails
+
+Othello turned out to be the one game where both halves already existed. The
+French Othello Federation's **WTHOR** database publishes 125,000 tournament
+games over forty years and 3,650 players, free, with full move sequences — and
+Othello already had a measured agent ladder, a reference network and a feature
+extractor. So agents and people could be put through identical code.
+
+Two things had to be handled to get there, both silent when wrong. WTHOR
+**omits passes**, so replaying the move list literally desynchronises the board
+the first time a pass was skipped and every later move is attributed to the
+wrong player; passes are reinserted by checking legality at each ply. And WTHOR
+has **no ratings**, so skill is fitted from the results themselves with the same
+Bradley-Terry code the agent league uses, which keeps both populations on one
+scale and covers every player rather than the ranked elite.
+
+Validation passed: 60 of 60 games replayed legally through Pgx, and the fitted
+human Elo spread is sensible (p5 −269, median 444, p95 1030).
+
+**Then the comparison failed, in three ways at once.**
+
+| feature | weak human | strong human | agent tier 0 → 5 |
+|---|---|---|---|
+| corner_taken | 0.001 | 0.000 | 0.003 → 0.060 |
+| x_square | 0.000 | 0.000 | 0.082 → 0.004 |
+| c_square | 0.009 | 0.007 | 0.101 → 0.002 |
+| gave_corner | 0.000 | 0.000 | 0.167 → 0.009 |
+| ref_agreement | 0.271 | **0.258** | 0.105 → 0.309 |
+| ref_regret | 0.030 | 0.030 | 0.096 → 0.029 |
+
+**1. The corner features never fire.** They are nonzero in 0.013% of human move
+rows. The observation window is each player's first twenty moves — about forty
+plies — and in competent Othello corners are contested in the *endgame*. The
+feature set that separates agents is measuring events that do not occur in the
+window humans are observed over. The agents only produce them because they play
+badly enough to give corners away in the opening.
+
+**2. The reference feature is inverted.** Stronger humans agree with the
+reference network *less* (0.258 against 0.271). This is the yardstick problem
+appearing in real data rather than in theory: `coldopen/othello_reference` is a
+mediocre RL agent, and tournament players deviate from it because they are
+better than it. A yardstick has to be stronger than everyone it measures, and
+this one is weaker than all of them.
+
+**3. There is no overlap in strength.** The agent ladder tops out at 641 Elo
+above a random anchor. Every WTHOR player is a tournament entrant. The two
+populations do not meet.
+
+**This is the manifold-overlap risk named as the project's central threat,
+measured, on the first real attempt.** It is also the most valuable negative
+result so far, because each of the three failures says exactly what to change:
+
+- **The window or the features must match.** Either profile later moves, where
+  corners are live, or replace the corner family with features that vary in the
+  opening. The current set was tuned on agents that blunder early.
+- **The reference must be stronger than the profiled population.** For Othello
+  that means a real engine (Edax) rather than a self-play DQN.
+- **The ladder must reach the humans.** Distillation from a strong teacher is
+  the route, and Othello has one — the same recipe proposed for NetHack.
+
+None of this was visible from agent-only experiments, all four of which looked
+healthy. The cheapest way to find it was to run the overlap check first, and it
+should gate every remaining E6 attempt.
+
+---
+
 ## E6 — Baseline versus agent telemetry, head to head
 
 **Question.** On a game where both tracks have run, how much does the agent
