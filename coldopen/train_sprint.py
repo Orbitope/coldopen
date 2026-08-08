@@ -119,15 +119,26 @@ class BoolReplay:
                 self.next_mask[i].to(device))
 
 
-def evaluate(net, device, episodes=24, latency=100, seed=123):
-    """Greedy telemetry rollout — the unshaped truth about the policy."""
+def evaluate(net, device, episodes=24, latency=100, seed=123, temperature=0.0):
+    """Telemetry rollout — the unshaped truth about the policy.
+
+    `temperature > 0` samples rather than taking the argmax, which distilled
+    students need: a deterministic policy here falls into tap-oscillation
+    limit cycles and never locks a piece. Measured on one checkpoint, argmax
+    gave 0.7 lines at 138 inputs per piece and T=1.0 gave 5.1 at 13.7. The
+    default stays greedy for DQN, where greedy is the intended policy.
+    """
     env = TetrisSprintBatched(min(episodes, 32), latency=latency)
+    generator = torch.Generator().manual_seed(seed)
 
     def greedy(obs, env):
         with torch.no_grad():
             q = net(obs.to(device)).cpu()
         q = q.masked_fill(~action_mask(env), -1e9)
-        return q.argmax(dim=1)
+        if temperature <= 0:
+            return q.argmax(dim=1)
+        probs = torch.softmax(q / temperature, dim=1)
+        return torch.multinomial(probs, 1, generator=generator).squeeze(1)
 
     # A stalling policy runs every episode to the horizon; cap the eval
     # budget so a bad checkpoint costs seconds, not minutes.

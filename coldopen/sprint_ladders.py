@@ -64,11 +64,34 @@ SKILL_RUNGS = [(1.0, 17), (0.9, 34), (0.8, 68), (0.7, 136),
                (0.6, 272), (0.5, 400), (0.4, 560)]
 
 
-def net_policy(net, device):
+def net_policy(net, device, temperature=0.0, seed=0):
+    """Roll out a net. `temperature > 0` samples instead of taking the argmax.
+
+    Sampling is not a nicety for the distilled students, it is required. A
+    deterministic argmax policy in this environment falls into **limit
+    cycles**: it taps left, the tap moves the piece, the new state's argmax is
+    tap right, and it oscillates until gravity locks the piece somewhere
+    arbitrary. Same checkpoint, only the action rule changed:
+
+        argmax      0.7 lines, 138.0 inputs per piece
+        T = 1.0     5.1 lines,  13.7 inputs per piece
+
+    138 keystrokes for a piece the teacher places in 3.3 is not a policy
+    misplacing pieces, it is a policy stuck. Any deterministic policy over a
+    state space where actions are reversible can do this; sampling breaks the
+    cycle. DQN checkpoints keep `temperature = 0`, since greedy really is the
+    policy Q-learning is trying to learn.
+    """
+    generator = torch.Generator().manual_seed(seed)
+
     def policy(obs, env):
         with torch.no_grad():
             q = net(obs.to(device)).cpu()
-        return q.masked_fill(~action_mask(env), -1e9).argmax(dim=1)
+        q = q.masked_fill(~action_mask(env), -1e9)
+        if temperature <= 0:
+            return q.argmax(dim=1)
+        probs = torch.softmax(q / temperature, dim=1)
+        return torch.multinomial(probs, 1, generator=generator).squeeze(1)
     return policy
 
 
@@ -123,14 +146,19 @@ def build_ladders(episodes, device):
                   f"in/pc {result['inputs_per_piece']:5.2f}  "
                   f"quads {result['quad_rate']:.2f}", flush=True)
 
-    for name, directory in (("distilled", "coldopen/ladders/sprint_distilled"),
-                            ("trained", "coldopen/ladders/tetris_sprint")):
+    # Distilled students are classifiers and must be SAMPLED (see net_policy:
+    # argmax deadlocks them into tap oscillations). DQN checkpoints stay
+    # greedy, because greedy is the policy Q-learning is approximating.
+    for name, directory, temp in (
+            ("distilled", "coldopen/ladders/sprint_distilled", 1.0),
+            ("trained", "coldopen/ladders/tetris_sprint", 0.0)):
         if not pathlib.Path(directory).exists():
             continue
         ladders[name] = []
         for entry in load_checkpoints(directory, device):
-            result = measure(lambda env, n=entry["net"]: net_policy(n, device),
-                             episodes=episodes, latency=100, seed=31)
+            result = measure(
+                lambda env, n=entry["net"], t=temp: net_policy(n, device, t),
+                episodes=episodes, latency=100, seed=31)
             if result:
                 result["rung"] = entry["id"]
                 result["dial"] = entry["steps"]

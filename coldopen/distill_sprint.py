@@ -138,7 +138,11 @@ def distil(steps=6000, batch=512, lr=1e-3, channels=64, seed=0, rounds=4,
         with torch.no_grad():
             predicted = student(obs[index].float().to(device)).argmax(dim=1).cpu()
         agreement = float((predicted == labels[index]).float().mean())
-        report = evaluate(student, device, latency=latency)
+        # Sampled, not greedy: an argmax student deadlocks into tap
+        # oscillations and its logged telemetry describes the deadlock rather
+        # than what it learned (0.7 lines / 138 inputs per piece against
+        # 5.1 / 13.7 for the same weights sampled).
+        report = evaluate(student, device, latency=latency, temperature=1.0)
         report.update({"steps": tag, "teacher_agreement": round(agreement, 4),
                        "elapsed_s": round(time.time() - started, 1)})
         log.append(report)
