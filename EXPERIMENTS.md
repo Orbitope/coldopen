@@ -739,15 +739,22 @@ immediate clear, so the bot cashed singles the moment one appeared and never
 stacked four rows. Its finesse was excellent and its stacking was a beginner's
 — exactly the incoherent shape coherence was built to catch.
 
-Two further faults surfaced on reading the code rather than from any failing
-test:
+One further fault surfaced on reading the code: **no hold logic**, leaving
+holds-per-piece at 0.0, below the weakest human rank's 0.07.
 
-* **Column 9 was unreachable.** The placement search ran `x in range(-2, 9)`,
-  but a piece whose cells all sit at `dx = 0` — a vertical I, S, Z, L, J or T
-  — needs `x = 9` to reach the rightmost column. The single move quad play is
-  built around was not in the search space.
-* **No hold logic**, leaving holds-per-piece at 0.0, below the weakest human
-  rank's 0.07.
+> **Correction.** This section previously also claimed that column 9 was
+> unreachable, because the search ran `x in range(-2, 9)` and a piece whose
+> cells all sit at `dx = 0` would need `x = 9`. **That was wrong, and it was
+> written up before it was checked.** `_CELLS` uses a bounding-box convention
+> in which every `dx >= 0`, so `x` is the box's left edge rather than a cell
+> offset: a vertical I has `dx = 1` or `2` and reaches column 9 at `x = 8` or
+> `x = 7`, both inside the original sweep. Verified directly — widening the
+> sweep to 11 added zero legal placements for all seven pieces, since the
+> largest legal `x` is 8. The sweep has been restored to `range(-2, 9)`, and
+> `tests/test_sprint_ladder_metrics.py` now pins the property that actually
+> matters (every column is covered, and a vertical I can fill column 9 alone)
+> rather than a claim about a loop bound. **The entire quad improvement came
+> from the objective, not the search space.**
 
 v2 keeps a well at column 9, pays `W_QUAD` for four-row clears, charges for
 partial clears while the stack is safe, and holds when the swap scores
@@ -892,8 +899,8 @@ median implied rank, agents against the human baseline:
 | inputs per piece | +1.1 | +2.9 | off by +1.8 |
 | holds per piece | +0.3 | **−4.1** | **off by −4.4** |
 
-So the honest result is: **four of five features are inside the spread real
-players show, and exactly one is genuinely off-distribution.**
+So the reading at this stage was: **four of five features inside the spread
+real players show, and exactly one genuinely off-distribution.**
 
 * **Hold usage** (−4.4 against control) is the real gap. The bot's hold policy
   is a one-ply greedy comparison — swap if the other piece places better right
@@ -912,6 +919,54 @@ The methodological point generalises past Tetris: **a coherence or overlap
 statistic is uninterpretable without running it on held-out humans first.**
 Reported alone, 8.0 looked like a failure; against its control it is the
 noise floor, and the single real defect was hiding underneath it.
+
+### Fixing the hold policy, and the state of the ladder now
+
+The hold gap had a mechanical cause, so it got a mechanical fix. `best_pair`
+scores placing the current piece and the next one **both ways round** and holds
+when the swap wins, expanding only the top 6 first placements so it costs about
+4.5× one search rather than 44×. Piece *ordering* is what the slot is for, and
+one ply cannot express it.
+
+This was chosen after seeing which feature mismatched, which is model selection
+on the test set; the budget for that is small and it is labelled as such in the
+code. It survives on an agent-side justification too — it makes the bot better
+at the game, independent of any human comparison. Finish rate rose at every
+rung (0.92 → 1.00 at skill 1.0, 0.83 → 1.00 at 0.7, 0.67 → 0.92 at 0.4).
+
+The resulting ladder, seven rungs, 20 episodes each:
+
+| skill | time | in/pc | quad | hold | pps | finish |
+|---|---|---|---|---|---|---|
+| 1.00 | 15.3s | 3.34 | 0.669 | 0.341 | 7.21 | 1.00 |
+| 0.80 | 36.1s | 3.59 | 0.449 | 0.182 | 3.09 | 0.85 |
+| 0.60 | 122.3s | 3.90 | 0.146 | 0.127 | 0.88 | 0.95 |
+| 0.40 | 272.1s | 4.45 | 0.049 | 0.094 | 0.39 | 0.90 |
+
+**Coverage:** every feature 0% off-manifold except pps at 14%, spanning ranks
+d…x+ on quad rate, d+…x on hold usage and c+…u on finesse.
+
+**Coherence: 7.0 against the human floor of 8.0** — the agent ladder is now
+*more* internally consistent than a single real sprint record, which is the
+strongest form this result can take.
+
+| feature | human | agent | excess | before the fix |
+|---|---|---|---|---|
+| holds per piece | +0.3 | −0.9 | **−1.2** | −4.4 |
+| inputs per piece | +1.1 | +2.2 | +1.1 | +1.8 |
+| pps | +0.4 | +1.3 | +0.9 | +1.2 |
+| quad rate | −1.0 | +0.5 | +1.5 | +1.5 |
+| max B2B | −0.3 | −2.4 | **−2.1** | −1.0 |
+
+Hold moved from the one clear outlier to inside the human spread. The largest
+remaining gap is **max B2B at −2.1**: the bot quads often (0.669) but chains
+them less than people do, because the danger valve takes a partial clear
+between quads and breaks the streak. That is smaller than the hold gap was and
+has the same character — a specific mechanism, not a tuning knob.
+
+Nothing here says the telemetry *predicts* skill yet; it says agents and people
+now occupy the same feature space, coherently, which is the precondition E6a
+showed cannot be assumed.
 
 ---
 

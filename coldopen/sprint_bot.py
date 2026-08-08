@@ -31,16 +31,21 @@ and charges for partial clears while the stack is safe — the classical sprint
 strategy, and the one humans are ranked on. A danger valve re-enables partial
 clears when the stack gets tall, or the bot would top out defending a well.
 
-Two other v1 faults fixed here, both found by reading rather than by a failing
-test:
+The other v1 fault fixed here: **no hold at all**. v1's holds_per_piece was
+0.0, *below every human alive* (the weakest rank holds 0.07/piece). v2 holds
+when the swap improves the two-piece ordering, which both improves play and
+puts the feature on the manifold.
 
-* **Column 9 was unreachable.** The placement search ran `x in range(-2, 9)`,
-  but a piece whose cells all sit at `dx = 0` — a vertical I, S, Z, L, J or T
-  — needs `x = 9` to occupy the rightmost column. The single most important
-  move in quad play was not in the search space.
-* **No hold.** v1's holds_per_piece was 0.0, *below every human alive* (the
-  weakest rank holds 0.07/piece). v2 holds when the swap scores materially
-  better, which both improves play and puts the feature on the manifold.
+**Correction, recorded because the claim was published before it was
+checked.** An earlier version of this docstring said column 9 had been
+unreachable, on the reasoning that a piece whose cells all sit at `dx = 0`
+needs `x = 9`. That is false. `_CELLS` uses a bounding-box convention in which
+`dx >= 0` always, so `x` is the box's left edge, not a cell offset: a vertical
+I has `dx = 1` or `2` and reaches column 9 at `x = 8` or `x = 7`, both inside
+the original `x in range(-2, 9)` sweep. Verified directly — widening the sweep
+adds zero legal placements for all seven pieces, since the largest legal `x`
+is 8. The quad improvement came entirely from the objective, not the search
+space.
 """
 
 from __future__ import annotations
@@ -197,16 +202,17 @@ def _score_after(board, piece, rot, x, strategy=1.0):
 def best_placement(board, piece, noise=0.0, rng=None, strategy=1.0):
     """(score, rot, x) for the best drop of `piece`, or (None, None, None).
 
-    The x sweep runs to 10, not 9: a piece whose cells all sit at `dx = 0` —
-    a vertical I, S, Z, L, J or T — needs `x = 9` to occupy the rightmost
-    column. v1 stopped at 8 and so could never put a vertical I in the well,
-    which is the one move quad play is built around. `_score_after` rejects
-    genuinely off-board offsets, so widening the sweep is safe.
+    `x` is the LEFT EDGE of the piece's bounding box, not a cell offset —
+    `_CELLS` keeps every `dx >= 0`. The largest legal `x` is therefore 8 (a
+    vertical I at `x = 8` occupies column 9), and `range(-2, 9)` covers the
+    whole reachable set. Stated explicitly because the opposite was once
+    asserted here: the sweep was briefly widened to 11 on the theory that
+    column 9 needed `x = 9`, which added no legal placement at all.
     """
     best, best_target = None, (None, None)
     n_rots = 1 if piece == 1 else 4  # O has one distinct rotation
     for rot in range(n_rots):
-        for x in range(-2, 11):
+        for x in range(-2, 9):
             scored = _score_after(board, piece, rot, x, strategy=strategy)
             if scored is None:
                 continue
@@ -304,7 +310,7 @@ def best_pair(board, first, second, noise=0.0, rng=None, strategy=1.0, top_k=6):
     """
     scored = []
     for rot in range(1 if first == 1 else 4):
-        for x in range(-2, 11):
+        for x in range(-2, 9):
             got = _score_after(board, first, rot, x, strategy=strategy)
             if got is not None:
                 scored.append((got[0], rot, x))
