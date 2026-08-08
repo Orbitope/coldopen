@@ -259,6 +259,38 @@ def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0,
     return actions
 
 
+def markov_action(board, piece, rot, x, target_rot, target_x):
+    """The single next keystroke toward (target_rot, target_x), from HERE.
+
+    The plan-following emitter is not a Markov policy: which keystroke it plays
+    depends on how far through its plan it is, which is not in the observation.
+    That is fine for playing, and fatal for imitation — "what would the teacher
+    do in this state?" has no well-defined answer, which is precisely the
+    question DAgger relabelling asks. Measured consequence: a student at 98.6%
+    agreement on the teacher's own states scored 25.8% on its own, and 39.6% of
+    its relabelled targets were `hold` against the student's 1.1%.
+
+    This derives the action from observable state alone, so teacher and relabel
+    agree by construction.
+    """
+    if target_rot is None:
+        return HARD_DROP
+    delta_rot = (target_rot - rot) % 4
+    if delta_rot:
+        return {1: ROTATE_CW, 2: ROTATE_180, 3: ROTATE_CCW}[delta_rot]
+    if x == target_x:
+        return HARD_DROP
+    # DAS when the target is the extreme reachable column for this rotation
+    # (one input to the wall, which is what good finesse looks like).
+    dx_min = -min(dx for dx, dy in _CELLS[piece][target_rot])
+    dx_max = 9 - max(dx for dx, dy in _CELLS[piece][target_rot])
+    if target_x <= dx_min and target_x < x:
+        return DAS_LEFT
+    if target_x >= dx_max and target_x > x:
+        return DAS_RIGHT
+    return TAP_RIGHT if target_x > x else TAP_LEFT
+
+
 class SprintBot:
     """Per-instance plans over a batched env; replans when a piece appears.
 
@@ -306,10 +338,15 @@ class SprintBot:
       stay *ordered* without becoming fatal.
     """
 
-    def __init__(self, env, skill=1.0, use_hold=True):
+    def __init__(self, env, skill=1.0, use_hold=True, markov=False):
         self.env = env
         self.skill = float(skill)
         self.use_hold = use_hold
+        #: Emit one keystroke per call from observable state alone, instead of
+        #: following a stored plan. Slower (it re-searches every step) but it
+        #: makes the teacher a genuine Markov policy, which imitation needs.
+        #: Distillation uses it; the ladder rungs do not need to.
+        self.markov = markov
         self.plans = [[] for _ in range(env.n)]
         self._rng = np.random.default_rng(0)
 
@@ -355,6 +392,18 @@ class SprintBot:
         queue = env.queue.cpu().numpy()
         actions = torch.zeros(env.n, dtype=torch.int64)
         dials = self._dials
+        if self.markov:
+            for i in range(env.n):
+                if self._wants_hold(boards[i], pieces[i], holds[i],
+                                    hold_used[i], int(queue[i][0]), dials):
+                    actions[i] = HOLD
+                    continue
+                _, t_rot, t_x = best_placement(
+                    boards[i], pieces[i], noise=dials["noise"],
+                    rng=self._rng, strategy=dials["strategy"])
+                actions[i] = markov_action(boards[i], pieces[i], rots[i],
+                                           xs[i], t_rot, t_x)
+            return actions
         for i in range(env.n):
             if ts[i] == 0:
                 self.plans[i] = []  # auto-reset: the old plan is meaningless

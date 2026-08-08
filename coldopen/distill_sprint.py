@@ -57,7 +57,7 @@ def collect(n_envs, steps, latency=100, seed=0, explore=0.05):
     """
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 7919)
-    bot = SprintBot(env)
+    bot = SprintBot(env, markov=True)
     generator = torch.Generator().manual_seed(seed)
 
     observations, labels = [], []
@@ -83,13 +83,13 @@ def collect(n_envs, steps, latency=100, seed=0, explore=0.05):
 def relabel(env, bot):
     """What the teacher would play in each instance's CURRENT state.
 
-    The bot is plan-driven, so asking it costs a replan: clear the plans and
-    take the first keystroke of the fresh plan for the board as it now is.
-    That is exactly the DAgger query — the teacher's action on a state the
-    student chose to visit.
+    Only meaningful because the teacher runs in Markov mode: its action is a
+    function of observable state, so the DAgger query has a well-defined
+    answer. With the plan-following teacher it did not, and the damage was
+    measurable — 39.6% of relabelled targets came back `hold` (against 1.1%
+    from the student), because the teacher re-decided to hold on every step
+    the student declined to, flooding the aggregated set with one label.
     """
-    for i in range(env.n):
-        bot.plans[i] = []
     return bot(None, env)
 
 
@@ -97,7 +97,7 @@ def collect_student(student, device, n_envs, steps, latency=100, seed=0):
     """States the STUDENT reaches, labelled by the teacher (a DAgger round)."""
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 104_729)
-    bot = SprintBot(env)
+    bot = SprintBot(env, markov=True)
 
     observations, labels = [], []
     obs = env.observe()
