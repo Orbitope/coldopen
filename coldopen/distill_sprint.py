@@ -11,12 +11,19 @@ The teacher is `coldopen.sprint_bot`: placement search over hand-written
 board heuristics. No human data touches it, so the ladder stays cold-start
 legitimate.
 
-Behavioural cloning's usual weakness applies — the student only sees states
-the teacher's own play reaches, so it is fragile off-distribution. Two things
-blunt it here: the teacher is stochastic through the piece bag, and the
-collection runs with a little forced exploration so the student sees boards
-its teacher would not have built. Both are about making a *graded* ladder
-robust, not about making the top rung strong.
+Plain behavioural cloning was tried first and **is not enough**, measured: a
+student reaching 99.5% per-action agreement with the teacher still cleared
+4.3 lines against the teacher's 40, and never finished a sprint. A sprint is
+~300 keystrokes, so even 99.5% accuracy gives 0.995^300 ≈ 22% odds of a clean
+run — and a single wrong keystroke lands the student on a board its teacher
+never built, where the next action is worse than a guess. Compounding error,
+in its textbook form.
+
+The fix is **DAgger** (Ross et al. 2011): roll the *student* out, ask the
+teacher what it would have done in the states the student actually reached,
+and add those to the training set. The distribution the student is trained on
+converges to the distribution it induces, which is the mismatch plain cloning
+cannot close. `--rounds 1` reproduces the plain-BC behaviour for comparison.
 
     python -m coldopen.distill_sprint --out coldopen/ladders/sprint_distilled
 """
@@ -73,7 +80,38 @@ def collect(n_envs, steps, latency=100, seed=0, explore=0.05):
     return torch.cat(observations), torch.cat(labels)
 
 
-def distil(steps=6000, batch=512, lr=1e-3, channels=64, seed=0,
+def relabel(env, bot):
+    """What the teacher would play in each instance's CURRENT state.
+
+    The bot is plan-driven, so asking it costs a replan: clear the plans and
+    take the first keystroke of the fresh plan for the board as it now is.
+    That is exactly the DAgger query — the teacher's action on a state the
+    student chose to visit.
+    """
+    for i in range(env.n):
+        bot.plans[i] = []
+    return bot(None, env)
+
+
+def collect_student(student, device, n_envs, steps, latency=100, seed=0):
+    """States the STUDENT reaches, labelled by the teacher (a DAgger round)."""
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 104_729)
+    bot = SprintBot(env)
+
+    observations, labels = [], []
+    obs = env.observe()
+    for _ in range(steps):
+        observations.append(obs.bool())
+        labels.append(relabel(env, bot).clone())
+        with torch.no_grad():
+            q = student(obs.to(device)).cpu()
+        acts = q.masked_fill(~action_mask(env), -1e9).argmax(dim=1)
+        obs, _, _, _ = env.step(acts)
+    return torch.cat(observations), torch.cat(labels)
+
+
+def distil(steps=6000, batch=512, lr=1e-3, channels=64, seed=0, rounds=4,
            latency=100, pool_envs=64, pool_steps=600, out=None, device="cpu"):
     device = torch.device(device)
     torch.manual_seed(seed)
@@ -87,7 +125,10 @@ def distil(steps=6000, batch=512, lr=1e-3, channels=64, seed=0,
 
     student = BoardNet(OBS_SHAPE, N_ACTIONS, channels).to(device)
     opt = torch.optim.Adam(student.parameters(), lr=lr)
-    pending = snapshot_schedule(steps, count=14, lo=25)
+    # Snapshots span the WHOLE curriculum, so the ladder's rungs are spread
+    # across DAgger rounds rather than bunched inside the first one.
+    per_round = max(1, steps // rounds)
+    pending = snapshot_schedule(steps, count=16, lo=25)
     log, started = [], time.time()
 
     def save(tag):
@@ -119,12 +160,24 @@ def distil(steps=6000, batch=512, lr=1e-3, channels=64, seed=0,
         opt.step()
         while pending and pending[0] <= step:
             save(pending.pop(0))
+        # DAgger round boundary: aggregate states the student now reaches,
+        # labelled by the teacher, and keep training on the union.
+        if rounds > 1 and step % per_round == 0 and step < steps:
+            extra_obs, extra_labels = collect_student(
+                student, device, pool_envs, pool_steps // 2,
+                latency=latency, seed=seed + step)
+            obs = torch.cat([obs, extra_obs])
+            labels = torch.cat([labels, extra_labels])
+            print(f"  dagger round at {step:,}: +{extra_obs.shape[0]:,} states "
+                  f"(total {obs.shape[0]:,})", flush=True)
     return student
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=6000)
+    ap.add_argument("--rounds", type=int, default=4,
+                    help="DAgger rounds; 1 reproduces plain behavioural cloning")
     ap.add_argument("--batch", type=int, default=512)
     ap.add_argument("--channels", type=int, default=64)
     ap.add_argument("--lr", type=float, default=1e-3)
@@ -136,6 +189,7 @@ def main():
     ap.add_argument("--out", default="coldopen/ladders/sprint_distilled")
     args = ap.parse_args()
     distil(steps=args.steps, batch=args.batch, lr=args.lr, channels=args.channels,
+           rounds=args.rounds,
            seed=args.seed, latency=args.latency, pool_envs=args.pool_envs,
            pool_steps=args.pool_steps, out=args.out, device=args.device)
     print(f"wrote {args.out}")
