@@ -92,8 +92,12 @@ def _score_after(board, piece, rot, x):
     return score, y
 
 
-def plan_keystrokes(board, piece, rot0, x0):
-    """The action list for the best placement of the current piece."""
+def plan_keystrokes(board, piece, rot0, x0, noise=0.0, rng=None, fumble=0.0):
+    """The action list for the best placement of the current piece.
+
+    `noise` perturbs each candidate's score (weak judgement); `fumble` is the
+    probability of adding a wasted tap-and-return pair (weak execution).
+    """
     best, best_target = None, None
     n_rots = 1 if piece == 1 else 4  # O has one distinct rotation
     for rot in range(n_rots):
@@ -102,6 +106,8 @@ def plan_keystrokes(board, piece, rot0, x0):
             if scored is None:
                 continue
             score, _ = scored
+            if noise and rng is not None:
+                score = score + float(rng.normal(0.0, noise))
             if best is None or score > best:
                 best, best_target = score, (rot, x)
     if best_target is None:  # nowhere to go; drop in place
@@ -124,17 +130,53 @@ def plan_keystrokes(board, piece, rot0, x0):
     else:
         step = TAP_RIGHT if x > x0 else TAP_LEFT
         actions.extend([step] * abs(x - x0))
+    # Fumbles: a tap and its correction. The placement is unchanged, the
+    # keystroke count is not - which is exactly what finesse measures.
+    if fumble and rng is not None:
+        while rng.random() < fumble:
+            if x < dx_max:
+                actions.extend([TAP_RIGHT, TAP_LEFT])
+            else:
+                actions.extend([TAP_LEFT, TAP_RIGHT])
     actions.append(HARD_DROP)
     return actions
 
 
 class SprintBot:
-    """Per-instance plans over a batched env; replans when a piece appears."""
+    """Per-instance plans over a batched env; replans when a piece appears.
 
-    def __init__(self, env):
+    A plan always ends in a hard drop, so an exhausted plan means a new piece
+    has spawned — that is the replan trigger. The other trigger is an episode
+    boundary: auto-reset swaps in a fresh board mid-plan, and applying the
+    leftover keystrokes to it would place pieces by reference to a board that
+    no longer exists. `t == 0` catches that.
+
+    **`skill` degrades judgement, and it has to.** Measured: dialling the
+    env's LATENCY alone changes speed and nothing else — gravity moves pieces
+    only vertically and a hard drop lands them at the bottom regardless, so a
+    slow bot still places perfectly. That produces slow-but-flawless players, a
+    combination E1 found does not exist among humans (the slowest ranks have
+    the *worst* finesse, 4.86 against 2.81 at the top). Speed and accuracy have
+    to be coupled deliberately.
+
+    `skill` in [0, 1] does that with two knobs at once:
+
+    * **evaluation noise** — Gaussian noise on each candidate placement's
+      score, so a weak bot sometimes prefers a worse square. Its mistakes stay
+      *ordered* (a slightly worse placement is likelier than a disastrous one),
+      which is the property E2 found separates temperature-style degradation
+      from uniform noise.
+    * **wasted keystrokes** — a weak player fumbles the input: extra taps that
+      are walked back, costing finesse without changing the placement. This is
+      the only knob that moves inputs-per-piece, and finesse is the human
+      feature with the widest measured spread.
+    """
+
+    def __init__(self, env, skill=1.0):
         self.env = env
+        self.skill = float(skill)
         self.plans = [[] for _ in range(env.n)]
-        self.plan_key = [None] * env.n
+        self._rng = np.random.default_rng(0)
 
     def __call__(self, obs, env):
         boards = env.board.cpu().numpy()
@@ -144,13 +186,12 @@ class SprintBot:
         ts = env.t.cpu().tolist()
         actions = torch.zeros(env.n, dtype=torch.int64)
         for i in range(env.n):
-            # A new piece (or a fresh episode) invalidates the plan. The key is
-            # (t-of-plan-start irrelevant): replan whenever the queue advanced,
-            # detected cheaply via empty plan.
-            if not self.plans[i] or self.plan_key[i] != (pieces[i], ts[i] >= 0 and len(self.plans[i])):
-                if not self.plans[i]:
-                    self.plans[i] = plan_keystrokes(
-                        boards[i], pieces[i], rots[i], xs[i])
-                    self.plan_key[i] = (pieces[i], len(self.plans[i]))
+            if ts[i] == 0:
+                self.plans[i] = []  # auto-reset: the old plan is meaningless
+            if not self.plans[i]:
+                weak = 1.0 - self.skill
+                self.plans[i] = plan_keystrokes(
+                    boards[i], pieces[i], rots[i], xs[i],
+                    noise=8.0 * weak, rng=self._rng, fumble=0.55 * weak)
             actions[i] = self.plans[i].pop(0)
         return actions
