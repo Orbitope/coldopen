@@ -340,26 +340,71 @@ classifier:
 - **blindspot** — hide a band of the board before the network looks. Models
   attention rather than decision noise.
 
-All four ladders span a comparable range (612–736 Elo), so the comparison is at
-matched measured strength:
+Five generators, all through one code path, with **tiers pinned to the same six
+ratings** so that tier spacing cannot explain the difference. An earlier version
+matched only the total Elo range, which let the trained ladder's tiers sit 1.4×
+further apart — the exact confound this document raises about Leduc and then
+failed to apply to itself. Corrected, the finding is stronger, because the
+trained ladder now has one of the *narrowest* gaps and still wins:
 
-| moves seen | undertrained | temperature | epsilon | blindspot |
-|---|---|---|---|---|
-| 1 | **0.468** | 0.281 | 0.249 | 0.307 |
-| 3 | 0.602 | 0.312 | 0.283 | 0.369 |
-| 5 | 0.548 | 0.302 | 0.286 | **0.536** |
-| 12 | 0.567 | 0.358 | 0.346 | 0.486 |
-| 20 | 0.631 | 0.402 | 0.382 | 0.525 |
+| generator | tier gap | concordance | n=1 | n=3 | n=5 | n=20 |
+|---|---|---|---|---|---|---|
+| **trained** (undertrained RL) | 121 | 0.912 | **0.522** | 0.601 | 0.519 | 0.634 |
+| distilled (imitation) | 122 | 0.971 | 0.283 | 0.333 | 0.436 | 0.479 |
+| blindspot | 126 | 1.000 | 0.308 | 0.361 | 0.504 | 0.481 |
+| temperature | 139 | 0.978 | 0.292 | 0.298 | 0.312 | 0.410 |
+| epsilon | 130 | 1.000 | 0.249 | 0.283 | 0.286 | 0.382 |
 
-**At matched strength, undertraining is by far the most legible from a single
-move.** Every handicap lands between 0.25 and 0.31 where undertraining reaches
-0.468. This is the most consequential result in the project so far: the headline
-finding — most of the signal arriving on move one — is substantially a property of
-*how the ladder was built*, not of Connect Four.
+**Undertrained RL checkpoints are not one generator among five — they are the
+outlier.** Every other method lands in a 0.25–0.31 band at one move; the RL
+ladder nearly doubles it. The four agree with each other and disagree with it.
 
-It also sharpens the standing E3 prediction. If humans resemble any of these
-handicaps more than they resemble an undertrained network, achievable accuracy
-from one move is nearer 0.3 than 0.47.
+The decisive part is **distillation**, which is also a form of undertraining — a
+student snapshotted partway to competence — and which behaves like the handicaps
+rather than like the RL ladder. So what makes the original ladder legible is not
+"partly trained" in general. It is something specific to RL checkpoints.
+
+The likely mechanism: a DQN checkpoint early in training has a systematically
+*distorted* value function — it has learned something about the centre column and
+nothing at all about blocking — so its blunder profile is a recognisable
+fingerprint of what has not been learned yet. A behavioural-cloning student at
+60% teacher agreement is wrong in scattered places instead, because what it has
+missed is whichever positions were rare in the demonstrations.
+
+That reading is supported by the error concentration, which the earlier writeup
+got backwards and which now separates the generators cleanly:
+
+| generator | error concentration, weakest → strongest tier |
+|---|---|
+| trained | 0.33, 0.34, 0.46, 0.25, 0.46, 0.39 |
+| distilled | 0.37, 0.31, 0.24, 0.14, 0.11, 0.12 |
+| blindspot | 0.31, 0.36, 0.19, 0.16, 0.12, 0.16 |
+| temperature | 0.16, 0.15, 0.12, 0.12, 0.13, 0.49 |
+| epsilon | 0.21, 0.13, 0.12, 0.11, 0.17, 0.32 |
+
+The trained ladder's errors stay concentrated **at every strength**. Distillation
+and blindspot are concentrated only at the weak end and become uniform as they
+improve — which is the more plausible description of a person: a beginner has
+systematic gaps, while a strong player's remaining mistakes are idiosyncratic.
+
+**Three curve families**, which is the practical output:
+
+- *trained* — high from move one, stays high
+- *distilled and blindspot* — low start, a jump around five moves, plateau ~0.48
+- *temperature and epsilon* — low start, slow steady climb to ~0.40
+
+Those are fingerprints. Computing the same two signatures on a human corpus says
+which family people belong to, and therefore which generator a ladder should use.
+The human side of that needs no agents at all.
+
+It also sharpens the standing E3 prediction: if people are not undertrained RL
+networks — and four of five generators say that is a distinctive thing to be —
+achievable accuracy from one move is nearer 0.3 than 0.5.
+
+**A secondary finding.** The trained ladder has the *worst* concordance of the
+five (0.912 against 0.97–1.00). A dial controls strength directly; training only
+correlates with it. If the point of a ladder is graded strength, every other
+method here is a better instrument.
 
 ### The prediction was wrong, and the reversal is more useful
 
