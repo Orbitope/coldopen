@@ -21,17 +21,21 @@ point it at real players on day one.
 
 ## The questions this project is trying to answer
 
-1. **How early is skill legible?** On Connect Four the answer so far is
-   uncomfortably early — most of the signal is there on the first move — but a
-   large part of that is opening choice, which is also the easiest thing for
-   somebody to imitate.
-2. **What property of a game decides that?** The plan is to vary three axes:
-   tactical density (does a position usually contain a forced win or loss?),
-   chance, and hidden information.
-3. **Does any of it transfer to humans?** This is the load-bearing question. A
-   network's blunders and a beginner's blunders are both blunders, but they are
-   not the same distribution. Until that is tested against real human games with
-   known ratings, this is a proof of pipeline and not a proof of concept.
+1. **How early is skill legible?** On Connect Four most of the signal is there on
+   the first move — but that number turns out to be mostly a fact about the
+   *agents*, not the game. Rebuilding the ladder four other ways at matched
+   strength drops one-move accuracy from 52% to 25-31%, and undertrained RL
+   checkpoints are the outlier among the five. See `EXPERIMENTS.md`, E2.
+2. **What property of a game decides that?** Three axes: tactical density (does a
+   position usually contain a forced win or loss?), chance, and hidden
+   information. Tactical density is now measured rather than asserted, and it
+   separates Connect Four from Othello in the predicted direction.
+3. **Does any of it transfer to humans?** Still the load-bearing question, and
+   still unanswered. A network's blunders and a beginner's blunders are both
+   blunders, but they are not the same distribution. Four human corpora are now
+   ingested and a free baseline is measured on them, but no game yet has *both*
+   an agent ladder and human data, so the two halves have not met. Until they do
+   this is a proof of pipeline and not a proof of concept.
 
 ## Status
 
@@ -55,6 +59,13 @@ equally spread out: Connect Four's six tiers are ~194 Elo apart and Leduc's are
 ~15 Elo apart, so Leduc's classifier is separating players who are an order of
 magnitude closer in strength. Its 62.1% is the more impressive number on this
 table, not the less — and its 90.3% within-one-tier is the best of the four.
+
+**And read the whole table as a statement about undertrained networks, not about
+the games.** Every ladder here was built by snapshotting self-play. Rebuilding
+Connect Four's four other ways — imitation, and three kinds of handicap — puts
+one-move accuracy at 0.25-0.31 against this table's 0.47, at matched tier
+spacing. Whether the games differ from each other is a separate question from
+whether any of these numbers survive contact with people.
 
 Three things fall out of it:
 
