@@ -685,8 +685,16 @@ magnitude below what this env sustains. If it ever binds, the known lever is
 the 24-trip ghost probe (cache it between step and observe, or height-map the
 no-overhang case).
 
-Next: finesse/quad-rate telemetry from trajectories, then the ladder — LATENCY
-as the coupled dial, plus distillation from a strong sprint policy.
+(The battery claim above was re-verified later, after the committed report
+turned out to be a benchmark-only artifact — see *A process failure worth
+recording* below. It does pass: 12 tests, overall PASS.)
+
+What came next, and how much of it was wrong: **LATENCY as the coupled dial
+did not work** — it is a pure speed dial, producing slow-but-flawless players
+that do not exist among humans — and **distillation from the strong sprint
+policy did not work either**, at either the keystroke or the placement level
+without DAgger. What did work was interpolating the teacher's *objective*
+between expert and beginner strategy. The rest of E5 is that story.
 
 ### The human target, measured
 
