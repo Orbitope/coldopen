@@ -1030,6 +1030,82 @@ because the E2 question this generator exists to answer — *is a part-trained
 imitator a distinct kind of bad?* — is a question about judgement, and because
 the alternative is a generator that does not work at all.
 
+#### The answer: distillation cannot be a ladder here, and the reason generalises
+
+DAgger at the placement level worked exactly as advertised **on the metric it
+targets**, and changed nothing about the play:
+
+| step | own-state agreement | lines |
+|---|---|---|
+| 1,117 (pre-DAgger) | 0.273 | 1.0 |
+| 2,887 | 0.581 | 1.1 |
+| 7,463 | 0.811 | 1.0 |
+| 12,000 | **0.834** | **1.3** |
+
+Agreement tripled, tracking each round; lines stayed flat against an oracle
+that scores 36.8 on the same pathway. Rather than guess why, corrupt the oracle
+by a known random fraction — same pathway, same emitter, same teacher, only the
+per-decision error rate moving:
+
+| per-placement accuracy | lines | finish rate | quad rate |
+|---|---|---|---|
+| 1.00 | 36.8 | 0.83 | 0.621 |
+| 0.98 | 40.2 | 0.92 | 0.494 |
+| 0.95 | 27.8 | 0.42 | 0.472 |
+| 0.90 | 10.2 | **0.00** | 0.185 |
+| 0.80 | 5.6 | 0.00 | 0.069 |
+| 0.60 | 0.8 | 0.00 | 0.000 |
+| 0.20 | 0.2 | 0.00 | 0.000 |
+
+**Nothing finishes below 95% per-placement accuracy.** Every one of the 396
+human records is a finish, so the entire human-relevant range is compressed
+into accuracy 0.95–1.00, and everything below 0.90 is indistinguishable
+rubble. A sprint is ~100 placements; at 90% accuracy that is ten bad
+placements, each leaving a hole, and the board fills long before 40 lines.
+
+That is the disqualifying property, stated generally: **a ladder needs a dial
+whose intermediate settings produce intermediate play.** Imitation accuracy is
+not such a dial in a game with long correlated action sequences — it is a step
+function. And this is exactly why the scripted dial *does* work: it varies
+**strategy**, which changes performance smoothly all the way down, rather than
+**accuracy**, which changes nothing until it is nearly perfect.
+
+A second result falls out of the same data. The DAgger student at 0.834
+agreement cleared **1.3** lines where *random* corruption at 0.80 clears
+**5.6**. A learned policy is worse than noise at the same error rate, because
+its errors are **systematic rather than independent** — it is wrong in the same
+way on similar boards, so mistakes compound instead of averaging out. E2 found
+the same asymmetry from the other side (undertraining produces more structured
+errors than handicapping); here it is measured directly.
+
+Recorded in `analysis/tetris_sprint/accuracy_cliff.json`.
+
+#### What it cost to learn that, and the check that would have shortened it
+
+Six separate faults in this generator's plumbing, each producing numbers that
+read as "the model is not learning":
+
+1. argmax limit cycles (the policy oscillates and never locks a piece);
+2. agreement measured on the teacher's state distribution, not the student's;
+3. predicted placements that were illegal for the piece;
+4. predicted targets that changed as the piece fell, so the emitter chased;
+5. legal targets unreachable from beside a tall stack, with no fallback;
+6. **hold missing from the action space entirely**, capping the pathway at 31
+   lines and a 50% finish rate.
+
+Number 6 is the instructive one, because no amount of training or debugging
+would have revealed it — the ceiling was below the human manifold before the
+student made a single mistake. `oracle_ceiling()` catches that whole class in
+about a minute by running the pathway with the teacher's own answers
+substituted for the student's. It now runs at the top of every distillation and
+its result is stored beside the training log, so no learning curve can be read
+without the ceiling it is being judged against.
+
+The rule worth keeping: **before training a student, measure what the pathway
+scores with perfect predictions.** "The student has not learned" and "the
+pathway cannot do better" are indistinguishable from the outside, and only one
+of them is fixed by more training.
+
 Plain cloning at the placement level then reproduced the same failure one level
 up, which is worth recording because the numbers look so different from the
 outside:
