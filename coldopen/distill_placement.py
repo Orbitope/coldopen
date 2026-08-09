@@ -114,10 +114,23 @@ def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
     (board, piece), with no plan state to be out of sync with and no way for
     one disagreement to flood the labels.
 
-    It is also necessary. Plain cloning reached 91.5% agreement on the
-    teacher's own pool and **21.5% on the boards the student actually built** —
-    the student's boards are messy in ways the teacher's never are, so nothing
-    in the training set describes them.
+    It is also necessary, and the size of the distribution gap is worth having
+    in numbers. Averaged over 300 steps of each policy's own play:
+
+        boards       max height   holes   bumpiness
+        teacher          6.85      0.45     10.01
+        student          9.78     13.50     13.86
+
+    **Thirty times the holes.** The teacher essentially never makes one, so the
+    pool contains almost no example of what to do on a board with thirteen
+    holes — and that is the only kind of board the student ever sees. It is not
+    failing to learn the function; it has never been shown the domain it
+    operates in. Plain cloning reached 97.2% agreement on the teacher's pool
+    and 26.7% on its own boards, which is the same fact stated as a metric.
+
+    The encouraging half: the teacher's search works on *any* board, so correct
+    labels for holey boards are computable. They simply are not in the pool
+    until the student's own play puts them there.
     """
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 104_729)
