@@ -1,8 +1,8 @@
 {
   "env": "tetris_sprint",
-  "overall_pass": false,
-  "created_at": "2026-08-08T21:40:13.588484+00:00",
-  "git_sha": "b85c89c70443572dd61b62647951b3f420512f42",
+  "overall_pass": true,
+  "created_at": "2026-08-09T00:02:10.036080+00:00",
+  "git_sha": "c9472aa62c262d558f192ad5414e1aad067300d7",
   "versions": {
     "python": "3.12.13",
     "platform": "macOS-14.3-arm64-arm-64bit",
@@ -11,18 +11,84 @@
     "numpy": "2.5.1"
   },
   "tests": {
+    "test_spec_contract": {
+      "outcome": "passed",
+      "duration": 0.006,
+      "message": null
+    },
+    "test_differential": {
+      "outcome": "passed",
+      "duration": 10.419,
+      "message": null
+    },
+    "test_batch_independence": {
+      "outcome": "passed",
+      "duration": 11.125,
+      "message": null
+    },
+    "test_invariant_sweep": {
+      "outcome": "passed",
+      "duration": 3.92,
+      "message": null
+    },
+    "test_auto_reset": {
+      "outcome": "passed",
+      "duration": 48.421,
+      "message": null
+    },
+    "test_determinism": {
+      "outcome": "passed",
+      "duration": 2.628,
+      "message": null
+    },
+    "test_replay": {
+      "outcome": "passed",
+      "duration": 0.372,
+      "message": null
+    },
+    "test_scripted_policies": {
+      "outcome": "skipped",
+      "duration": 0.0,
+      "message": "Skipped: no scripted policies provided (HarnessConfig.scripted_policies)"
+    },
     "test_benchmark_factory_parity": {
       "outcome": "passed",
-      "duration": 53.906,
+      "duration": 5.745,
+      "message": null
+    },
+    "test_throughput": {
+      "outcome": "passed",
+      "duration": 69.482,
+      "message": null
+    },
+    "test_reference_tables_match_the_spec": {
+      "outcome": "passed",
+      "duration": 0.0,
+      "message": null
+    },
+    "test_batched_tables_match_the_spec": {
+      "outcome": "passed",
+      "duration": 0.0,
+      "message": null
+    },
+    "test_kick_tensor_encodes_the_tables_in_try_order": {
+      "outcome": "passed",
+      "duration": 0.002,
       "message": null
     }
   },
-  "required_tests_not_passed": [
-    "test_spec_contract",
-    "test_differential",
-    "test_batch_independence",
-    "test_invariant_sweep",
-    "test_determinism",
-    "test_replay"
-  ]
+  "required_tests_not_passed": [],
+  "tolerance_fields_used": {},
+  "throughput": {
+    "reference_steps_per_sec": 140296.20732420374,
+    "batched": {
+      "n=1,debug=False": 6583.001515343384,
+      "n=1,debug=True": 228.40785238714838,
+      "n=64,debug=False": 49734.24350892466,
+      "n=64,debug=True": 12466.13745091489,
+      "n=1024,debug=False": 79945.61772264204,
+      "n=1024,debug=True": 54990.06045960172
+    },
+    "speedup_at_largest_batch": 0.5698344898084063
+  }
 }
