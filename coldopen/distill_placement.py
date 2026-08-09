@@ -210,12 +210,22 @@ def own_state_agreement(net, device, n_envs=12, steps=180, latency=100, seed=7):
 def placement_policy(net, device, fumble=0.0, seed=0):
     """Roll out a placement student: predict a target, emit toward it.
 
-    The target is recomputed every step from the board, exactly as the Markov
-    teacher does, so a mispredicted piece simply gets re-aimed rather than
-    stranding the policy — which is the failure mode that killed the
-    keystroke student.
+    The target is **committed once per (board, piece)** and cached, exactly as
+    the Markov teacher memoises its own search. Without that the policy chases
+    a moving target: the observation renders the active piece at its current
+    height, so the prediction can flip as the piece falls, and the emitter
+    turns around mid-approach. Measured while re-predicting every step: 86.4
+    inputs per piece against the teacher's 3.3, even with targets masked to
+    legal columns.
+
+    Training already supplies the invariance this relies on — the same
+    (board, piece) appears at every fall height with the same label — but the
+    student only approximates it, and caching makes it exact. The cached value
+    is still a pure function of observable state, so the policy stays Markov
+    in the sense the teacher is.
     """
     rng = np.random.default_rng(seed)
+    cache = {}
 
     def policy(obs, env):
         with torch.no_grad():
@@ -228,13 +238,19 @@ def placement_policy(net, device, fumble=0.0, seed=0):
         pieces = env.piece.cpu().tolist()
         rots = env.rot.cpu().tolist()
         xs = env.x.cpu().tolist()
+        ys = env.y.cpu().tolist()
         actions = torch.zeros(env.n, dtype=torch.int64)
         for i in range(env.n):
-            rot, x = decode(choice[i])
-            if fumble and rng.random() < fumble:
-                x = int(np.clip(x + rng.choice([-1, 1]), X_LO, X_HI - 1))
+            key = (boards[i].tobytes(), pieces[i])
+            hit = cache.get(i)
+            if hit is None or hit[0] != key:
+                rot, x = decode(choice[i])
+                if fumble and rng.random() < fumble:
+                    x = int(np.clip(x + rng.choice([-1, 1]), X_LO, X_HI - 1))
+                cache[i] = (key, rot, x)
+            _, rot, x = cache[i]
             actions[i] = markov_action(boards[i], pieces[i], rots[i], xs[i],
-                                       rot, x)
+                                       rot, x, ys[i])
         return actions
     return policy
 

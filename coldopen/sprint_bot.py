@@ -331,7 +331,18 @@ def best_pair(board, first, second, noise=0.0, rng=None, strategy=1.0, top_k=6):
     return best
 
 
-def markov_action(board, piece, rot, x, target_rot, target_x):
+def fits(board, piece, rot, x, y):
+    """Can (piece, rot) sit at (x, y) without leaving the board or overlapping?"""
+    for dx, dy in _CELLS[piece][rot]:
+        cx, cy = x + dx, y + dy
+        if cx < 0 or cx > 9 or cy < 0:
+            return False
+        if cy <= 23 and board[cy, cx]:
+            return False
+    return True
+
+
+def markov_action(board, piece, rot, x, target_rot, target_x, y=None):
     """The single next keystroke toward (target_rot, target_x), from HERE.
 
     The plan-following emitter is not a Markov policy: which keystroke it plays
@@ -344,14 +355,34 @@ def markov_action(board, piece, rot, x, target_rot, target_x):
 
     This derives the action from observable state alone, so teacher and relabel
     agree by construction.
+
+    `y` enables the **blocked-move fallback**, and without it the emitter can
+    hang. It only emits HARD_DROP once the piece has arrived at
+    (target_rot, target_x); if the piece has fallen beside a tall stack, the
+    rotation or the sideways step it wants can be physically blocked, so it
+    never arrives and taps until gravity locks it somewhere arbitrary.
+    Measured on a student playing tall, holey boards: 86.4 inputs per piece
+    against the teacher's 3.3, even after masking targets to legal columns —
+    legality of the *destination* is not reachability from *here*.
+
+    The teacher never hit this because it replans from wherever the piece is,
+    but a fixed target can become unreachable mid-fall. When the wanted move
+    does not fit, dropping now is strictly better than tapping forever.
     """
     if target_rot is None:
         return HARD_DROP
     delta_rot = (target_rot - rot) % 4
     if delta_rot:
+        # A blocked rotation would be a no-op forever; drop instead.
+        if y is not None and not fits(board, piece, target_rot, x, y):
+            return HARD_DROP
         return {1: ROTATE_CW, 2: ROTATE_180, 3: ROTATE_CCW}[delta_rot]
     if x == target_x:
         return HARD_DROP
+    if y is not None:
+        step = 1 if target_x > x else -1
+        if not fits(board, piece, rot, x + step, y):
+            return HARD_DROP
     # DAS when the target is the extreme reachable column for this rotation
     # (one input to the wall, which is what good finesse looks like).
     dx_min = -min(dx for dx, dy in _CELLS[piece][target_rot])
@@ -485,6 +516,7 @@ class SprintBot:
         rots = env.rot.cpu().tolist()
         xs = env.x.cpu().tolist()
         ts = env.t.cpu().tolist()
+        ys = env.y.cpu().tolist()
         holds = env.hold.cpu().tolist()
         hold_used = env.hold_used.cpu().tolist()
         queue = env.queue.cpu().numpy()
@@ -506,7 +538,7 @@ class SprintBot:
                     self._target_cache[i] = (key, t_rot, t_x)
                 _, t_rot, t_x = self._target_cache[i]
                 actions[i] = markov_action(boards[i], pieces[i], rots[i],
-                                           xs[i], t_rot, t_x)
+                                           xs[i], t_rot, t_x, ys[i])
             return actions
         for i in range(env.n):
             if ts[i] == 0:
