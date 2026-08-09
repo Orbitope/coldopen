@@ -56,7 +56,17 @@ from tetris_sprint.fast import _CELLS, HORIZON, TetrisSprintBatched
 #: value is 8 (a vertical I there occupies column 9), so the sweep is -2..8.
 X_LO, X_HI = -2, 9
 N_X = X_HI - X_LO
-N_PLACEMENTS = 4 * N_X
+N_TARGETS = 4 * N_X
+
+#: One extra action: use the hold slot. Excluding it was a mistake with a
+#: measurable price. An ORACLE on this pathway — perfect placement predictions,
+#: no hold — scores 31.0 lines at a 50% finish rate and quad rate 0.349, against
+#: the teacher's 40.8 and 0.685. That is a ceiling, not a training gap: half the
+#: oracle's runs top out, while *every* human sprint record is a finish. A
+#: student without hold could never reach the human manifold however well it
+#: learned, so hold is part of what the student has to learn.
+HOLD_INDEX = N_TARGETS
+N_PLACEMENTS = N_TARGETS + 1
 
 
 def _legal_mask():
@@ -85,7 +95,16 @@ def _legal_mask():
 
 
 #: Flattened to the student's action space, so it can mask logits directly.
-LEGAL = torch.from_numpy(_legal_mask().reshape(7, 4 * N_X))
+#: The hold column is appended separately: its legality depends on `hold_used`,
+#: not on the piece, so it is masked per step rather than looked up per piece.
+LEGAL_TARGETS = torch.from_numpy(_legal_mask().reshape(7, N_TARGETS))
+
+
+def legal_actions(env):
+    """[n, N_PLACEMENTS] — placements this piece can occupy, plus hold if free."""
+    legal = LEGAL_TARGETS[env.piece.cpu().long()]
+    hold_ok = (env.hold_used.cpu() == 0).unsqueeze(1)
+    return torch.cat([legal, hold_ok], dim=1)
 
 
 def encode(rot, x):
@@ -107,7 +126,9 @@ def collect(n_envs=64, pieces=400, latency=100, seed=0):
     trained only on spawn-height boards would be asked at rollout about boards
     it had never seen.
 
-    Hold steps are skipped: the label would describe a piece on its way out.
+    Hold steps are labelled `HOLD_INDEX` rather than skipped. An earlier
+    version dropped them, which silently removed hold from what the student
+    could learn and capped the whole pathway at 31 lines.
     """
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 7919)
@@ -120,19 +141,37 @@ def collect(n_envs=64, pieces=400, latency=100, seed=0):
         boards = env.board.cpu().numpy()
         active = env.piece.cpu().tolist()
         actions = bot(obs, env)
-        # A hold swaps the piece, so the label for THIS observation would be
-        # about a piece that is on its way out. Skip those rows.
-        keep = (actions != HOLD).nonzero().flatten().tolist()
-        if keep:
-            targets = []
-            for i in keep:
-                _, rot, x = best_placement(boards[i], active[i])
-                targets.append(encode(rot, x) if rot is not None else 0)
-            observations.append(obs[keep].bool())
-            labels.append(torch.tensor(targets, dtype=torch.int64))
-            seen += len(keep)
+        targets = []
+        for i in range(env.n):
+            if actions[i] == HOLD:
+                targets.append(HOLD_INDEX)
+                continue
+            _, rot, x = best_placement(boards[i], active[i])
+            targets.append(encode(rot, x) if rot is not None else 0)
+        observations.append(obs.bool())
+        labels.append(torch.tensor(targets, dtype=torch.int64))
+        seen += env.n
         obs, _, _, _ = env.step(actions)
     return torch.cat(observations), torch.cat(labels)
+
+
+def teacher_labels(env, bot):
+    """The teacher's action for each instance's current state, as a target id.
+
+    Uses the bot itself so hold decisions come from the same two-ply logic the
+    scripted ladder uses, rather than a second implementation that could drift.
+    """
+    actions = bot(None, env)
+    boards = env.board.cpu().numpy()
+    pieces = env.piece.cpu().tolist()
+    out = []
+    for i in range(env.n):
+        if actions[i] == HOLD:
+            out.append(HOLD_INDEX)
+            continue
+        _, rot, x = best_placement(boards[i], pieces[i])
+        out.append(encode(rot, x) if rot is not None else 0)
+    return torch.tensor(out, dtype=torch.int64)
 
 
 def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
@@ -166,15 +205,10 @@ def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
     observations, labels = [], []
     obs = env.observe()
     policy = placement_policy(net, device)
+    bot = SprintBot(env, markov=True)
     for _ in range(steps):
-        boards = env.board.cpu().numpy()
-        pieces = env.piece.cpu().tolist()
-        targets = []
-        for i in range(env.n):
-            _, rot, x = best_placement(boards[i], pieces[i])
-            targets.append(encode(rot, x) if rot is not None else 0)
         observations.append(obs.bool())
-        labels.append(torch.tensor(targets, dtype=torch.int64))
+        labels.append(teacher_labels(env, bot))
         obs, _, _, _ = env.step(policy(obs, env))
     return torch.cat(observations), torch.cat(labels)
 
@@ -189,20 +223,16 @@ def own_state_agreement(net, device, n_envs=12, steps=180, latency=100, seed=7):
     env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed)
     policy = placement_policy(net, device)
+    bot = SprintBot(env, markov=True)
     obs = env.observe()
     hits = total = 0
     for _ in range(steps):
-        boards = env.board.cpu().numpy()
-        pieces = env.piece.cpu().tolist()
+        want = teacher_labels(env, bot)
         with torch.no_grad():
             logits = net(obs.to(device)).cpu()
-        legal = LEGAL[env.piece.cpu().long()]
-        choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
-        for i in range(env.n):
-            _, rot, x = best_placement(boards[i], pieces[i])
-            total += 1
-            if rot is not None and decode(choice[i]) == (rot, x):
-                hits += 1
+        choice = logits.masked_fill(~legal_actions(env), -1e9).argmax(dim=1)
+        hits += int((choice == want).sum())
+        total += env.n
         obs, _, _, _ = env.step(policy(obs, env))
     return hits / max(total, 1)
 
@@ -232,8 +262,7 @@ def placement_policy(net, device, fumble=0.0, seed=0):
             logits = net(obs.to(device)).cpu()
         # Mask to placements this piece can physically occupy, or the emitter
         # can be sent somewhere it will never arrive and will never drop.
-        legal = LEGAL[env.piece.cpu().long()]
-        choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
+        choice = logits.masked_fill(~legal_actions(env), -1e9).argmax(dim=1)
         boards = env.board.cpu().numpy()
         pieces = env.piece.cpu().tolist()
         rots = env.rot.cpu().tolist()
@@ -241,6 +270,10 @@ def placement_policy(net, device, fumble=0.0, seed=0):
         ys = env.y.cpu().tolist()
         actions = torch.zeros(env.n, dtype=torch.int64)
         for i in range(env.n):
+            if choice[i] == HOLD_INDEX:
+                actions[i] = HOLD
+                cache.pop(i, None)   # the swap changes the piece; replan after
+                continue
             key = (boards[i].tobytes(), pieces[i])
             hit = cache.get(i)
             if hit is None or hit[0] != key:

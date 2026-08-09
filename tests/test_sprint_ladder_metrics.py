@@ -204,16 +204,20 @@ def test_placement_encoding_roundtrips_over_the_legal_range():
     would silently mislabel every example — the kind of error that shows up as
     "the net just didn't learn" rather than as a failure.
     """
-    from coldopen.distill_placement import (N_PLACEMENTS, X_HI, X_LO, decode,
+    from coldopen.distill_placement import (HOLD_INDEX, N_PLACEMENTS,
+                                            N_TARGETS, X_HI, X_LO, decode,
                                             encode)
     seen = set()
     for rot in range(4):
         for x in range(X_LO, X_HI):
             index = encode(rot, x)
-            assert 0 <= index < N_PLACEMENTS, (rot, x, index)
+            assert 0 <= index < N_TARGETS, (rot, x, index)
             assert decode(index) == (rot, x)
             seen.add(index)
-    assert seen == set(range(N_PLACEMENTS)), "encoding must be a bijection"
+    assert seen == set(range(N_TARGETS)), "encoding must be a bijection"
+    # Hold sits just past the placements and must not collide with one.
+    assert HOLD_INDEX == N_TARGETS
+    assert N_PLACEMENTS == N_TARGETS + 1
 
     # And the range must match the search's own sweep, or labels fall outside
     # the student's reachable set.
@@ -223,7 +227,7 @@ def test_placement_encoding_roundtrips_over_the_legal_range():
         for rot in range(4):
             for x in range(X_LO, X_HI):
                 if _score_after(board, piece, rot, x) is not None:
-                    assert 0 <= encode(rot, x) < N_PLACEMENTS
+                    assert 0 <= encode(rot, x) < N_TARGETS
 
 
 def test_own_state_agreement_differs_from_pool_agreement():
@@ -255,9 +259,10 @@ def test_legal_placement_mask_matches_the_search():
     target means the piece never drops. An unmasked student predicted them and
     stalled at 50.8 inputs per piece against the teacher's 3.3.
     """
-    from coldopen.distill_placement import LEGAL, X_HI, X_LO, decode
+    from coldopen.distill_placement import LEGAL_TARGETS, X_HI, X_LO, decode
     from coldopen.sprint_bot import _score_after
     board = np.zeros((24, 10), dtype=np.int64)
+    LEGAL = LEGAL_TARGETS
     for piece in range(7):
         for index in range(LEGAL.shape[1]):
             rot, x = decode(index)
@@ -270,16 +275,33 @@ def test_legal_placement_mask_matches_the_search():
 
 def test_masked_argmax_never_picks_an_unreachable_target():
     """Even a net that wants an illegal placement must be steered to a legal one."""
-    from coldopen.distill_placement import LEGAL, N_PLACEMENTS, decode
+    from coldopen.distill_placement import (LEGAL_TARGETS, N_TARGETS, decode)
     from coldopen.sprint_bot import _score_after
     board = np.zeros((24, 10), dtype=np.int64)
+    LEGAL = LEGAL_TARGETS
     for piece in range(7):
-        illegal = [i for i in range(N_PLACEMENTS) if not LEGAL[piece, i]]
+        illegal = [i for i in range(N_TARGETS) if not LEGAL[piece, i]]
         if not illegal:
             continue
-        logits = torch.full((1, N_PLACEMENTS), -5.0)
+        logits = torch.full((1, N_TARGETS), -5.0)
         logits[0, illegal[0]] = 100.0          # the net's favourite is illegal
         legal = LEGAL[piece].unsqueeze(0)
         choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
         rot, x = decode(choice[0])
         assert _score_after(board, piece, rot, x) is not None, (piece, rot, x)
+
+
+def test_hold_is_maskable_and_reflects_hold_used():
+    """Hold must be offered only when the slot is actually free.
+
+    Excluding hold from the student's action space capped the whole pathway:
+    an oracle with perfect placements but no hold scored 31.0 lines at a 50%
+    finish rate, against 36.8 and 83% once hold was available. Half its runs
+    topped out, while every human sprint record is a finish.
+    """
+    from coldopen.distill_placement import HOLD_INDEX, legal_actions
+    env = TetrisSprintBatched(4, latency=100)
+    env.reset(torch.arange(4, dtype=torch.int64))
+    assert bool(legal_actions(env)[:, HOLD_INDEX].all()), "hold free at spawn"
+    env.hold_used[:] = 1
+    assert not bool(legal_actions(env)[:, HOLD_INDEX].any()), "spent hold is masked"
