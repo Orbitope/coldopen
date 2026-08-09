@@ -106,6 +106,63 @@ def collect(n_envs=64, pieces=400, latency=100, seed=0):
     return torch.cat(observations), torch.cat(labels)
 
 
+def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
+    """Boards the STUDENT reaches, labelled with the teacher's placement.
+
+    A DAgger round, and at this level it is well posed in a way the
+    keystroke version never was: the teacher's placement is a pure function of
+    (board, piece), with no plan state to be out of sync with and no way for
+    one disagreement to flood the labels.
+
+    It is also necessary. Plain cloning reached 91.5% agreement on the
+    teacher's own pool and **21.5% on the boards the student actually built** —
+    the student's boards are messy in ways the teacher's never are, so nothing
+    in the training set describes them.
+    """
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 104_729)
+    observations, labels = [], []
+    obs = env.observe()
+    policy = placement_policy(net, device)
+    for _ in range(steps):
+        boards = env.board.cpu().numpy()
+        pieces = env.piece.cpu().tolist()
+        targets = []
+        for i in range(env.n):
+            _, rot, x = best_placement(boards[i], pieces[i])
+            targets.append(encode(rot, x) if rot is not None else 0)
+        observations.append(obs.bool())
+        labels.append(torch.tensor(targets, dtype=torch.int64))
+        obs, _, _, _ = env.step(policy(obs, env))
+    return torch.cat(observations), torch.cat(labels)
+
+
+def own_state_agreement(net, device, n_envs=16, steps=300, latency=100, seed=7):
+    """Agreement with the teacher on the student's OWN boards.
+
+    The number that matters, and the one that was missing every time this
+    project mistook a well-fitted student for a working one. Teacher-pool
+    agreement said 91.5% while this said 21.5%.
+    """
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed)
+    policy = placement_policy(net, device)
+    obs = env.observe()
+    hits = total = 0
+    for _ in range(steps):
+        boards = env.board.cpu().numpy()
+        pieces = env.piece.cpu().tolist()
+        with torch.no_grad():
+            choice = net(obs.to(device)).cpu().argmax(dim=1)
+        for i in range(env.n):
+            _, rot, x = best_placement(boards[i], pieces[i])
+            total += 1
+            if rot is not None and decode(choice[i]) == (rot, x):
+                hits += 1
+        obs, _, _, _ = env.step(policy(obs, env))
+    return hits / max(total, 1)
+
+
 def placement_policy(net, device, fumble=0.0, seed=0):
     """Roll out a placement student: predict a target, emit toward it.
 
@@ -157,7 +214,7 @@ def evaluate(net, device, episodes=12, latency=100, fumble=0.0, seed=123):
 
 
 def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
-           pool_envs=64, pool_pieces=120, out=None, device="cpu"):
+           pool_envs=64, pool_pieces=120, rounds=5, out=None, device="cpu"):
     device = torch.device(device)
     torch.manual_seed(seed)
     out = pathlib.Path(out)
@@ -171,6 +228,7 @@ def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
     student = BoardNet(OBS_SHAPE, N_PLACEMENTS, channels).to(device)
     opt = torch.optim.Adam(student.parameters(), lr=lr)
     pending = snapshot_schedule(steps, count=14, lo=25)
+    per_round = max(1, steps // rounds)
     log, started = [], time.time()
 
     def save(tag):
@@ -180,13 +238,18 @@ def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
         index = torch.randint(0, obs.shape[0], (4096,))
         with torch.no_grad():
             predicted = student(obs[index].float().to(device)).argmax(dim=1).cpu()
-        agreement = float((predicted == labels[index]).float().mean())
+        pool = float((predicted == labels[index]).float().mean())
+        # Both numbers, always, and `own` first when reading: pool agreement
+        # said 91.5% while own-state agreement said 21.5%, and the second was
+        # the one describing the policy.
+        own = own_state_agreement(student, device, latency=latency)
         report = evaluate(student, device, latency=latency)
-        report.update({"steps": tag, "teacher_agreement": round(agreement, 4),
+        report.update({"steps": tag, "pool_agreement": round(pool, 4),
+                       "own_state_agreement": round(own, 4),
                        "elapsed_s": round(time.time() - started, 1)})
         log.append(report)
         (out / "train_log.json").write_text(json.dumps(log, indent=2))
-        print(f"  [{tag:>6,}] agree {agreement:.3f}  "
+        print(f"  [{tag:>6,}] own {own:.3f} (pool {pool:.3f})  "
               f"lines {report.get('mean_lines', 0):5.1f}  "
               f"finish {report.get('finish_rate', 0):.2f}  "
               f"in/pc {report.get('inputs_per_piece', 0):5.2f}  "
@@ -203,6 +266,14 @@ def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
         opt.step()
         while pending and pending[0] <= step:
             save(pending.pop(0))
+        if rounds > 1 and step % per_round == 0 and step < steps:
+            extra_obs, extra_labels = collect_student(
+                student, device, pool_envs, max(60, pool_pieces // 3),
+                latency=latency, seed=seed + step)
+            obs = torch.cat([obs, extra_obs])
+            labels = torch.cat([labels, extra_labels])
+            print(f"  dagger round at {step:,}: +{extra_obs.shape[0]:,} boards "
+                  f"(total {obs.shape[0]:,})", flush=True)
     return student
 
 
@@ -215,13 +286,16 @@ def main():
     ap.add_argument("--latency", type=int, default=100)
     ap.add_argument("--pool-envs", type=int, default=64)
     ap.add_argument("--pool-pieces", type=int, default=120)
+    ap.add_argument("--rounds", type=int, default=5,
+                    help="DAgger rounds; 1 reproduces plain cloning")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--out", default="coldopen/ladders/sprint_placement")
     args = ap.parse_args()
     distil(steps=args.steps, batch=args.batch, lr=args.lr, channels=args.channels,
            seed=args.seed, latency=args.latency, pool_envs=args.pool_envs,
-           pool_pieces=args.pool_pieces, out=args.out, device=args.device)
+           pool_pieces=args.pool_pieces, rounds=args.rounds, out=args.out,
+           device=args.device)
     print(f"wrote {args.out}")
 
 
