@@ -1,0 +1,42 @@
+{
+  "question": "does a model fitted only on agent telemetry predict human rank better than ranking players by one observable number?",
+  "answer": "no, on 40L sprint. pps alone is unbeaten by any method tried, including models fitted on humans with cross-validation.",
+  "n_human_records": 396,
+  "baselines_no_model": {
+    "inputs_per_piece": 0.7733401354037135,
+    "quad_rate": 0.5346645680733618,
+    "holds_per_piece": 0.5931175415153351,
+    "max_b2b": 0.5997675315151322,
+    "pps": 0.931592428445408
+  },
+  "agent_fitted": {
+    "coupled_dial": 0.66,
+    "skill_x_latency_grid": 0.927
+  },
+  "human_fitted_cv": {
+    "all_five": 0.9233684950773557,
+    "pps_only": 0.9333629052616395
+  },
+  "best_human_fitted_combination": {
+    "label": "pps alone",
+    "spearman": 0.9333629052616395,
+    "searched": "all 16 subsets containing pps, 5-fold CV; none beat it"
+  },
+  "partial_correlation_given_pps": {
+    "inputs_per_piece": 0.39332295631119085,
+    "quad_rate": 0.2799724438853349,
+    "holds_per_piece": 0.434574421316761,
+    "max_b2b": 0.3458572589395534
+  },
+  "feature_collinearity_mean_abs_gap_vs_humans": {
+    "coupled_dial": 0.237,
+    "skill_x_latency_grid": 0.342
+  },
+  "interpretation": [
+    "40 LINES is a time trial, so its ground truth is close to a single observable axis; pps captures it at rho 0.93.",
+    "The coupled skill dial makes agent features near-collinear, so ridge gave pps a negative weight and transfer collapsed to 0.660.",
+    "Decoupling into a skill x latency grid restored the correct sign (+0.73) and recovered 0.927 - the trivial solution, not better than it.",
+    "Non-speed features carry residual signal given pps (holds +0.435, finesse +0.393) but it does not improve RANK ordering: no subset beats pps alone under cross-validation.",
+    "Design conclusion: the agent approach needs games whose skill is NOT reducible to one observable axis. Sprint is close to the worst case."
+  ]
+}

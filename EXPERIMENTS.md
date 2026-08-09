@@ -1125,6 +1125,94 @@ to be out of sync with and no way for one disagreement to flood the labels.
 because the gap between them is the whole story every time this project
 mistook a well-fitted student for a working one.
 
+### E6 for sprint: the simulator loses to one number, and here is why
+
+Everything above established that the agent ladder occupies the human manifold.
+That is a precondition. This is the test, and it is **negative**.
+
+Fit a ridge on agent episodes only, labelled by each rung's own virtual sprint
+time — no human quantity anywhere — then apply it once to the 396 records:
+
+| method | ρ vs true rank | needs a simulator? |
+|---|---|---|
+| **`pps` alone, no model** | **+0.932** | no |
+| `inputs_per_piece` alone | +0.773 | no |
+| `max_b2b` alone | +0.600 | no |
+| `holds_per_piece` alone | +0.593 | no |
+| `quad_rate` alone | +0.535 | no |
+| human-fitted 5-feature ridge, 5-fold CV | +0.923 | no (and needs labels) |
+| **agent-fitted 5-feature ridge** | **+0.660** | yes |
+
+Ranking 396 players by one number beats the agent-fitted model by 0.27, and
+the *human*-fitted model does not beat it either.
+
+**E1's costume finding, reproduced exactly.** Fitting `pps` **alone** on agents
+scores +0.932 — identical to the no-fit ranking, to three decimals. A one-axis
+fitted model *is* the no-fit ranking.
+
+#### Why the multivariate fit was worse than its own inputs
+
+Every feature has the right sign in both populations (agents: pps +0.988,
+finesse −0.945, quad +0.846; humans: +0.932, −0.773, +0.535). But the learned
+weight on `pps` was **−0.399** — backwards. The agent features are far more
+collinear than human ones, because a single coupled `skill` dial moves all of
+them together:
+
+| pair | agents (coupled dial) | humans |
+|---|---|---|
+| holds × pps | +0.90 | +0.46 |
+| quad × pps | +0.85 | +0.47 |
+| quad × holds | +0.73 | +0.40 |
+
+Ridge splits weight arbitrarily among redundant predictors, and that arbitrary
+split does not transfer. **A one-dimensional ladder produces one-dimensional
+telemetry** — and the coupling that made each rung human-shaped is exactly what
+broke multivariate transfer.
+
+Decoupling into a **skill × latency grid** (25 cells, 368 episodes) confirms
+the mechanism and the conclusion at once:
+
+| | coupled dial | grid |
+|---|---|---|
+| all five features | +0.660 | **+0.927** |
+| learned `pps` weight | −0.40 | **+0.73** |
+| other learned weights | −0.87 … +0.41 | all ≈ 0 |
+
+With the axes separated the regression identifies `pps`'s true effect, the sign
+flip disappears, and the model converges on *the trivial solution* — 0.927
+against the baseline's 0.932. Fixed, and still not better.
+
+#### Is there any signal beyond speed? Yes, and it does not help
+
+Controlling for `pps`, the other features retain real partial correlation with
+rank — holds +0.435, finesse +0.393, B2B +0.346, quad +0.280. So the signal is
+not absent. But an exhaustive search over **all 16 feature subsets containing
+`pps`**, fitted on humans with 5-fold cross-validation, found **nothing that
+beats `pps` alone** (0.9334). The residual information describes variation
+*within* a rank, not the ordering *between* ranks.
+
+#### The design conclusion, which is the part worth keeping
+
+40 LINES is a time trial: its ground truth is close to a single observable
+axis, and `pps` captures it at ρ = 0.93. No simulator can add to that, and
+neither can any amount of further feature engineering — the human-fitted
+ceiling proves it.
+
+**The agent approach needs games whose skill is not reducible to one observable
+axis.** Sprint is close to the worst possible test case on that criterion, and
+that was knowable in advance from E1's own tetrio column (ρ 0.926 from speed
+alone, before any of this was built). The check to run *before* building a
+simulator for a game: how well does the best single observable feature already
+predict rank? If it is 0.9, there is no room. This is the same discipline as
+the overlap gate, one level earlier — measure the headroom before paying for
+the method.
+
+That does not retire the agent track. It says the track should be pointed at
+games where the ceiling leaves room: E1 measured Lichess at 0.358 from its best
+single axis and SkillCraft at 0.661, against sprint's 0.932. Minesweeper (E4)
+is the interesting untested case — not real-time in the same sense, with 3BV/s
+and efficiency plausibly less redundant than pps is here.
+
 ### What "early" can and cannot mean with this data
 
 The project's question is skill *before results exist*. Sprint answers a strong
