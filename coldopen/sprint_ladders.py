@@ -51,6 +51,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "envs"))
 from coldopen.nets import BoardNet
 from coldopen.sprint_bot import SprintBot
 from coldopen.tetris import HUMAN_COMPARABLE, rollout
+from coldopen.distill_placement import N_PLACEMENTS, placement_policy
 from coldopen.train_sprint import N_ACTIONS, OBS_SHAPE, action_mask
 from tetris_sprint.fast import HORIZON, TetrisSprintBatched
 
@@ -109,14 +110,24 @@ def net_policy(net, device, temperature=0.0, seed=0):
 
 
 def load_checkpoints(directory, device="cpu"):
+    """Load a ladder directory, handling both head sizes.
+
+    Keystroke and DQN checkpoints have a 10-way head (one per input);
+    placement checkpoints have a 44-way head (rotation x column) and carry a
+    `placement` flag, because the two are not interchangeable — a placement
+    net's output indexes a target, not an action.
+    """
     directory = pathlib.Path(directory)
     out = []
     for path in sorted(directory.glob("ckpt_*.pt")):
         blob = torch.load(path, map_location=device, weights_only=False)
-        net = BoardNet(OBS_SHAPE, N_ACTIONS, blob.get("channels", 64)).to(device)
+        placement = bool(blob.get("placement", False))
+        outputs = N_PLACEMENTS if placement else N_ACTIONS
+        net = BoardNet(OBS_SHAPE, outputs, blob.get("channels", 64)).to(device)
         net.load_state_dict(blob["state"])
         net.eval()
-        out.append({"id": path.stem, "steps": int(blob.get("steps", 0)), "net": net})
+        out.append({"id": path.stem, "steps": int(blob.get("steps", 0)),
+                    "net": net, "placement": placement})
     return out
 
 
@@ -159,19 +170,26 @@ def build_ladders(episodes, device):
                   f"in/pc {result['inputs_per_piece']:5.2f}  "
                   f"quads {result['quad_rate']:.2f}", flush=True)
 
-    # Distilled students are classifiers and must be SAMPLED (see net_policy:
-    # argmax deadlocks them into tap oscillations). DQN checkpoints stay
+    # Keystroke students are classifiers over inputs and must be SAMPLED (see
+    # net_policy: argmax deadlocks them into tap oscillations). DQN stays
     # greedy, because greedy is the policy Q-learning is approximating.
+    # Placement students need neither: they choose a target and a deterministic
+    # emitter walks to it, so there is no cycle to escape.
     for name, directory, temp in (
+            ("placement", "coldopen/ladders/sprint_placement", 0.0),
             ("distilled", "coldopen/ladders/sprint_distilled", 1.0),
             ("trained", "coldopen/ladders/tetris_sprint", 0.0)):
         if not pathlib.Path(directory).exists():
             continue
         ladders[name] = []
         for entry in load_checkpoints(directory, device):
-            result = measure(
-                lambda env, n=entry["net"], t=temp: net_policy(n, device, t),
-                episodes=episodes, latency=100, seed=31)
+            if entry["placement"]:
+                factory = (lambda env, n=entry["net"]:
+                           placement_policy(n, device))
+            else:
+                factory = (lambda env, n=entry["net"], t=temp:
+                           net_policy(n, device, t))
+            result = measure(factory, episodes=episodes, latency=100, seed=31)
             if result:
                 result["rung"] = entry["id"]
                 result["dial"] = entry["steps"]
