@@ -1125,6 +1125,22 @@ to be out of sync with and no way for one disagreement to flood the labels.
 because the gap between them is the whole story every time this project
 mistook a well-fitted student for a working one.
 
+### What "early" can and cannot mean with this data
+
+The project's question is skill *before results exist*. Sprint answers a strong
+form of that: a 40 LINES run is a solo time trial, so **one game** produces a
+full telemetry row, and the comparison is against a TETR.IO rank that takes
+many ranked matches to establish. Predicting rank from a single sprint is the
+cold-start question in its natural form for this game.
+
+What this data cannot answer is the *within-game* version — "how many pieces
+in can we tell?" The public API returns game-level summary statistics, not
+replays, so a human record cannot be truncated to its first ten pieces. Agent
+episodes can be truncated freely, but with nothing to compare against, that
+would be measuring the simulator rather than testing it. Recorded as a limit
+of the dataset, not of the method: a game with replay access (minesweeper, or
+TETR.IO replays if they ever become available) could run it unchanged.
+
 ### A process failure worth recording: the validation gate was never green
 
 `envs/tetris_sprint/validation_report.json` was committed reading
