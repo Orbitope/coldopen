@@ -309,12 +309,64 @@ def evaluate(net, device, episodes=12, latency=100, fumble=0.0, seed=123):
     }
 
 
+class _Oracle(torch.nn.Module):
+    """A stand-in net that always emits the teacher's own label."""
+
+    def __init__(self, env, bot):
+        super().__init__()
+        self.env, self.bot = env, bot
+
+    def forward(self, obs):
+        want = teacher_labels(self.env, self.bot)
+        q = torch.full((obs.shape[0], N_PLACEMENTS), -10.0)
+        q[torch.arange(obs.shape[0]), want] = 10.0
+        return q
+
+
+def oracle_ceiling(episodes=12, latency=100, seed=31):
+    """What this pathway scores with PERFECT predictions.
+
+    Run this before training, not after. It separates "the student has not
+    learned" from "the pathway cannot do better", and those look identical from
+    the outside — which cost most of a day here. The check costs about a
+    minute.
+
+    It is what caught hold being missing from the action space: the ceiling was
+    31.0 lines at a 50% finish rate, so no amount of training could have
+    reached the human manifold, where every record is a finish. With hold the
+    ceiling is 36.8 lines and 83%.
+    """
+    env = TetrisSprintBatched(min(episodes, 24), latency=latency)
+    oracle = _Oracle(env, SprintBot(env, markov=True))
+    rows = rollout(env, placement_policy(oracle, torch.device("cpu")),
+                   total_episodes=episodes, seed=seed,
+                   max_steps=episodes * HORIZON)
+    if not rows:
+        return {"episodes": 0}
+    mean = lambda k: float(np.mean([r[k] for r in rows]))
+    finished = [r for r in rows if r["finished"]]
+    return {"episodes": len(rows), "mean_lines": round(mean("lines"), 2),
+            "finish_rate": round(len(finished) / len(rows), 3),
+            "inputs_per_piece": round(mean("inputs_per_piece"), 3),
+            "quad_rate": round(mean("quad_rate"), 3),
+            "holds_per_piece": round(mean("holds_per_piece"), 3)}
+
+
 def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
            pool_envs=64, pool_pieces=120, rounds=5, out=None, device="cpu"):
     device = torch.device(device)
     torch.manual_seed(seed)
     out = pathlib.Path(out)
     out.mkdir(parents=True, exist_ok=True)
+
+    ceiling = oracle_ceiling(latency=latency)
+    print(f"pathway ceiling (perfect predictions): "
+          f"lines {ceiling.get('mean_lines', 0):5.1f}  "
+          f"finish {ceiling.get('finish_rate', 0):.2f}  "
+          f"quad {ceiling.get('quad_rate', 0):.3f}  "
+          f"hold {ceiling.get('holds_per_piece', 0):.3f}", flush=True)
+    print("  ^ no student can beat this; a run that stalls well below it is a\n"
+          "    pathway problem, not a training problem.", flush=True)
 
     print("collecting teacher placements ...", flush=True)
     obs, labels = collect(pool_envs, pool_pieces, latency=latency, seed=seed)
@@ -344,7 +396,8 @@ def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
                        "own_state_agreement": round(own, 4),
                        "elapsed_s": round(time.time() - started, 1)})
         log.append(report)
-        (out / "train_log.json").write_text(json.dumps(log, indent=2))
+        (out / "train_log.json").write_text(
+            json.dumps({"ceiling": ceiling, "log": log}, indent=2))
         print(f"  [{tag:>6,}] own {own:.3f} (pool {pool:.3f})  "
               f"lines {report.get('mean_lines', 0):5.1f}  "
               f"finish {report.get('finish_rate', 0):.2f}  "

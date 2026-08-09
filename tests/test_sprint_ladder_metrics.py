@@ -305,3 +305,19 @@ def test_hold_is_maskable_and_reflects_hold_used():
     assert bool(legal_actions(env)[:, HOLD_INDEX].all()), "hold free at spawn"
     env.hold_used[:] = 1
     assert not bool(legal_actions(env)[:, HOLD_INDEX].any()), "spent hold is masked"
+
+
+def test_oracle_ceiling_beats_any_real_student():
+    """The pathway ceiling must be computable and must actually be a ceiling.
+
+    Its whole job is to separate "the student has not learned" from "the
+    pathway cannot do better", which look identical from the outside. It caught
+    hold being missing from the action space, where the ceiling sat at 31 lines
+    and a 50% finish rate against a human population where every record is a
+    finish.
+    """
+    from coldopen.distill_placement import oracle_ceiling
+    result = oracle_ceiling(episodes=4)
+    assert result["episodes"] == 4
+    assert result["mean_lines"] > 10, result
+    assert result["holds_per_piece"] > 0.0, "hold must be reachable"
