@@ -245,3 +245,41 @@ def test_own_state_agreement_differs_from_pool_agreement():
     score = own_state_agreement(OnePlacement(), torch.device("cpu"),
                                 n_envs=4, steps=40)
     assert 0.0 <= score < 0.5, score
+
+
+def test_legal_placement_mask_matches_the_search():
+    """The mask must admit exactly the placements the search calls legal.
+
+    It is a correctness fix, not a speedup: `markov_action` emits HARD_DROP
+    only once the piece reaches (target_rot, target_x), so an unreachable
+    target means the piece never drops. An unmasked student predicted them and
+    stalled at 50.8 inputs per piece against the teacher's 3.3.
+    """
+    from coldopen.distill_placement import LEGAL, X_HI, X_LO, decode
+    from coldopen.sprint_bot import _score_after
+    board = np.zeros((24, 10), dtype=np.int64)
+    for piece in range(7):
+        for index in range(LEGAL.shape[1]):
+            rot, x = decode(index)
+            # On an empty board, column bounds are the only constraint, so the
+            # cheap mask and the full search must agree exactly.
+            assert bool(LEGAL[piece, index]) == (
+                _score_after(board, piece, rot, x) is not None), (piece, rot, x)
+        assert LEGAL[piece].any(), f"piece {piece} has no legal placement"
+
+
+def test_masked_argmax_never_picks_an_unreachable_target():
+    """Even a net that wants an illegal placement must be steered to a legal one."""
+    from coldopen.distill_placement import LEGAL, N_PLACEMENTS, decode
+    from coldopen.sprint_bot import _score_after
+    board = np.zeros((24, 10), dtype=np.int64)
+    for piece in range(7):
+        illegal = [i for i in range(N_PLACEMENTS) if not LEGAL[piece, i]]
+        if not illegal:
+            continue
+        logits = torch.full((1, N_PLACEMENTS), -5.0)
+        logits[0, illegal[0]] = 100.0          # the net's favourite is illegal
+        legal = LEGAL[piece].unsqueeze(0)
+        choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
+        rot, x = decode(choice[0])
+        assert _score_after(board, piece, rot, x) is not None, (piece, rot, x)

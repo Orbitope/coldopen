@@ -49,7 +49,7 @@ from coldopen.nets import BoardNet
 from coldopen.sprint_bot import HOLD, SprintBot, best_placement, markov_action
 from coldopen.tetris import rollout
 from coldopen.train_sprint import OBS_SHAPE
-from tetris_sprint.fast import HORIZON, TetrisSprintBatched
+from tetris_sprint.fast import _CELLS, HORIZON, TetrisSprintBatched
 
 #: The action space of this student: 4 rotations x the reachable column range.
 #: `x` is the left edge of the piece's bounding box, and the largest legal
@@ -57,6 +57,35 @@ from tetris_sprint.fast import HORIZON, TetrisSprintBatched
 X_LO, X_HI = -2, 9
 N_X = X_HI - X_LO
 N_PLACEMENTS = 4 * N_X
+
+
+def _legal_mask():
+    """[7, 4, N_X] — can this piece, in this rotation, sit at this x at all?
+
+    Purely the column-bounds question: does `x + dx` stay in [0, 9] for every
+    cell. Board occupancy is not consulted, because a hard drop lands the piece
+    wherever the stack allows; what matters is that the target is *reachable*.
+
+    This mask is not an optimisation, it is a correctness fix. `markov_action`
+    emits HARD_DROP only once the piece has arrived at (target_rot, target_x).
+    The teacher never asks for an unreachable target because its search only
+    returns legal ones — but an unmasked student can, and then the piece never
+    arrives, never drops, and the policy stalls. Measured before the mask:
+    inputs per piece climbed to 50.8 against the teacher's 3.3.
+    """
+    mask = np.zeros((7, 4, N_X), dtype=bool)
+    for piece in range(7):
+        for rot in range(4):
+            cells = _CELLS[piece][rot]
+            lo = -min(dx for dx, _ in cells)
+            hi = 9 - max(dx for dx, _ in cells)
+            for j, x in enumerate(range(X_LO, X_HI)):
+                mask[piece, rot, j] = lo <= x <= hi
+    return mask
+
+
+#: Flattened to the student's action space, so it can mask logits directly.
+LEGAL = torch.from_numpy(_legal_mask().reshape(7, 4 * N_X))
 
 
 def encode(rot, x):
@@ -166,7 +195,9 @@ def own_state_agreement(net, device, n_envs=12, steps=180, latency=100, seed=7):
         boards = env.board.cpu().numpy()
         pieces = env.piece.cpu().tolist()
         with torch.no_grad():
-            choice = net(obs.to(device)).cpu().argmax(dim=1)
+            logits = net(obs.to(device)).cpu()
+        legal = LEGAL[env.piece.cpu().long()]
+        choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
         for i in range(env.n):
             _, rot, x = best_placement(boards[i], pieces[i])
             total += 1
@@ -189,7 +220,10 @@ def placement_policy(net, device, fumble=0.0, seed=0):
     def policy(obs, env):
         with torch.no_grad():
             logits = net(obs.to(device)).cpu()
-        choice = logits.argmax(dim=1)
+        # Mask to placements this piece can physically occupy, or the emitter
+        # can be sent somewhere it will never arrive and will never drop.
+        legal = LEGAL[env.piece.cpu().long()]
+        choice = logits.masked_fill(~legal, -1e9).argmax(dim=1)
         boards = env.board.cpu().numpy()
         pieces = env.piece.cpu().tolist()
         rots = env.rot.cpu().tolist()
