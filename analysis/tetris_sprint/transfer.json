@@ -1,0 +1,39 @@
+{
+  "n_agent_episodes": 260,
+  "n_human_records": 396,
+  "features": [
+    "inputs_per_piece",
+    "quad_rate",
+    "holds_per_piece",
+    "max_b2b",
+    "pps"
+  ],
+  "agent_fitted_spearman": 0.6596995687835212,
+  "no_fit_single_feature": {
+    "inputs_per_piece": 0.7733401354037135,
+    "quad_rate": 0.5346645680733618,
+    "holds_per_piece": 0.5931175415153351,
+    "max_b2b": 0.5997675315151322,
+    "pps": 0.931592428445408
+  },
+  "best_single_feature": {
+    "name": "pps",
+    "spearman": 0.931592428445408
+  },
+  "human_fitted_ceiling": 0.9233684950773557,
+  "ablation": {
+    "all": 0.6596995687835212,
+    "no_pps": 0.7744771633047627,
+    "pps_only": 0.931592428445408,
+    "judgement_only": 0.6350119181162129
+  },
+  "beats_best_single": false,
+  "agent_weights": {
+    "inputs_per_piece": -0.868547002730192,
+    "quad_rate": 0.41040129517461327,
+    "holds_per_piece": 0.19538035800588444,
+    "max_b2b": -0.09233005885026556,
+    "pps": -0.39917149465545915,
+    "intercept": 2.690174321622595e-15
+  }
+}

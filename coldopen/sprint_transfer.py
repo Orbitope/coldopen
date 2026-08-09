@@ -78,6 +78,46 @@ def standardise(matrix):
     return (matrix - mean) / std
 
 
+#: A GRID of (skill, latency), against SKILL_RUNGS' single coupled dial.
+#:
+#: The coupled dial was chosen so each rung looks like a plausible player, and
+#: it succeeds at that. But it makes the agent population **one-dimensional**:
+#: every feature moves with one number, so agent features are near-collinear
+#: (holds x pps +0.90, quad x pps +0.85) where humans are only moderately so
+#: (+0.46, +0.47). Ridge then splits weight arbitrarily among redundant
+#: predictors - it gave pps a NEGATIVE coefficient - and that arbitrary split
+#: does not transfer to a population whose features vary independently.
+#:
+#: Real players vary on speed and on judgement semi-independently: a fast
+#: sloppy player and a slow careful one both exist. A grid reproduces that,
+#: at the cost of some cells being combinations no human occupies.
+GRID_SKILLS = [1.0, 0.85, 0.7, 0.55, 0.4]
+GRID_LATENCIES = [17, 60, 150, 350, 700]
+
+
+def agent_grid_episodes(episodes=16):
+    """Episodes over the (skill x latency) grid, decoupling the two axes."""
+    rows, labels = [], []
+    for skill in GRID_SKILLS:
+        for ms in GRID_LATENCIES:
+            result = measure(lambda env, s=skill: SprintBot(env, skill=s),
+                             episodes=episodes, latency=ms, seed=21)
+            if not result:
+                continue
+            kept = 0
+            for row in result["rows"]:
+                if not row["finished"]:
+                    continue
+                if any(row.get(f) is None for f in HUMAN_COMPARABLE):
+                    continue
+                rows.append([row[f] for f in HUMAN_COMPARABLE])
+                labels.append(-row["time_ms"])
+                kept += 1
+            print(f"  skill {skill:4.2f} lat {ms:4d}ms: {kept}/{episodes}",
+                  flush=True)
+    return np.array(rows, dtype=float), np.array(labels, dtype=float)
+
+
 def agent_episodes(episodes=40, device="cpu"):
     """Per-episode agent rows, labelled by the rung's own sprint time.
 
@@ -126,9 +166,21 @@ def predict(weights, x):
     return np.hstack([x, np.ones((x.shape[0], 1))]) @ weights
 
 
-def run(episodes=40, out=None):
-    print("measuring agent episodes:", flush=True)
-    agent_x, agent_y = agent_episodes(episodes=episodes)
+def run(episodes=40, out=None, cache="analysis/tetris_sprint/agent_episodes.npz"):
+    # Measuring the ladder costs ~15 minutes, and the analysis on top of it is
+    # instant, so the episodes are cached. Delete the file to re-measure.
+    cache = pathlib.Path(cache) if cache else None
+    if cache and cache.exists():
+        blob = np.load(cache)
+        agent_x, agent_y = blob["x"], blob["y"]
+        print(f"loaded {agent_x.shape[0]} cached agent episodes from {cache}",
+              flush=True)
+    else:
+        print("measuring agent episodes:", flush=True)
+        agent_x, agent_y = agent_episodes(episodes=episodes)
+        if cache:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            np.savez(cache, x=agent_x, y=agent_y)
     print(f"  {agent_x.shape[0]} finished agent episodes", flush=True)
 
     human_rows = human_bands()
