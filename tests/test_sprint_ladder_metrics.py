@@ -195,3 +195,53 @@ def test_sampling_escapes_a_deterministic_deadlock():
     for _ in range(20):
         seen.update(sampled(obs, env).tolist())
     assert len(seen) > 1, "sampling must break the deadlock"
+
+
+def test_placement_encoding_roundtrips_over_the_legal_range():
+    """encode/decode must cover exactly the placements the search can produce.
+
+    The student's whole action space is this encoding, so an off-by-one here
+    would silently mislabel every example — the kind of error that shows up as
+    "the net just didn't learn" rather than as a failure.
+    """
+    from coldopen.distill_placement import (N_PLACEMENTS, X_HI, X_LO, decode,
+                                            encode)
+    seen = set()
+    for rot in range(4):
+        for x in range(X_LO, X_HI):
+            index = encode(rot, x)
+            assert 0 <= index < N_PLACEMENTS, (rot, x, index)
+            assert decode(index) == (rot, x)
+            seen.add(index)
+    assert seen == set(range(N_PLACEMENTS)), "encoding must be a bijection"
+
+    # And the range must match the search's own sweep, or labels fall outside
+    # the student's reachable set.
+    from coldopen.sprint_bot import _score_after
+    board = np.zeros((24, 10), dtype=np.int64)
+    for piece in range(7):
+        for rot in range(4):
+            for x in range(X_LO, X_HI):
+                if _score_after(board, piece, rot, x) is not None:
+                    assert 0 <= encode(rot, x) < N_PLACEMENTS
+
+
+def test_own_state_agreement_differs_from_pool_agreement():
+    """The two agreement numbers must not be wired to the same thing.
+
+    They diverged by 4-13x every time distillation failed here, so a refactor
+    that quietly made them identical would remove the only signal that caught
+    it. A net predicting one constant placement should score near zero on its
+    own states.
+    """
+    from coldopen.distill_placement import N_PLACEMENTS, own_state_agreement
+
+    class OnePlacement(torch.nn.Module):
+        def forward(self, obs):
+            q = torch.zeros(obs.shape[0], N_PLACEMENTS)
+            q[:, 0] = 1.0
+            return q
+
+    score = own_state_agreement(OnePlacement(), torch.device("cpu"),
+                                n_envs=4, steps=40)
+    assert 0.0 <= score < 0.5, score
