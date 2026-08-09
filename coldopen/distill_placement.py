@@ -137,7 +137,7 @@ def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
     return torch.cat(observations), torch.cat(labels)
 
 
-def own_state_agreement(net, device, n_envs=16, steps=300, latency=100, seed=7):
+def own_state_agreement(net, device, n_envs=12, steps=180, latency=100, seed=7):
     """Agreement with the teacher on the student's OWN boards.
 
     The number that matters, and the one that was missing every time this

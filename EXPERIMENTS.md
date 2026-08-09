@@ -901,6 +901,44 @@ because the E2 question this generator exists to answer — *is a part-trained
 imitator a distinct kind of bad?* — is a question about judgement, and because
 the alternative is a generator that does not work at all.
 
+Plain cloning at the placement level then reproduced the same failure one level
+up, which is worth recording because the numbers look so different from the
+outside:
+
+| | value |
+|---|---|
+| agreement on the teacher's pool | 91.5% |
+| agreement on the student's **own** boards | **21.5%** |
+| illegal placements predicted | 2.5% |
+| mean board-score gap when legal | 15.66 (≈ two holes) |
+
+The placements were legal and simply *bad*. So the fix is DAgger again — and
+at this level it is well posed in the way the keystroke version never was: the
+teacher's placement is a pure function of `(board, piece)`, with no plan state
+to be out of sync with and no way for one disagreement to flood the labels.
+`own_state_agreement()` is now logged beside pool agreement and printed first,
+because the gap between them is the whole story every time this project
+mistook a well-fitted student for a working one.
+
+### A process failure worth recording: the validation gate was never green
+
+`envs/tetris_sprint/validation_report.json` was committed reading
+`overall_pass: false`, with all six required tests listed as not passed and a
+single entry — `test_benchmark_factory_parity` — in the results. The standalone
+benchmark run done while measuring throughput had overwritten the battery's
+report before the commit picked it up.
+
+The commit message claimed "the full validation battery — PASS, eligible for
+training". That was true of console output seen at the time and false of the
+artifact, and the project rule is specifically that *a fresh passing report is
+the gate*. Everything trained on this environment since was trained ungated.
+
+Re-run: **12 passed, 1 skipped, overall PASS** — bit-exact differential, batch
+independence, invariant sweep, auto-reset, determinism and replay all green. So
+the environment was in fact sound and no result changes. The lesson is about
+the gate, not the env: a gate checked by reading console output is not a gate,
+and a run that writes to the same artifact path can silently revoke one.
+
 ### The cold-start ladder against real players: the first honest reading
 
 Seven rungs, no constant fitted to human data, measured against all 396
