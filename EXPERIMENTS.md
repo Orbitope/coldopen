@@ -818,6 +818,127 @@ telemetry matches human telemetry and then reporting the overlap is circular —
 it proves the tuning worked, not that the method transfers. The Othello
 failure (E6a) is only informative *because* nothing had been fitted to it.
 
+### The cold-start ladder against real players: the first honest reading
+
+Seven rungs, no constant fitted to human data, measured against all 396
+records. **Coverage** first, since that is the gate Othello failed:
+
+| feature | agent range | looks like human ranks | off-manifold |
+|---|---|---|---|
+| inputs per piece | 3.29 – 4.38 | c+ … u | 0% |
+| quad rate | 0.07 – 0.69 | d+ … x+ | 0% |
+| holds per piece | 0.04 – 0.24 | d … s− | 0% |
+| max B2B | 0.95 – 5.40 | d+ … s+ | 0% |
+| pps | 0.40 – 7.57 | d+ … x | 14% |
+
+This is the result E5 was built to get. Every feature now traverses most of the
+human ladder and essentially nothing falls outside it, against a v1 that had
+quad rate pinned at rank d and hold usage below every human alive. Sprint
+telemetry from agents and from people occupies the same region — which is what
+Othello could not manage, and it is the precondition for anything downstream.
+
+**Coherence** read 8.0 ranks of median disagreement, unchanged from v1, and
+the first instinct was to call that a failure. It is not — the metric needed
+a control, and the control changes the reading entirely.
+
+Score each of the 396 human records the same way, leave-one-out (so a record
+is never compared against a rank table it helped build):
+
+| | median rank disagreement |
+|---|---|
+| a single **human** sprint record | **8.0** (quartiles 5 / 8 / 11) |
+| the agent ladder | **8.0** |
+
+**8.0 is the noise floor of the metric, not the agent's error.** One 40-line
+sprint is a small sample, and any single player's five features disagree about
+their rank by a median of eight ranks. The agent rungs are no less internally
+coherent than a real game is. (Sanity check on the same pass: the median
+implied rank of a human record is unbiased against its true rank, mean
+absolute error 2.2 ranks.)
+
+What survives the control is *systematic per-feature bias*, which spread
+cannot see. Comparing each feature's signed deviation from its own record's
+median implied rank, agents against the human baseline:
+
+| feature | human control | agent ladder | verdict |
+|---|---|---|---|
+| quad rate | −1.0 | +0.4 | within human spread |
+| max B2B | −0.3 | −1.3 | within human spread |
+| pps | +0.4 | +1.7 | within human spread |
+| inputs per piece | +1.1 | +2.9 | off by +1.8 |
+| holds per piece | +0.3 | **−4.1** | **off by −4.4** |
+
+So the reading at this stage was: **four of five features inside the spread
+real players show, and exactly one genuinely off-distribution.**
+
+* **Hold usage** (−4.4 against control) is the real gap. The bot's hold policy
+  is a one-ply greedy comparison — swap if the other piece places better right
+  now. Humans use the hold slot to *plan*, which one ply cannot express, and
+  their usage stays meaningful all the way down to rank d (0.070/piece). This
+  is exactly the constant that was fitted and reverted above; left un-fitted it
+  is a specific mechanical thing to fix (a deeper hold policy), not a number to
+  tune.
+* **Finesse** (+1.8) is mild and has an obvious cause: the emitter computes the
+  exact keystroke sequence for its chosen placement, so even weak rungs are
+  tidier than the humans they otherwise resemble.
+* **Quad rate** — the feature v1 got most wrong, and the hardest strategic one
+  — is the best calibrated of the five, with nothing fitted to achieve it.
+
+The methodological point generalises past Tetris: **a coherence or overlap
+statistic is uninterpretable without running it on held-out humans first.**
+Reported alone, 8.0 looked like a failure; against its control it is the
+noise floor, and the single real defect was hiding underneath it.
+
+### Fixing the hold policy, and the state of the ladder now
+
+The hold gap had a mechanical cause, so it got a mechanical fix. `best_pair`
+scores placing the current piece and the next one **both ways round** and holds
+when the swap wins, expanding only the top 6 first placements so it costs about
+4.5× one search rather than 44×. Piece *ordering* is what the slot is for, and
+one ply cannot express it.
+
+This was chosen after seeing which feature mismatched, which is model selection
+on the test set; the budget for that is small and it is labelled as such in the
+code. It survives on an agent-side justification too — it makes the bot better
+at the game, independent of any human comparison. Finish rate rose at every
+rung (0.92 → 1.00 at skill 1.0, 0.83 → 1.00 at 0.7, 0.67 → 0.92 at 0.4).
+
+The resulting ladder, seven rungs, 20 episodes each:
+
+| skill | time | in/pc | quad | hold | pps | finish |
+|---|---|---|---|---|---|---|
+| 1.00 | 15.3s | 3.34 | 0.669 | 0.341 | 7.21 | 1.00 |
+| 0.80 | 36.1s | 3.59 | 0.449 | 0.182 | 3.09 | 0.85 |
+| 0.60 | 122.3s | 3.90 | 0.146 | 0.127 | 0.88 | 0.95 |
+| 0.40 | 272.1s | 4.45 | 0.049 | 0.094 | 0.39 | 0.90 |
+
+**Coverage:** every feature 0% off-manifold except pps at 14%, spanning ranks
+d…x+ on quad rate, d+…x on hold usage and c+…u on finesse.
+
+**Coherence: 7.0 against the human floor of 8.0** — the agent ladder is now
+*more* internally consistent than a single real sprint record, which is the
+strongest form this result can take.
+
+| feature | human | agent | excess | before the fix |
+|---|---|---|---|---|
+| holds per piece | +0.3 | −0.9 | **−1.2** | −4.4 |
+| inputs per piece | +1.1 | +2.2 | +1.1 | +1.8 |
+| pps | +0.4 | +1.3 | +0.9 | +1.2 |
+| quad rate | −1.0 | +0.5 | +1.5 | +1.5 |
+| max B2B | −0.3 | −2.4 | **−2.1** | −1.0 |
+
+Hold moved from the one clear outlier to inside the human spread. The largest
+remaining gap is **max B2B at −2.1**: the bot quads often (0.669) but chains
+them less than people do, because the danger valve takes a partial clear
+between quads and breaks the streak. That is smaller than the hold gap was and
+has the same character — a specific mechanism, not a tuning knob.
+
+Nothing here says the telemetry *predicts* skill yet; it says agents and people
+now occupy the same feature space, coherently, which is the precondition E6a
+showed cannot be assumed.
+
+---
+
 ### Distillation failed, and agreement was the wrong thing to watch
 
 The distilled generator — the one E2 nominated as closest to how people are
@@ -946,127 +1067,6 @@ independence, invariant sweep, auto-reset, determinism and replay all green. So
 the environment was in fact sound and no result changes. The lesson is about
 the gate, not the env: a gate checked by reading console output is not a gate,
 and a run that writes to the same artifact path can silently revoke one.
-
-### The cold-start ladder against real players: the first honest reading
-
-Seven rungs, no constant fitted to human data, measured against all 396
-records. **Coverage** first, since that is the gate Othello failed:
-
-| feature | agent range | looks like human ranks | off-manifold |
-|---|---|---|---|
-| inputs per piece | 3.29 – 4.38 | c+ … u | 0% |
-| quad rate | 0.07 – 0.69 | d+ … x+ | 0% |
-| holds per piece | 0.04 – 0.24 | d … s− | 0% |
-| max B2B | 0.95 – 5.40 | d+ … s+ | 0% |
-| pps | 0.40 – 7.57 | d+ … x | 14% |
-
-This is the result E5 was built to get. Every feature now traverses most of the
-human ladder and essentially nothing falls outside it, against a v1 that had
-quad rate pinned at rank d and hold usage below every human alive. Sprint
-telemetry from agents and from people occupies the same region — which is what
-Othello could not manage, and it is the precondition for anything downstream.
-
-**Coherence** read 8.0 ranks of median disagreement, unchanged from v1, and
-the first instinct was to call that a failure. It is not — the metric needed
-a control, and the control changes the reading entirely.
-
-Score each of the 396 human records the same way, leave-one-out (so a record
-is never compared against a rank table it helped build):
-
-| | median rank disagreement |
-|---|---|
-| a single **human** sprint record | **8.0** (quartiles 5 / 8 / 11) |
-| the agent ladder | **8.0** |
-
-**8.0 is the noise floor of the metric, not the agent's error.** One 40-line
-sprint is a small sample, and any single player's five features disagree about
-their rank by a median of eight ranks. The agent rungs are no less internally
-coherent than a real game is. (Sanity check on the same pass: the median
-implied rank of a human record is unbiased against its true rank, mean
-absolute error 2.2 ranks.)
-
-What survives the control is *systematic per-feature bias*, which spread
-cannot see. Comparing each feature's signed deviation from its own record's
-median implied rank, agents against the human baseline:
-
-| feature | human control | agent ladder | verdict |
-|---|---|---|---|
-| quad rate | −1.0 | +0.4 | within human spread |
-| max B2B | −0.3 | −1.3 | within human spread |
-| pps | +0.4 | +1.7 | within human spread |
-| inputs per piece | +1.1 | +2.9 | off by +1.8 |
-| holds per piece | +0.3 | **−4.1** | **off by −4.4** |
-
-So the reading at this stage was: **four of five features inside the spread
-real players show, and exactly one genuinely off-distribution.**
-
-* **Hold usage** (−4.4 against control) is the real gap. The bot's hold policy
-  is a one-ply greedy comparison — swap if the other piece places better right
-  now. Humans use the hold slot to *plan*, which one ply cannot express, and
-  their usage stays meaningful all the way down to rank d (0.070/piece). This
-  is exactly the constant that was fitted and reverted above; left un-fitted it
-  is a specific mechanical thing to fix (a deeper hold policy), not a number to
-  tune.
-* **Finesse** (+1.8) is mild and has an obvious cause: the emitter computes the
-  exact keystroke sequence for its chosen placement, so even weak rungs are
-  tidier than the humans they otherwise resemble.
-* **Quad rate** — the feature v1 got most wrong, and the hardest strategic one
-  — is the best calibrated of the five, with nothing fitted to achieve it.
-
-The methodological point generalises past Tetris: **a coherence or overlap
-statistic is uninterpretable without running it on held-out humans first.**
-Reported alone, 8.0 looked like a failure; against its control it is the
-noise floor, and the single real defect was hiding underneath it.
-
-### Fixing the hold policy, and the state of the ladder now
-
-The hold gap had a mechanical cause, so it got a mechanical fix. `best_pair`
-scores placing the current piece and the next one **both ways round** and holds
-when the swap wins, expanding only the top 6 first placements so it costs about
-4.5× one search rather than 44×. Piece *ordering* is what the slot is for, and
-one ply cannot express it.
-
-This was chosen after seeing which feature mismatched, which is model selection
-on the test set; the budget for that is small and it is labelled as such in the
-code. It survives on an agent-side justification too — it makes the bot better
-at the game, independent of any human comparison. Finish rate rose at every
-rung (0.92 → 1.00 at skill 1.0, 0.83 → 1.00 at 0.7, 0.67 → 0.92 at 0.4).
-
-The resulting ladder, seven rungs, 20 episodes each:
-
-| skill | time | in/pc | quad | hold | pps | finish |
-|---|---|---|---|---|---|---|
-| 1.00 | 15.3s | 3.34 | 0.669 | 0.341 | 7.21 | 1.00 |
-| 0.80 | 36.1s | 3.59 | 0.449 | 0.182 | 3.09 | 0.85 |
-| 0.60 | 122.3s | 3.90 | 0.146 | 0.127 | 0.88 | 0.95 |
-| 0.40 | 272.1s | 4.45 | 0.049 | 0.094 | 0.39 | 0.90 |
-
-**Coverage:** every feature 0% off-manifold except pps at 14%, spanning ranks
-d…x+ on quad rate, d+…x on hold usage and c+…u on finesse.
-
-**Coherence: 7.0 against the human floor of 8.0** — the agent ladder is now
-*more* internally consistent than a single real sprint record, which is the
-strongest form this result can take.
-
-| feature | human | agent | excess | before the fix |
-|---|---|---|---|---|
-| holds per piece | +0.3 | −0.9 | **−1.2** | −4.4 |
-| inputs per piece | +1.1 | +2.2 | +1.1 | +1.8 |
-| pps | +0.4 | +1.3 | +0.9 | +1.2 |
-| quad rate | −1.0 | +0.5 | +1.5 | +1.5 |
-| max B2B | −0.3 | −2.4 | **−2.1** | −1.0 |
-
-Hold moved from the one clear outlier to inside the human spread. The largest
-remaining gap is **max B2B at −2.1**: the bot quads often (0.669) but chains
-them less than people do, because the danger valve takes a partial clear
-between quads and breaks the streak. That is smaller than the hold gap was and
-has the same character — a specific mechanism, not a tuning knob.
-
-Nothing here says the telemetry *predicts* skill yet; it says agents and people
-now occupy the same feature space, coherently, which is the precondition E6a
-showed cannot be assumed.
-
----
 
 ## E6a — Othello: the first agent-versus-human comparison, and it fails
 
