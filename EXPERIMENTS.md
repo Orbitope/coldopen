@@ -596,6 +596,35 @@ starts satisfy every env invariant except I9 (which defines `t == 0` as
 ungenerated — a curriculum start is deliberately mid-game), so curriculum
 training runs with debug off and validation stays on the base class.
 
+### Training results: five ladders, and the signal-density lesson measured twice
+
+| ladder | outcome |
+|---|---|
+| DQN v1, 2M steps | 0.000 win everywhere; flag-spin. **Rational** under its reward: an uninformed reveal is a mine with prior ~21% (EV ≈ −210k) against flagging at −230/step, and the +1 shaping for a correct reveal was 0.4% of the step cost |
+| DQN v2 (death repriced −1M→−20k, shaping ×300, auxiliary mine head) | first curriculum advances ever — frontier **3 → 22** hidden cells in 63k steps — then stalled for 1.4M steps; full-board play still 0, because a blank board is off-distribution for a policy trained on mostly-revealed ones |
+| mineprob Expert | 25 → 81 safe cells over 16k updates; judgement ladder, no wins |
+| **mineprob Beginner** | **3% → 67% win rate** over 16 checkpoints, ~4.0s time-on-win — the first agent records comparable to a human leaderboard entry |
+| mineprob Intermediate | first wins at 2.1k updates, caps ~2–3%; progress 74 → 139/216 |
+
+The controlling comparison, same net, same env, same observations:
+
+* **1 sparse scalar per action** (DQN): 0 safe cells after 2M env steps;
+* **480 dense labels per state** (mineprob): 81 safe cells after 16k updates.
+
+Gradient density, not reward shape, was the bottleneck — v2's reward surgery
+fixed "flag-spin is rational" (proving it via the curriculum unlocking) and
+still could not train the *policy* through a scalar. This is E5's
+distillation-cliff finding from the other side: there, imitation accuracy was
+a step function; here, scalar RL cannot find the step at all, while dense
+supervision walks up it smoothly.
+
+The cross-board scaling is itself a result: one local net wins Beginner
+solidly, barely wins Intermediate, and cannot finish Expert — exactly the
+shape human win rates have across the same three boards. And the Beginner
+curve gives E4 what E5's ladder never had: **two independent dials** (training
+progress × ε-lapse rate) over records carrying the same fields as a human
+leaderboard entry. E6's collinearity lesson is answered at design time.
+
 ---
 
 ## E5 — TETR.IO simulation
