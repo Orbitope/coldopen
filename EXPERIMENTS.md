@@ -647,11 +647,39 @@ proven-safe falls more slowly. Two axes, distinguishable in telemetry — the
 anti-collinearity property sprint's one-dial ladder lacked, now measured
 rather than hoped for.
 
+### The three-dial grid (`analysis/minesweeper/beginner_grid.json`)
+
+6 checkpoints × 8 lapse rates (0–0.40) × 4 latencies (50–1500ms), 16 episodes
+per rung, 192 rungs, every reveal oracle-judged. What it establishes:
+
+**Coverage.** time 0.38–25s, 3BV/s 0.34–10.4, proven-safe 0.02–0.94, blunder
+0.00–0.38, efficiency 0.50–1.00 — the speed axis now spans near-record to
+casual rather than sitting at one point.
+
+**Decorrelation, the headline.** Across all 192 rungs:
+
+| pair | this ladder | sprint's ladder |
+|---|---|---|
+| speed × judgement (3BV/s × proven-safe) | **−0.03** | +0.85…+0.90 |
+| speed × win | +0.03 | — |
+| judgement × win | +0.64 / −0.62 (safe/blunder) | — |
+
+The collinearity that sank sprint's multivariate transfer is absent by
+construction and confirmed by measurement: latency moves speed with judgement
+flat (proven-safe 0.82–0.87 from 50ms to 1500ms), while training and lapses
+move judgement with speed flat. Win rate is carried by the judgement axis,
+not the speed axis — which is what makes this game the right test.
+
+**A practical note for rung placement:** the lapse dial cliffs between 0.05
+and 0.10 (win 0.56 → 0.06 at the top checkpoint); the useful range is
+roughly 0–0.15 and future sweeps should sample it more densely. 16-episode
+rungs carry ±0.12 win-rate noise; the human-comparison run should use more.
+
 Status: **the agent side of E4 is complete** — validated env at three board
 sizes, five ladders, deduction oracle, both telemetry families, and a
-two-dial judged ladder on disk. The remaining input is human data, blocked on
-minesweeper.online support; the ingest contract (outcome field, replay
-format, player split) is ready for the day it arrives.
+192-rung three-dial judged grid on disk. The remaining input is human data,
+blocked on minesweeper.online support; the ingest contract (outcome field,
+replay format, player split) is ready for the day it arrives.
 
 ---
 
