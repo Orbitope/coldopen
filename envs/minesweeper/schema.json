@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "minesweeper state and trajectory schemas",
+  "$defs": {
+    "cellmask": {
+      "description": "Flat row-major 0/1 mask over the board; cell (r, c) is index r*W + c.",
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 1 }
+    },
+    "state": {
+      "type": "object",
+      "description": "One serialized environment state. Mirrors spec.md's state-space table. Every field is integral, so no x-atol is declared anywhere.",
+      "properties": {
+        "mines": { "$ref": "#/$defs/cellmask" },
+        "revealed": { "$ref": "#/$defs/cellmask" },
+        "flagged": { "$ref": "#/$defs/cellmask" },
+        "generated": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "first_cell": { "type": "integer", "minimum": -1 },
+        "dead": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "won": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "time_ms": { "type": "integer", "minimum": 0 },
+        "t": { "type": "integer", "minimum": 0 }
+      },
+      "required": [
+        "mines", "revealed", "flagged", "generated", "first_cell",
+        "dead", "won", "time_ms", "t"
+      ],
+      "additionalProperties": false
+    },
+    "action": {
+      "description": "kind = a // (H*W), cell = a % (H*W); kind 0 reveal, 1 flag, 2 chord.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "trajectory": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "env": { "type": "string" },
+            "format_version": { "type": "string" },
+            "simulacrum_version": { "type": "string" },
+            "seed": { "type": "integer" },
+            "source": { "enum": ["reference", "batched"] },
+            "instance": { "type": ["integer", "null"] },
+            "git_sha": { "type": ["string", "null"] },
+            "created_at": { "type": "string" }
+          },
+          "required": ["env", "format_version", "seed", "source", "created_at"]
+        },
+        "initial": {
+          "type": "object",
+          "properties": {
+            "episode": { "type": "integer" },
+            "state": { "$ref": "#/$defs/state" }
+          },
+          "required": ["episode", "state"]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "t": { "type": "integer" },
+              "episode": { "type": "integer" },
+              "state": { "$ref": "#/$defs/state" },
+              "action": { "$ref": "#/$defs/action" },
+              "reward": { "type": "number" },
+              "terminated": { "type": "boolean" }
+            },
+            "required": ["t", "episode", "state", "action", "reward", "terminated"]
+          }
+        }
+      },
+      "required": ["metadata", "initial", "steps"]
+    }
+  }
+}
