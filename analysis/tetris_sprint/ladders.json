@@ -1,0 +1,645 @@
+{
+  "ladders": {
+    "scripted": [
+      {
+        "episodes": 16,
+        "mean_lines": 40.0625,
+        "finish_rate": 1.0,
+        "time_s": 15.111,
+        "inputs_per_piece": 3.0538033611141544,
+        "quad_rate": 0.005590475437486822,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.1875,
+        "pps": 7.036447075506053,
+        "rung": "skill_1",
+        "dial": 1.0
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 40.0,
+        "finish_rate": 1.0,
+        "time_s": 31.2690625,
+        "inputs_per_piece": 3.326753418564951,
+        "quad_rate": 0.008064516129032258,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.1875,
+        "pps": 3.433242182191253,
+        "rung": "skill_0.85",
+        "dial": 0.85
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 38.0625,
+        "finish_rate": 0.875,
+        "time_s": 66.51035714285715,
+        "inputs_per_piece": 3.6114106313699246,
+        "quad_rate": 0.012784002489884842,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.3125,
+        "pps": 1.687564038539361,
+        "rung": "skill_0.7",
+        "dial": 0.7
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 37.0,
+        "finish_rate": 0.75,
+        "time_s": 125.69775,
+        "inputs_per_piece": 3.881331260253169,
+        "quad_rate": 0.009800261699507389,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.3125,
+        "pps": 0.9132183395879805,
+        "rung": "skill_0.55",
+        "dial": 0.55
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 29.9375,
+        "finish_rate": 0.375,
+        "time_s": 228.67816666666667,
+        "inputs_per_piece": 4.182102811698626,
+        "quad_rate": 0.003472222222222222,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0625,
+        "pps": 0.5439616095703694,
+        "rung": "skill_0.4",
+        "dial": 0.4
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 14.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 4.439078704247256,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.33841097063445347,
+        "rung": "skill_0.25",
+        "dial": 0.25
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 8.9375,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 4.846283935030166,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.2263208563118718,
+        "rung": "skill_0.1",
+        "dial": 0.1
+      }
+    ],
+    "distilled": [
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00000000",
+        "dial": 0
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 2.913361718205069,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 3.456087385421433,
+        "rung": "ckpt_00000025",
+        "dial": 25
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 2.731360570544007,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 3.665456282960982,
+        "rung": "ckpt_00000038",
+        "dial": 38
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 4.6564778971028975,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 2.242250575670131,
+        "rung": "ckpt_00000058",
+        "dial": 58
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 1.0625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 12.675266295407045,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.8448314349241096,
+        "rung": "ckpt_00000089",
+        "dial": 89
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.5625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 103.18838344814907,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.4139212882973522,
+        "rung": "ckpt_00000135",
+        "dial": 135
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.75,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 108.30767176978114,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.42510107123691954,
+        "rung": "ckpt_00000206",
+        "dial": 206
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 1.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 7.185852052710605,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 1.4884510415707988,
+        "rung": "ckpt_00000314",
+        "dial": 314
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 2.1875,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 16.060694496874454,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.6525682721547319,
+        "rung": "ckpt_00000478",
+        "dial": 478
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 4.75,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.70917647141924,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.5126203412469695,
+        "rung": "ckpt_00000729",
+        "dial": 729
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 4.875,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 23.627711545162214,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.8023791759791239,
+        "rung": "ckpt_00001111",
+        "dial": 1111
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 4.0625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 45.887126912076596,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.4723362365108933,
+        "rung": "ckpt_00001694",
+        "dial": 1694
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 5.3125,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 7.099931859321565,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 1.3799982277511988,
+        "rung": "ckpt_00002582",
+        "dial": 2582
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 5.5625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 7.053317950474343,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 1.344441317733666,
+        "rung": "ckpt_00003936",
+        "dial": 3936
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 6.4375,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 6.444172095991593,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 1.4769777165814313,
+        "rung": "ckpt_00006000",
+        "dial": 6000
+      }
+    ],
+    "trained": [
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00000000",
+        "dial": 0
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00002000",
+        "dial": 2000
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00003075",
+        "dial": 3075
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00004728",
+        "dial": 4728
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00007270",
+        "dial": 7270
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00011178",
+        "dial": 11178
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.55889423076923,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09674008981780668,
+        "rung": "ckpt_00017186",
+        "dial": 17186
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 122.80303030303031,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.08177083333333332,
+        "rung": "ckpt_00026424",
+        "dial": 26424
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 38.119310897435895,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09772813860304927,
+        "rung": "ckpt_00040629",
+        "dial": 40629
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 5.0,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 2.0,
+        "rung": "ckpt_00062469",
+        "dial": 62469
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 5.0,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 2.0,
+        "rung": "ckpt_00096048",
+        "dial": 96048
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 83.921875,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.09697955471606651,
+        "rung": "ckpt_00147679",
+        "dial": 147679
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 168.70111504789494,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.134194366757473,
+        "rung": "ckpt_00227064",
+        "dial": 227064
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 147.17261904761904,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.06155687564373414,
+        "rung": "ckpt_00349122",
+        "dial": 349122
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 69.51552032526297,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.0,
+        "max_b2b": 0.0,
+        "pps": 0.08374274718938296,
+        "rung": "ckpt_00536792",
+        "dial": 536792
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 56.856156685430584,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.045133277670042375,
+        "max_b2b": 0.0,
+        "pps": 0.8059528713208755,
+        "rung": "ckpt_00825343",
+        "dial": 825343
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0625,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 1.8983178688141924,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.008333333333333333,
+        "max_b2b": 0.0,
+        "pps": 4.244613183977982,
+        "rung": "ckpt_01269005",
+        "dial": 1269005
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 1.9331187042124542,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.17770432692307692,
+        "max_b2b": 0.0,
+        "pps": 3.888153201788872,
+        "rung": "ckpt_01951158",
+        "dial": 1951158
+      },
+      {
+        "episodes": 16,
+        "mean_lines": 0.0,
+        "finish_rate": 0.0,
+        "time_s": null,
+        "inputs_per_piece": 41.88379953379953,
+        "quad_rate": 0.0,
+        "holds_per_piece": 0.4276903651903652,
+        "max_b2b": 0.0,
+        "pps": 1.4022187861821005,
+        "rung": "ckpt_03000000",
+        "dial": 3000000
+      }
+    ]
+  },
+  "overlap": {
+    "inputs_per_piece": {
+      "human_p2": 2.669,
+      "human_p98": 5.90786369593709,
+      "human_median": 3.7549019607843137,
+      "scripted": {
+        "min": 3.0538033611141544,
+        "max": 4.846283935030166,
+        "share_inside_human_range": 1.0
+      },
+      "distilled": {
+        "min": 2.731360570544007,
+        "max": 108.30767176978114,
+        "share_inside_human_range": 0.2
+      },
+      "trained": {
+        "min": 1.8983178688141924,
+        "max": 168.70111504789494,
+        "share_inside_human_range": 0.10526315789473684
+      }
+    },
+    "quad_rate": {
+      "human_p2": 0.0,
+      "human_p98": 1.0,
+      "human_median": 0.3333333333333333,
+      "scripted": {
+        "min": 0.0,
+        "max": 0.012784002489884842,
+        "share_inside_human_range": 1.0
+      },
+      "distilled": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      },
+      "trained": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      }
+    },
+    "holds_per_piece": {
+      "human_p2": 0.0,
+      "human_p98": 0.4881188118811871,
+      "human_median": 0.21463925375975634,
+      "scripted": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      },
+      "distilled": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      },
+      "trained": {
+        "min": 0.0,
+        "max": 0.4276903651903652,
+        "share_inside_human_range": 1.0
+      }
+    },
+    "max_b2b": {
+      "human_p2": 0.0,
+      "human_p98": 10.0,
+      "human_median": 4.0,
+      "scripted": {
+        "min": 0.0,
+        "max": 0.3125,
+        "share_inside_human_range": 1.0
+      },
+      "distilled": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      },
+      "trained": {
+        "min": 0.0,
+        "max": 0.0,
+        "share_inside_human_range": 1.0
+      }
+    },
+    "pps": {
+      "human_p2": 0.5995405493699293,
+      "human_p98": 6.161711449811036,
+      "human_median": 1.63416825977813,
+      "scripted": {
+        "min": 0.2263208563118718,
+        "max": 7.036447075506053,
+        "share_inside_human_range": 0.42857142857142855
+      },
+      "distilled": {
+        "min": 0.09674008981780668,
+        "max": 3.665456282960982,
+        "share_inside_human_range": 0.6666666666666666
+      },
+      "trained": {
+        "min": 0.06155687564373414,
+        "max": 4.244613183977982,
+        "share_inside_human_range": 0.3157894736842105
+      }
+    }
+  }
+}

@@ -116,10 +116,35 @@ def trim_league(league):
     }
 
 
+def collect_cross_game(root="analysis"):
+    """Per-game ladders and telemetry, for the comparison the article turns on.
+
+    Connect Four appears twice on purpose: once from the bespoke pipeline at the
+    top level, which is the differential-tested implementation the first half of
+    the article is about, and once here from the game-agnostic one. Running the
+    same game through both is the check that the generic stack did not change
+    what the numbers mean.
+    """
+    out = {}
+    root = pathlib.Path(root)
+    for directory in sorted(p for p in root.iterdir() if p.is_dir()):
+        league = read_json(directory / "league.json")
+        telemetry = read_json(directory / "telemetry.json")
+        if league is None and telemetry is None:
+            continue
+        out[directory.name] = {
+            "league": trim_league(league),
+            "telemetry": telemetry,
+        }
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--league", default="analysis/league.json")
     ap.add_argument("--telemetry", default="analysis/telemetry.json")
+    ap.add_argument("--tactics", default="analysis/tactics.json")
+    ap.add_argument("--analysis", default="analysis")
     ap.add_argument("--checkpoints", default="coldopen/checkpoints")
     ap.add_argument("--out", default="docs/data.js")
     ap.add_argument("--device", default="cpu")
@@ -130,6 +155,8 @@ def main():
     payload = {
         "league": trim_league(league),
         "telemetry": read_json(args.telemetry),
+        "tactics": read_json(args.tactics),
+        "by_game": collect_cross_game(args.analysis),
         "games": [],
     }
 
@@ -149,7 +176,10 @@ def main():
     )
     print(f"wrote {path} ({path.stat().st_size / 1024:.0f} KB)")
     for key, value in payload.items():
-        state = "missing" if value in (None, []) else "ok"
+        if key == "by_game":
+            print(f"  {key:12} {', '.join(value) if value else 'missing'}")
+            continue
+        state = "missing" if value in (None, [], {}) else "ok"
         print(f"  {key:12} {state}")
 
 

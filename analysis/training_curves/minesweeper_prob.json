@@ -1,0 +1,121 @@
+[
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 25.3,
+    "steps": 0,
+    "elapsed_s": 1.4
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 38.2,
+    "steps": 50,
+    "elapsed_s": 38.1
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 51.8,
+    "steps": 73,
+    "elapsed_s": 51.6
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 41.4,
+    "steps": 108,
+    "elapsed_s": 65.4
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 45.1,
+    "steps": 158,
+    "elapsed_s": 85.8
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 49.4,
+    "steps": 233,
+    "elapsed_s": 112.9
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 44.0,
+    "steps": 342,
+    "elapsed_s": 148.3
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 41.4,
+    "steps": 502,
+    "elapsed_s": 202.0
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 71.9,
+    "steps": 738,
+    "elapsed_s": 280.7
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 43.3,
+    "steps": 1084,
+    "elapsed_s": 388.9
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 55.1,
+    "steps": 1592,
+    "elapsed_s": 559.9
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 47.1,
+    "steps": 2339,
+    "elapsed_s": 808.9
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 72.7,
+    "steps": 3436,
+    "elapsed_s": 1170.4
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 74.1,
+    "steps": 5048,
+    "elapsed_s": 1671.6
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 81.7,
+    "steps": 7415,
+    "elapsed_s": 2376.0
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 64.0,
+    "steps": 10892,
+    "elapsed_s": 3798.9
+  },
+  {
+    "episodes": 64,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 80.8,
+    "steps": 16000,
+    "elapsed_s": 37012.4
+  }
+]

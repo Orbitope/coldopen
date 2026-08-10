@@ -1,0 +1,189 @@
+[
+  {
+    "episodes": 24,
+    "mean_lines": 0.0,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 38.582,
+    "quad_rate": 0.0,
+    "steps": 0,
+    "teacher_agreement": 0.031,
+    "elapsed_s": 4.0
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.0,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 3.708,
+    "quad_rate": 0.0,
+    "steps": 25,
+    "teacher_agreement": 0.4307,
+    "elapsed_s": 5.3
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.0,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 3.916,
+    "quad_rate": 0.0,
+    "steps": 39,
+    "teacher_agreement": 0.4651,
+    "elapsed_s": 6.4
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.12,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 4.338,
+    "quad_rate": 0.0,
+    "steps": 61,
+    "teacher_agreement": 0.5483,
+    "elapsed_s": 8.3
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.79,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 18.634,
+    "quad_rate": 0.0,
+    "steps": 95,
+    "teacher_agreement": 0.5925,
+    "elapsed_s": 16.8
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.58,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 102.647,
+    "quad_rate": 0.0,
+    "steps": 149,
+    "teacher_agreement": 0.6399,
+    "elapsed_s": 26.3
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.83,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 51.381,
+    "quad_rate": 0.0,
+    "steps": 232,
+    "teacher_agreement": 0.6575,
+    "elapsed_s": 36.2
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 0.79,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 76.011,
+    "quad_rate": 0.0,
+    "steps": 362,
+    "teacher_agreement": 0.6855,
+    "elapsed_s": 47.3
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 2.12,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 17.854,
+    "quad_rate": 0.0,
+    "steps": 566,
+    "teacher_agreement": 0.7327,
+    "elapsed_s": 60.1
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 3.33,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 12.776,
+    "quad_rate": 0.01,
+    "steps": 884,
+    "teacher_agreement": 0.7625,
+    "elapsed_s": 76.1
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 4.04,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 29.079,
+    "quad_rate": 0.021,
+    "steps": 1380,
+    "teacher_agreement": 0.8479,
+    "elapsed_s": 96.9
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 5.12,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 29.808,
+    "quad_rate": 0.056,
+    "steps": 2154,
+    "teacher_agreement": 0.9214,
+    "elapsed_s": 125.2
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 3.54,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 34.114,
+    "quad_rate": 0.006,
+    "steps": 3364,
+    "teacher_agreement": 0.7063,
+    "elapsed_s": 187.9
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 1.58,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 74.576,
+    "quad_rate": 0.0,
+    "steps": 5253,
+    "teacher_agreement": 0.9707,
+    "elapsed_s": 245.9
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 3.38,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 59.803,
+    "quad_rate": 0.158,
+    "steps": 8203,
+    "teacher_agreement": 0.947,
+    "elapsed_s": 349.3
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 1.38,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 101.588,
+    "quad_rate": 0.104,
+    "steps": 12808,
+    "teacher_agreement": 0.9409,
+    "elapsed_s": 499.1
+  },
+  {
+    "episodes": 24,
+    "mean_lines": 2.75,
+    "finish_rate": 0.0,
+    "mean_time_s": 0.0,
+    "inputs_per_piece": 95.61,
+    "quad_rate": 0.042,
+    "steps": 20000,
+    "teacher_agreement": 0.8486,
+    "elapsed_s": 744.2
+  }
+]

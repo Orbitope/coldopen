@@ -1,0 +1,1528 @@
+{
+  "game": "connect_four",
+  "generator": "blindspot",
+  "league": {
+    "table": [
+      {
+        "id": "random",
+        "plies": -1,
+        "elo": 0.0,
+        "strength": 0.114262254709306
+      },
+      {
+        "id": "blindspot_1",
+        "plies": 0,
+        "elo": 173.5,
+        "strength": 0.31023240587872514
+      },
+      {
+        "id": "blindspot_0.9",
+        "plies": 1,
+        "elo": 252.5,
+        "strength": 0.48880327917111943
+      },
+      {
+        "id": "blindspot_0.8",
+        "plies": 2,
+        "elo": 257.1,
+        "strength": 0.5020202404707742
+      },
+      {
+        "id": "blindspot_0.7",
+        "plies": 3,
+        "elo": 301.8,
+        "strength": 0.6490990906183985
+      },
+      {
+        "id": "blindspot_0.6",
+        "plies": 4,
+        "elo": 374.7,
+        "strength": 0.9876603443352852
+      },
+      {
+        "id": "blindspot_0.45",
+        "plies": 5,
+        "elo": 454.1,
+        "strength": 1.5596799567022683
+      },
+      {
+        "id": "blindspot_0.3",
+        "plies": 6,
+        "elo": 542.0,
+        "strength": 2.587457544599177
+      },
+      {
+        "id": "blindspot_0.15",
+        "plies": 7,
+        "elo": 627.8,
+        "strength": 4.2406382507031175
+      },
+      {
+        "id": "blindspot_0",
+        "plies": 8,
+        "elo": 785.0,
+        "strength": 10.478428249475824
+      }
+    ],
+    "pairs": [
+      {
+        "a": "random",
+        "b": "blindspot_1",
+        "wins_a": 40,
+        "wins_b": 260,
+        "draws": 0,
+        "score_a": 0.13333334028720856
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.9",
+        "wins_a": 69,
+        "wins_b": 231,
+        "draws": 0,
+        "score_a": 0.23000000417232513
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.8",
+        "wins_a": 54,
+        "wins_b": 246,
+        "draws": 0,
+        "score_a": 0.18000000715255737
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.7",
+        "wins_a": 51,
+        "wins_b": 249,
+        "draws": 0,
+        "score_a": 0.17000000178813934
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.6",
+        "wins_a": 26,
+        "wins_b": 274,
+        "draws": 0,
+        "score_a": 0.08666666597127914
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.45",
+        "wins_a": 30,
+        "wins_b": 270,
+        "draws": 0,
+        "score_a": 0.10000000149011612
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.3",
+        "wins_a": 27,
+        "wins_b": 272,
+        "draws": 1,
+        "score_a": 0.09166666865348816
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0.15",
+        "wins_a": 9,
+        "wins_b": 289,
+        "draws": 2,
+        "score_a": 0.03333333507180214
+      },
+      {
+        "a": "random",
+        "b": "blindspot_0",
+        "wins_a": 6,
+        "wins_b": 294,
+        "draws": 0,
+        "score_a": 0.019999999552965164
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.9",
+        "wins_a": 97,
+        "wins_b": 199,
+        "draws": 4,
+        "score_a": 0.33000001311302185
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.8",
+        "wins_a": 87,
+        "wins_b": 210,
+        "draws": 3,
+        "score_a": 0.29499998688697815
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.7",
+        "wins_a": 89,
+        "wins_b": 207,
+        "draws": 4,
+        "score_a": 0.3033333420753479
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.6",
+        "wins_a": 67,
+        "wins_b": 232,
+        "draws": 1,
+        "score_a": 0.22499999403953552
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.45",
+        "wins_a": 48,
+        "wins_b": 252,
+        "draws": 0,
+        "score_a": 0.1599999964237213
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.3",
+        "wins_a": 40,
+        "wins_b": 260,
+        "draws": 0,
+        "score_a": 0.13333334028720856
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0.15",
+        "wins_a": 29,
+        "wins_b": 271,
+        "draws": 0,
+        "score_a": 0.09666666388511658
+      },
+      {
+        "a": "blindspot_1",
+        "b": "blindspot_0",
+        "wins_a": 7,
+        "wins_b": 293,
+        "draws": 0,
+        "score_a": 0.023333333432674408
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.8",
+        "wins_a": 146,
+        "wins_b": 152,
+        "draws": 2,
+        "score_a": 0.49000000953674316
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.7",
+        "wins_a": 126,
+        "wins_b": 170,
+        "draws": 4,
+        "score_a": 0.4266666769981384
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.6",
+        "wins_a": 93,
+        "wins_b": 203,
+        "draws": 4,
+        "score_a": 0.3166666626930237
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.45",
+        "wins_a": 75,
+        "wins_b": 224,
+        "draws": 1,
+        "score_a": 0.2516666650772095
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.3",
+        "wins_a": 43,
+        "wins_b": 255,
+        "draws": 2,
+        "score_a": 0.14666666090488434
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0.15",
+        "wins_a": 27,
+        "wins_b": 272,
+        "draws": 1,
+        "score_a": 0.09166666865348816
+      },
+      {
+        "a": "blindspot_0.9",
+        "b": "blindspot_0",
+        "wins_a": 17,
+        "wins_b": 282,
+        "draws": 1,
+        "score_a": 0.05833333358168602
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.7",
+        "wins_a": 126,
+        "wins_b": 174,
+        "draws": 0,
+        "score_a": 0.41999998688697815
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.6",
+        "wins_a": 106,
+        "wins_b": 193,
+        "draws": 1,
+        "score_a": 0.35499998927116394
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.45",
+        "wins_a": 54,
+        "wins_b": 245,
+        "draws": 1,
+        "score_a": 0.18166667222976685
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.3",
+        "wins_a": 39,
+        "wins_b": 260,
+        "draws": 1,
+        "score_a": 0.1316666603088379
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0.15",
+        "wins_a": 24,
+        "wins_b": 274,
+        "draws": 2,
+        "score_a": 0.0833333358168602
+      },
+      {
+        "a": "blindspot_0.8",
+        "b": "blindspot_0",
+        "wins_a": 19,
+        "wins_b": 281,
+        "draws": 0,
+        "score_a": 0.06333333253860474
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.6",
+        "wins_a": 116,
+        "wins_b": 180,
+        "draws": 4,
+        "score_a": 0.3933333456516266
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.45",
+        "wins_a": 80,
+        "wins_b": 217,
+        "draws": 3,
+        "score_a": 0.27166667580604553
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.3",
+        "wins_a": 64,
+        "wins_b": 234,
+        "draws": 2,
+        "score_a": 0.21666666865348816
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0.15",
+        "wins_a": 34,
+        "wins_b": 266,
+        "draws": 0,
+        "score_a": 0.1133333370089531
+      },
+      {
+        "a": "blindspot_0.7",
+        "b": "blindspot_0",
+        "wins_a": 19,
+        "wins_b": 278,
+        "draws": 3,
+        "score_a": 0.06833333522081375
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.45",
+        "wins_a": 116,
+        "wins_b": 180,
+        "draws": 4,
+        "score_a": 0.3933333456516266
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.3",
+        "wins_a": 70,
+        "wins_b": 228,
+        "draws": 2,
+        "score_a": 0.23666666448116302
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0.15",
+        "wins_a": 63,
+        "wins_b": 232,
+        "draws": 5,
+        "score_a": 0.21833333373069763
+      },
+      {
+        "a": "blindspot_0.6",
+        "b": "blindspot_0",
+        "wins_a": 17,
+        "wins_b": 281,
+        "draws": 2,
+        "score_a": 0.05999999865889549
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0.3",
+        "wins_a": 117,
+        "wins_b": 182,
+        "draws": 1,
+        "score_a": 0.3916666805744171
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0.15",
+        "wins_a": 77,
+        "wins_b": 222,
+        "draws": 1,
+        "score_a": 0.25833332538604736
+      },
+      {
+        "a": "blindspot_0.45",
+        "b": "blindspot_0",
+        "wins_a": 25,
+        "wins_b": 274,
+        "draws": 1,
+        "score_a": 0.08500000089406967
+      },
+      {
+        "a": "blindspot_0.3",
+        "b": "blindspot_0.15",
+        "wins_a": 119,
+        "wins_b": 173,
+        "draws": 8,
+        "score_a": 0.4099999964237213
+      },
+      {
+        "a": "blindspot_0.3",
+        "b": "blindspot_0",
+        "wins_a": 52,
+        "wins_b": 237,
+        "draws": 11,
+        "score_a": 0.19166666269302368
+      },
+      {
+        "a": "blindspot_0.15",
+        "b": "blindspot_0",
+        "wins_a": 92,
+        "wins_b": 200,
+        "draws": 8,
+        "score_a": 0.3199999928474426
+      }
+    ],
+    "games_per_pair": 300,
+    "monotonicity": {
+      "adjacent_inversions": 0,
+      "adjacent_pairs": 8,
+      "rank_concordance": 1.0,
+      "elo_range": 611.5,
+      "strictly_monotone": true,
+      "monotone_from_plies": 0,
+      "monotone_suffix_length": 9
+    },
+    "tiers": [
+      {
+        "id": "random",
+        "plies": -1,
+        "elo": 0.0,
+        "strength": 0.114262254709306,
+        "tier": "bronze",
+        "tier_index": 0,
+        "target_elo": 0.0
+      },
+      {
+        "id": "blindspot_1",
+        "plies": 0,
+        "elo": 173.5,
+        "strength": 0.31023240587872514,
+        "tier": "silver",
+        "tier_index": 1,
+        "target_elo": 130.0
+      },
+      {
+        "id": "blindspot_0.8",
+        "plies": 2,
+        "elo": 257.1,
+        "strength": 0.5020202404707742,
+        "tier": "gold",
+        "tier_index": 2,
+        "target_elo": 260.0
+      },
+      {
+        "id": "blindspot_0.6",
+        "plies": 4,
+        "elo": 374.7,
+        "strength": 0.9876603443352852,
+        "tier": "platinum",
+        "tier_index": 3,
+        "target_elo": 390.0
+      },
+      {
+        "id": "blindspot_0.3",
+        "plies": 6,
+        "elo": 542.0,
+        "strength": 2.587457544599177,
+        "tier": "diamond",
+        "tier_index": 4,
+        "target_elo": 520.0
+      },
+      {
+        "id": "blindspot_0.15",
+        "plies": 7,
+        "elo": 627.8,
+        "strength": 4.2406382507031175,
+        "tier": "grandmaster",
+        "tier_index": 5,
+        "target_elo": 650.0
+      }
+    ]
+  },
+  "telemetry": {
+    "feature_names": [
+      "missed_win",
+      "missed_block",
+      "gave_win",
+      "made_threat",
+      "took_win",
+      "center_distance",
+      "ref_agreement",
+      "ref_regret"
+    ],
+    "curves": {
+      "all": [
+        {
+          "n_moves": 1,
+          "n_samples": 3600,
+          "exact_accuracy": 0.30833333333333335,
+          "within_one_tier": 0.5313888888888889,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.24765560641499745,
+          "mean_absolute_tier_error": 1.5919444444444444,
+          "confusion": [
+            [
+              494,
+              54,
+              13,
+              22,
+              0,
+              17
+            ],
+            [
+              0,
+              323,
+              94,
+              61,
+              9,
+              113
+            ],
+            [
+              5,
+              296,
+              113,
+              61,
+              10,
+              115
+            ],
+            [
+              8,
+              299,
+              90,
+              81,
+              12,
+              110
+            ],
+            [
+              9,
+              314,
+              86,
+              68,
+              6,
+              117
+            ],
+            [
+              10,
+              332,
+              97,
+              57,
+              11,
+              93
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3600,
+          "exact_accuracy": 0.32416666666666666,
+          "within_one_tier": 0.5522222222222222,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.3016793683659893,
+          "mean_absolute_tier_error": 1.5047222222222223,
+          "confusion": [
+            [
+              573,
+              5,
+              5,
+              7,
+              4,
+              6
+            ],
+            [
+              0,
+              280,
+              80,
+              81,
+              83,
+              76
+            ],
+            [
+              4,
+              263,
+              79,
+              92,
+              70,
+              92
+            ],
+            [
+              8,
+              273,
+              70,
+              99,
+              75,
+              75
+            ],
+            [
+              19,
+              289,
+              62,
+              91,
+              66,
+              73
+            ],
+            [
+              18,
+              279,
+              65,
+              96,
+              72,
+              70
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3600,
+          "exact_accuracy": 0.3611111111111111,
+          "within_one_tier": 0.61,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.4050470885066829,
+          "mean_absolute_tier_error": 1.3352777777777778,
+          "confusion": [
+            [
+              567,
+              1,
+              1,
+              10,
+              13,
+              8
+            ],
+            [
+              0,
+              226,
+              83,
+              127,
+              70,
+              94
+            ],
+            [
+              4,
+              209,
+              90,
+              141,
+              71,
+              85
+            ],
+            [
+              14,
+              187,
+              89,
+              151,
+              72,
+              87
+            ],
+            [
+              21,
+              173,
+              88,
+              96,
+              92,
+              130
+            ],
+            [
+              19,
+              166,
+              82,
+              84,
+              75,
+              174
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3600,
+          "exact_accuracy": 0.5036111111111111,
+          "within_one_tier": 0.8044444444444444,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7045046526085628,
+          "mean_absolute_tier_error": 0.8125,
+          "confusion": [
+            [
+              552,
+              0,
+              1,
+              13,
+              19,
+              15
+            ],
+            [
+              0,
+              476,
+              85,
+              22,
+              9,
+              8
+            ],
+            [
+              1,
+              229,
+              211,
+              86,
+              42,
+              31
+            ],
+            [
+              9,
+              118,
+              124,
+              151,
+              110,
+              88
+            ],
+            [
+              19,
+              62,
+              70,
+              107,
+              149,
+              193
+            ],
+            [
+              13,
+              50,
+              34,
+              80,
+              149,
+              274
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4936111111111111,
+          "within_one_tier": 0.7686111111111111,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6355723860504267,
+          "mean_absolute_tier_error": 0.8977777777777778,
+          "confusion": [
+            [
+              541,
+              3,
+              1,
+              7,
+              19,
+              29
+            ],
+            [
+              3,
+              320,
+              112,
+              69,
+              43,
+              53
+            ],
+            [
+              1,
+              101,
+              301,
+              96,
+              52,
+              49
+            ],
+            [
+              13,
+              70,
+              113,
+              176,
+              114,
+              114
+            ],
+            [
+              14,
+              40,
+              76,
+              122,
+              185,
+              163
+            ],
+            [
+              19,
+              36,
+              36,
+              92,
+              163,
+              254
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4425,
+          "within_one_tier": 0.7544444444444445,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6230810617746078,
+          "mean_absolute_tier_error": 0.9675,
+          "confusion": [
+            [
+              544,
+              2,
+              0,
+              20,
+              19,
+              15
+            ],
+            [
+              1,
+              283,
+              130,
+              88,
+              36,
+              62
+            ],
+            [
+              0,
+              135,
+              218,
+              113,
+              61,
+              73
+            ],
+            [
+              19,
+              75,
+              138,
+              151,
+              104,
+              113
+            ],
+            [
+              21,
+              39,
+              66,
+              119,
+              166,
+              189
+            ],
+            [
+              16,
+              32,
+              44,
+              85,
+              192,
+              231
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4683333333333333,
+          "within_one_tier": 0.7936111111111112,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6903495089478231,
+          "mean_absolute_tier_error": 0.8519444444444444,
+          "confusion": [
+            [
+              562,
+              1,
+              3,
+              10,
+              11,
+              13
+            ],
+            [
+              2,
+              262,
+              127,
+              96,
+              77,
+              36
+            ],
+            [
+              4,
+              128,
+              259,
+              125,
+              61,
+              23
+            ],
+            [
+              7,
+              90,
+              113,
+              162,
+              145,
+              83
+            ],
+            [
+              10,
+              30,
+              45,
+              143,
+              186,
+              186
+            ],
+            [
+              14,
+              22,
+              24,
+              84,
+              201,
+              255
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3600,
+          "exact_accuracy": 0.48083333333333333,
+          "within_one_tier": 0.7986111111111112,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.7172375902131258,
+          "mean_absolute_tier_error": 0.8102777777777778,
+          "confusion": [
+            [
+              576,
+              2,
+              2,
+              1,
+              3,
+              16
+            ],
+            [
+              3,
+              286,
+              137,
+              100,
+              45,
+              29
+            ],
+            [
+              2,
+              140,
+              254,
+              124,
+              50,
+              30
+            ],
+            [
+              2,
+              86,
+              137,
+              151,
+              123,
+              101
+            ],
+            [
+              7,
+              26,
+              60,
+              130,
+              203,
+              174
+            ],
+            [
+              11,
+              18,
+              24,
+              112,
+              174,
+              261
+            ]
+          ]
+        }
+      ],
+      "intrinsic_only": [
+        {
+          "n_moves": 1,
+          "n_samples": 3600,
+          "exact_accuracy": 0.30722222222222223,
+          "within_one_tier": 0.49666666666666665,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5310661446561998,
+          "mean_absolute_tier_error": 1.7122222222222223,
+          "confusion": [
+            [
+              506,
+              94,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              600,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              12,
+              588,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              25,
+              575,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              21,
+              579,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              12,
+              588,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "n_moves": 2,
+          "n_samples": 3600,
+          "exact_accuracy": 0.33111111111111113,
+          "within_one_tier": 0.4936111111111111,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5124105700831364,
+          "mean_absolute_tier_error": 1.7058333333333333,
+          "confusion": [
+            [
+              591,
+              8,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              600,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              22,
+              577,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              39,
+              560,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              39,
+              561,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              30,
+              569,
+              0,
+              0,
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "n_moves": 3,
+          "n_samples": 3600,
+          "exact_accuracy": 0.35777777777777775,
+          "within_one_tier": 0.565,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.3568967508601225,
+          "mean_absolute_tier_error": 1.4983333333333333,
+          "confusion": [
+            [
+              549,
+              0,
+              0,
+              1,
+              9,
+              41
+            ],
+            [
+              0,
+              558,
+              6,
+              0,
+              33,
+              3
+            ],
+            [
+              0,
+              522,
+              3,
+              0,
+              46,
+              29
+            ],
+            [
+              8,
+              494,
+              0,
+              4,
+              53,
+              41
+            ],
+            [
+              7,
+              429,
+              1,
+              1,
+              79,
+              83
+            ],
+            [
+              10,
+              411,
+              3,
+              0,
+              81,
+              95
+            ]
+          ]
+        },
+        {
+          "n_moves": 5,
+          "n_samples": 3600,
+          "exact_accuracy": 0.43,
+          "within_one_tier": 0.7283333333333334,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5906002428828696,
+          "mean_absolute_tier_error": 1.0644444444444445,
+          "confusion": [
+            [
+              557,
+              0,
+              0,
+              3,
+              21,
+              19
+            ],
+            [
+              0,
+              505,
+              54,
+              11,
+              26,
+              4
+            ],
+            [
+              0,
+              450,
+              79,
+              13,
+              45,
+              13
+            ],
+            [
+              10,
+              283,
+              52,
+              47,
+              138,
+              70
+            ],
+            [
+              23,
+              178,
+              29,
+              38,
+              171,
+              161
+            ],
+            [
+              28,
+              155,
+              25,
+              35,
+              168,
+              189
+            ]
+          ]
+        },
+        {
+          "n_moves": 8,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4622222222222222,
+          "within_one_tier": 0.7452777777777778,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5747477932958991,
+          "mean_absolute_tier_error": 1.0130555555555556,
+          "confusion": [
+            [
+              539,
+              1,
+              1,
+              11,
+              16,
+              32
+            ],
+            [
+              0,
+              287,
+              134,
+              30,
+              68,
+              81
+            ],
+            [
+              0,
+              123,
+              342,
+              40,
+              33,
+              62
+            ],
+            [
+              13,
+              91,
+              163,
+              78,
+              123,
+              132
+            ],
+            [
+              25,
+              58,
+              90,
+              70,
+              152,
+              205
+            ],
+            [
+              38,
+              37,
+              54,
+              45,
+              160,
+              266
+            ]
+          ]
+        },
+        {
+          "n_moves": 12,
+          "n_samples": 3600,
+          "exact_accuracy": 0.43972222222222224,
+          "within_one_tier": 0.74,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.5987764335495628,
+          "mean_absolute_tier_error": 1.0138888888888888,
+          "confusion": [
+            [
+              541,
+              1,
+              0,
+              21,
+              14,
+              23
+            ],
+            [
+              1,
+              330,
+              110,
+              67,
+              36,
+              56
+            ],
+            [
+              0,
+              167,
+              173,
+              116,
+              63,
+              81
+            ],
+            [
+              20,
+              94,
+              129,
+              138,
+              97,
+              122
+            ],
+            [
+              33,
+              53,
+              68,
+              95,
+              128,
+              223
+            ],
+            [
+              27,
+              41,
+              48,
+              69,
+              142,
+              273
+            ]
+          ]
+        },
+        {
+          "n_moves": 16,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4633333333333333,
+          "within_one_tier": 0.7780555555555555,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6616665511753721,
+          "mean_absolute_tier_error": 0.8969444444444444,
+          "confusion": [
+            [
+              551,
+              2,
+              1,
+              10,
+              16,
+              20
+            ],
+            [
+              3,
+              280,
+              134,
+              74,
+              86,
+              23
+            ],
+            [
+              2,
+              146,
+              253,
+              96,
+              72,
+              31
+            ],
+            [
+              14,
+              99,
+              110,
+              125,
+              159,
+              93
+            ],
+            [
+              24,
+              38,
+              56,
+              111,
+              192,
+              179
+            ],
+            [
+              22,
+              22,
+              23,
+              73,
+              193,
+              267
+            ]
+          ]
+        },
+        {
+          "n_moves": 20,
+          "n_samples": 3600,
+          "exact_accuracy": 0.4625,
+          "within_one_tier": 0.785,
+          "majority_baseline": 0.16666666666666666,
+          "rank_correlation": 0.6785181159872211,
+          "mean_absolute_tier_error": 0.8747222222222222,
+          "confusion": [
+            [
+              567,
+              3,
+              2,
+              4,
+              13,
+              11
+            ],
+            [
+              6,
+              249,
+              175,
+              78,
+              60,
+              32
+            ],
+            [
+              5,
+              137,
+              266,
+              120,
+              42,
+              30
+            ],
+            [
+              6,
+              90,
+              138,
+              142,
+              131,
+              93
+            ],
+            [
+              25,
+              36,
+              78,
+              114,
+              168,
+              179
+            ],
+            [
+              10,
+              20,
+              61,
+              78,
+              158,
+              273
+            ]
+          ]
+        }
+      ]
+    },
+    "feature_means_by_tier": {
+      "0": {
+        "missed_win": 0.049861110746860504,
+        "missed_block": 0.1599999964237213,
+        "gave_win": 0.1899999976158142,
+        "made_threat": 0.10263887792825699,
+        "took_win": 0.011666667647659779,
+        "center_distance": 1.7661110162734985,
+        "ref_agreement": 0.15388888120651245,
+        "ref_regret": 0.35513365268707275
+      },
+      "1": {
+        "missed_win": 0.022638889029622078,
+        "missed_block": 0.10125000029802322,
+        "gave_win": 0.11944445222616196,
+        "made_threat": 0.09291666746139526,
+        "took_win": 0.02708333358168602,
+        "center_distance": 0.6606944799423218,
+        "ref_agreement": 0.34513887763023376,
+        "ref_regret": 0.2270558625459671
+      },
+      "2": {
+        "missed_win": 0.053611114621162415,
+        "missed_block": 0.08180555701255798,
+        "gave_win": 0.1168055608868599,
+        "made_threat": 0.13625000417232513,
+        "took_win": 0.03333333507180214,
+        "center_distance": 0.6559722423553467,
+        "ref_agreement": 0.35805556178092957,
+        "ref_regret": 0.21427956223487854
+      },
+      "3": {
+        "missed_win": 0.06458333134651184,
+        "missed_block": 0.05694444477558136,
+        "gave_win": 0.0959722250699997,
+        "made_threat": 0.15263889729976654,
+        "took_win": 0.037638887763023376,
+        "center_distance": 0.8226388692855835,
+        "ref_agreement": 0.3623611032962799,
+        "ref_regret": 0.20403391122817993
+      },
+      "4": {
+        "missed_win": 0.04097222164273262,
+        "missed_block": 0.036666665226221085,
+        "gave_win": 0.05416666716337204,
+        "made_threat": 0.13930554687976837,
+        "took_win": 0.050833333283662796,
+        "center_distance": 0.925277829170227,
+        "ref_agreement": 0.3976389169692993,
+        "ref_regret": 0.16981826722621918
+      },
+      "5": {
+        "missed_win": 0.03916666656732559,
+        "missed_block": 0.021388890221714973,
+        "gave_win": 0.034166667610406876,
+        "made_threat": 0.13680556416511536,
+        "took_win": 0.05999999865889549,
+        "center_distance": 0.9491666555404663,
+        "ref_agreement": 0.41624999046325684,
+        "ref_regret": 0.15036533772945404
+      }
+    },
+    "error_structure": {
+      "0": 0.312955885868809,
+      "1": 0.360445209326466,
+      "2": 0.19465859365111107,
+      "3": 0.1618774106481847,
+      "4": 0.11643836894104798,
+      "5": 0.1612903092596755
+    }
+  }
+}

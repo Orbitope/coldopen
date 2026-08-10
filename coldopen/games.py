@@ -42,6 +42,32 @@ MAX_PLIES = {
 }
 
 
+#: Divisor that brings raw observations into roughly unit range. Pgx hands back
+#: boolean planes for the board games, but backgammon's is a checker count per
+#: point (up to 15 on a stack), which a small net trains on badly untouched.
+OBS_SCALE = {"backgammon": 5.0}
+
+#: Divisor that brings terminal rewards into [-1, 1], which is where a Q head
+#: with a negamax target belongs. Backgammon pays 1/2/3 for a plain win, a
+#: gammon and a backgammon. Leduc pays the pot, which tops out at 13: the ante,
+#: then up to two raises of 2 in the first round and two of 4 in the second.
+#: That bound is worth deriving rather than sampling - a random rollout of a few
+#: hundred hands never reaches it, and a scale set from one is quietly wrong
+#: for exactly the biggest pots.
+REWARD_SCALE = {"backgammon": 3.0, "leduc_holdem": 13.0}
+
+
+def _tensor(value, device, dtype=None):
+    """A writable Torch view of a JAX array.
+
+    ``np.asarray`` on a JAX array hands back a read-only buffer, which Torch
+    accepts with a warning and then cannot be indexed into. The copy is small -
+    these are masks and scalars, not observations.
+    """
+    array = np.array(value, dtype=dtype, copy=True)
+    return torch.from_numpy(array).to(device)
+
+
 @dataclass
 class GameInfo:
     key: str
@@ -53,6 +79,8 @@ class GameInfo:
     obs_shape: tuple
     n_actions: int
     spatial: bool  # whether the observation is a board (conv) or a vector (MLP)
+    obs_scale: float = 1.0
+    reward_scale: float = 1.0
 
 
 class Game:
@@ -70,6 +98,7 @@ class Game:
         self.env = pgx.make(key)
         self._init = jax.jit(jax.vmap(self.env.init))
         self._step = jax.jit(jax.vmap(self.env.step))
+        self._restart = jax.jit(_restart_fn(self.env))
 
         probe = self._init(jax.random.split(jax.random.PRNGKey(0), 2))
         obs_shape = tuple(probe.observation.shape[1:])
@@ -86,6 +115,8 @@ class Game:
             obs_shape=(obs_shape[2], obs_shape[0], obs_shape[1]) if spatial else obs_shape,
             n_actions=int(probe.legal_action_mask.shape[1]),
             spatial=spatial,
+            obs_scale=OBS_SCALE.get(key, 1.0),
+            reward_scale=REWARD_SCALE.get(key, 1.0),
         )
 
     # -- lifecycle ---------------------------------------------------------
@@ -103,35 +134,101 @@ class Game:
         batch = a.shape[0]
         return self._step(state, a, jax.random.split(key, batch))
 
+    def restart(self, state, mask, key):
+        """Replace the games selected by ``mask`` with freshly dealt ones.
+
+        Pgx has no in-place reset, so this deals a whole new batch and selects
+        between the two leaf by leaf. Cheap next to a network forward pass, and
+        it keeps every slot of the batch busy.
+        """
+        if not bool(mask.any()):
+            return state
+        m = jnp.asarray(mask.detach().cpu().numpy())
+        return self._restart(state, m, key)
+
     # -- views -------------------------------------------------------------
 
     def observe(self, state):
-        """[B, *obs_shape] float, from the point of view of the side to move."""
+        """[B, *obs_shape] float network input, from the mover's point of view.
+
+        Scaled by ``info.obs_scale``; feature extractors that want the literal
+        board read the Pgx state instead (see ``coldopen/features``).
+        """
         obs = np.asarray(state.observation, dtype=np.float32)
         if self.info.spatial:
             obs = np.transpose(obs, (0, 3, 1, 2))
-        return torch.from_numpy(np.ascontiguousarray(obs)).to(self.device)
+        obs = np.ascontiguousarray(obs)
+        if self.info.obs_scale != 1.0:
+            obs = obs / self.info.obs_scale
+        return torch.from_numpy(obs).to(self.device)
 
     def legal_mask(self, state):
-        m = np.asarray(state.legal_action_mask)
-        return torch.from_numpy(np.ascontiguousarray(m)).to(self.device).bool()
+        return _tensor(state.legal_action_mask, self.device).bool()
 
     def current_player(self, state):
-        v = np.asarray(state.current_player, dtype=np.int64)
-        return torch.from_numpy(v).to(self.device)
+        return _tensor(state.current_player, self.device, np.int64)
 
     def terminated(self, state):
-        v = np.asarray(state.terminated)
-        return torch.from_numpy(np.ascontiguousarray(v)).to(self.device).bool()
+        return _tensor(state.terminated, self.device).bool()
+
+    def step_count(self, state):
+        return _tensor(state._step_count, self.device, np.int64)
+
+    def finished(self, state):
+        """Terminated, or run past ``max_plies`` and cut off.
+
+        Only backgammon reaches the cap in practice, and only under weak play -
+        two policies that both refuse to bear off can shuffle checkers for a
+        very long time. A cut game is scored as a draw, which is the honest
+        reading: nobody won it.
+        """
+        return self.terminated(state) | (self.step_count(state) >= self.info.max_plies)
 
     def rewards(self, state):
-        """[B, 2] indexed by absolute player id, not by seat-to-move."""
+        """[B, 2] indexed by absolute player id, not by seat-to-move.
+
+        Divided by ``info.reward_scale``, so a win is at most 1 in magnitude
+        whatever the game pays.
+        """
         v = np.asarray(state.rewards, dtype=np.float32)
-        return torch.from_numpy(np.ascontiguousarray(v)).to(self.device)
+        v = np.ascontiguousarray(v) / self.info.reward_scale
+        return torch.from_numpy(v).to(self.device)
 
     def reward_for(self, state, player):
         """[B] reward for the given per-batch player ids."""
         return self.rewards(state).gather(1, player.view(-1, 1).clamp(min=0)).squeeze(1)
+
+
+def _restart_fn(env):
+    """Select leaf-by-leaf between a freshly dealt batch and the live one."""
+    init = jax.vmap(env.init)
+
+    def restart(state, mask, key):
+        batch = mask.shape[0]
+        fresh = init(jax.random.split(key, batch))
+
+        def pick(new, old):
+            shape = (batch,) + (1,) * (new.ndim - 1)
+            return jnp.where(mask.reshape(shape), new, old)
+
+        return jax.tree_util.tree_map(pick, fresh, state)
+
+    return restart
+
+
+def ensure_nonempty(mask):
+    """Force one legal bit on rows that have none.
+
+    A terminated Pgx state can present an all-False action mask; a masked max
+    over it would be -inf and poison the bootstrap. The rows this touches are
+    exactly the ones whose target is the terminal reward, so the bit is never
+    read - it just keeps the arithmetic finite.
+    """
+    empty = ~mask.any(dim=1)
+    if empty.any():
+        mask = mask.clone()
+        mask[empty, 0] = True
+    return mask
 
 
 def make(key, device="cpu"):

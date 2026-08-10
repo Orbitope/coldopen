@@ -1,0 +1,452 @@
+"""Distil the sprint teacher at the PLACEMENT level, not the keystroke level.
+
+Keystroke-level cloning does not work here, and the reason is structural rather
+than a tuning miss. Asking a conv net for the next keystroke asks it to do two
+jobs at once: run a 44-way placement search *and* track whether the piece has
+already arrived at a column the net must itself have computed. Getting the
+second job slightly wrong is unrecoverable — the piece never reaches the exact
+state where the teacher says "hard drop", so the student taps forever. Measured
+on the keystroke student: 98.6% agreement with the teacher, 25.8% agreement on
+its own states, 1.8 lines, 60 inputs per piece.
+
+This module splits the two jobs, which is also how they come apart in people:
+
+* **placement judgement** — where should this piece go? Learned here, as a
+  44-way classification over (rotation, column). Conv nets are good at this;
+  it is a spatial question about a board picture.
+* **motor execution** — how many keystrokes to get it there? Handled by the
+  same emitter the teacher uses (`markov_action`), with a `fumble` rate as an
+  explicit dial.
+
+That split is a claim about what the ladder measures, so it is worth stating
+plainly: the rungs vary in *judgement*, and finesse is imposed rather than
+learned. That is a real limitation compared with the scripted ladder, where
+both fall out of one `skill` number — but it is the honest way to get a
+learned generator at all, and the E2 question ("is a part-trained imitator a
+distinct kind of bad?") is a question about judgement.
+
+One label per piece instead of one per keystroke, so a pool of the same size
+carries roughly 3-4x fewer examples but every one of them is clean.
+
+    python -m coldopen.distill_placement --out coldopen/ladders/sprint_placement
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+import sys
+import time
+
+import numpy as np
+import torch
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "envs"))
+
+from coldopen.distill import snapshot_schedule
+from coldopen.nets import BoardNet
+from coldopen.sprint_bot import HOLD, SprintBot, best_placement, markov_action
+from coldopen.tetris import rollout
+from coldopen.train_sprint import OBS_SHAPE
+from tetris_sprint.fast import _CELLS, HORIZON, TetrisSprintBatched
+
+#: The action space of this student: 4 rotations x the reachable column range.
+#: `x` is the left edge of the piece's bounding box, and the largest legal
+#: value is 8 (a vertical I there occupies column 9), so the sweep is -2..8.
+X_LO, X_HI = -2, 9
+N_X = X_HI - X_LO
+N_TARGETS = 4 * N_X
+
+#: One extra action: use the hold slot. Excluding it was a mistake with a
+#: measurable price. An ORACLE on this pathway — perfect placement predictions,
+#: no hold — scores 31.0 lines at a 50% finish rate and quad rate 0.349, against
+#: the teacher's 40.8 and 0.685. That is a ceiling, not a training gap: half the
+#: oracle's runs top out, while *every* human sprint record is a finish. A
+#: student without hold could never reach the human manifold however well it
+#: learned, so hold is part of what the student has to learn.
+HOLD_INDEX = N_TARGETS
+N_PLACEMENTS = N_TARGETS + 1
+
+
+def _legal_mask():
+    """[7, 4, N_X] — can this piece, in this rotation, sit at this x at all?
+
+    Purely the column-bounds question: does `x + dx` stay in [0, 9] for every
+    cell. Board occupancy is not consulted, because a hard drop lands the piece
+    wherever the stack allows; what matters is that the target is *reachable*.
+
+    This mask is not an optimisation, it is a correctness fix. `markov_action`
+    emits HARD_DROP only once the piece has arrived at (target_rot, target_x).
+    The teacher never asks for an unreachable target because its search only
+    returns legal ones — but an unmasked student can, and then the piece never
+    arrives, never drops, and the policy stalls. Measured before the mask:
+    inputs per piece climbed to 50.8 against the teacher's 3.3.
+    """
+    mask = np.zeros((7, 4, N_X), dtype=bool)
+    for piece in range(7):
+        for rot in range(4):
+            cells = _CELLS[piece][rot]
+            lo = -min(dx for dx, _ in cells)
+            hi = 9 - max(dx for dx, _ in cells)
+            for j, x in enumerate(range(X_LO, X_HI)):
+                mask[piece, rot, j] = lo <= x <= hi
+    return mask
+
+
+#: Flattened to the student's action space, so it can mask logits directly.
+#: The hold column is appended separately: its legality depends on `hold_used`,
+#: not on the piece, so it is masked per step rather than looked up per piece.
+LEGAL_TARGETS = torch.from_numpy(_legal_mask().reshape(7, N_TARGETS))
+
+
+def legal_actions(env):
+    """[n, N_PLACEMENTS] — placements this piece can occupy, plus hold if free."""
+    legal = LEGAL_TARGETS[env.piece.cpu().long()]
+    hold_ok = (env.hold_used.cpu() == 0).unsqueeze(1)
+    return torch.cat([legal, hold_ok], dim=1)
+
+
+def encode(rot, x):
+    return rot * N_X + (x - X_LO)
+
+
+def decode(index):
+    return int(index) // N_X, int(index) % N_X + X_LO
+
+
+def collect(n_envs=64, pieces=400, latency=100, seed=0):
+    """(observation, target placement) for every step of every piece's fall.
+
+    Deliberately *not* sampled only at piece boundaries. The same (board,
+    piece) recurs with the active piece drawn at a different height each step,
+    so those rows are distinct observations carrying the same label — which is
+    exactly the invariance the policy needs, because `placement_policy`
+    re-predicts the target on every step rather than committing once. A student
+    trained only on spawn-height boards would be asked at rollout about boards
+    it had never seen.
+
+    Hold steps are labelled `HOLD_INDEX` rather than skipped. An earlier
+    version dropped them, which silently removed hold from what the student
+    could learn and capped the whole pathway at 31 lines.
+    """
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 7919)
+    bot = SprintBot(env, markov=True)
+
+    observations, labels = [], []
+    obs = env.observe()
+    seen = 0
+    while seen < pieces * n_envs:
+        boards = env.board.cpu().numpy()
+        active = env.piece.cpu().tolist()
+        actions = bot(obs, env)
+        targets = []
+        for i in range(env.n):
+            if actions[i] == HOLD:
+                targets.append(HOLD_INDEX)
+                continue
+            _, rot, x = best_placement(boards[i], active[i])
+            targets.append(encode(rot, x) if rot is not None else 0)
+        observations.append(obs.bool())
+        labels.append(torch.tensor(targets, dtype=torch.int64))
+        seen += env.n
+        obs, _, _, _ = env.step(actions)
+    return torch.cat(observations), torch.cat(labels)
+
+
+def teacher_labels(env, bot):
+    """The teacher's action for each instance's current state, as a target id.
+
+    Uses the bot itself so hold decisions come from the same two-ply logic the
+    scripted ladder uses, rather than a second implementation that could drift.
+    """
+    actions = bot(None, env)
+    boards = env.board.cpu().numpy()
+    pieces = env.piece.cpu().tolist()
+    out = []
+    for i in range(env.n):
+        if actions[i] == HOLD:
+            out.append(HOLD_INDEX)
+            continue
+        _, rot, x = best_placement(boards[i], pieces[i])
+        out.append(encode(rot, x) if rot is not None else 0)
+    return torch.tensor(out, dtype=torch.int64)
+
+
+def collect_student(net, device, n_envs=64, steps=250, latency=100, seed=0):
+    """Boards the STUDENT reaches, labelled with the teacher's placement.
+
+    A DAgger round, and at this level it is well posed in a way the
+    keystroke version never was: the teacher's placement is a pure function of
+    (board, piece), with no plan state to be out of sync with and no way for
+    one disagreement to flood the labels.
+
+    It is also necessary, and the size of the distribution gap is worth having
+    in numbers. Averaged over 300 steps of each policy's own play:
+
+        boards       max height   holes   bumpiness
+        teacher          6.85      0.45     10.01
+        student          9.78     13.50     13.86
+
+    **Thirty times the holes.** The teacher essentially never makes one, so the
+    pool contains almost no example of what to do on a board with thirteen
+    holes — and that is the only kind of board the student ever sees. It is not
+    failing to learn the function; it has never been shown the domain it
+    operates in. Plain cloning reached 97.2% agreement on the teacher's pool
+    and 26.7% on its own boards, which is the same fact stated as a metric.
+
+    The encouraging half: the teacher's search works on *any* board, so correct
+    labels for holey boards are computable. They simply are not in the pool
+    until the student's own play puts them there.
+    """
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 104_729)
+    observations, labels = [], []
+    obs = env.observe()
+    policy = placement_policy(net, device)
+    bot = SprintBot(env, markov=True)
+    for _ in range(steps):
+        observations.append(obs.bool())
+        labels.append(teacher_labels(env, bot))
+        obs, _, _, _ = env.step(policy(obs, env))
+    return torch.cat(observations), torch.cat(labels)
+
+
+def own_state_agreement(net, device, n_envs=12, steps=180, latency=100, seed=7):
+    """Agreement with the teacher on the student's OWN boards.
+
+    The number that matters, and the one that was missing every time this
+    project mistook a well-fitted student for a working one. Teacher-pool
+    agreement said 91.5% while this said 21.5%.
+    """
+    env = TetrisSprintBatched(n_envs, latency=latency, emit_final_states=False)
+    env.reset(torch.arange(n_envs, dtype=torch.int64) + seed)
+    policy = placement_policy(net, device)
+    bot = SprintBot(env, markov=True)
+    obs = env.observe()
+    hits = total = 0
+    for _ in range(steps):
+        want = teacher_labels(env, bot)
+        with torch.no_grad():
+            logits = net(obs.to(device)).cpu()
+        choice = logits.masked_fill(~legal_actions(env), -1e9).argmax(dim=1)
+        hits += int((choice == want).sum())
+        total += env.n
+        obs, _, _, _ = env.step(policy(obs, env))
+    return hits / max(total, 1)
+
+
+def placement_policy(net, device, fumble=0.0, seed=0):
+    """Roll out a placement student: predict a target, emit toward it.
+
+    The target is **committed once per (board, piece)** and cached, exactly as
+    the Markov teacher memoises its own search. Without that the policy chases
+    a moving target: the observation renders the active piece at its current
+    height, so the prediction can flip as the piece falls, and the emitter
+    turns around mid-approach. Measured while re-predicting every step: 86.4
+    inputs per piece against the teacher's 3.3, even with targets masked to
+    legal columns.
+
+    Training already supplies the invariance this relies on — the same
+    (board, piece) appears at every fall height with the same label — but the
+    student only approximates it, and caching makes it exact. The cached value
+    is still a pure function of observable state, so the policy stays Markov
+    in the sense the teacher is.
+    """
+    rng = np.random.default_rng(seed)
+    cache = {}
+
+    def policy(obs, env):
+        with torch.no_grad():
+            logits = net(obs.to(device)).cpu()
+        # Mask to placements this piece can physically occupy, or the emitter
+        # can be sent somewhere it will never arrive and will never drop.
+        choice = logits.masked_fill(~legal_actions(env), -1e9).argmax(dim=1)
+        boards = env.board.cpu().numpy()
+        pieces = env.piece.cpu().tolist()
+        rots = env.rot.cpu().tolist()
+        xs = env.x.cpu().tolist()
+        ys = env.y.cpu().tolist()
+        actions = torch.zeros(env.n, dtype=torch.int64)
+        for i in range(env.n):
+            if choice[i] == HOLD_INDEX:
+                actions[i] = HOLD
+                cache.pop(i, None)   # the swap changes the piece; replan after
+                continue
+            key = (boards[i].tobytes(), pieces[i])
+            hit = cache.get(i)
+            if hit is None or hit[0] != key:
+                rot, x = decode(choice[i])
+                if fumble and rng.random() < fumble:
+                    x = int(np.clip(x + rng.choice([-1, 1]), X_LO, X_HI - 1))
+                cache[i] = (key, rot, x)
+            _, rot, x = cache[i]
+            actions[i] = markov_action(boards[i], pieces[i], rots[i], xs[i],
+                                       rot, x, ys[i])
+        return actions
+    return policy
+
+
+def evaluate(net, device, episodes=12, latency=100, fumble=0.0, seed=123):
+    env = TetrisSprintBatched(min(episodes, 24), latency=latency)
+    rows = rollout(env, placement_policy(net, device, fumble), seed=seed,
+                   total_episodes=episodes, max_steps=episodes * HORIZON)
+    if not rows:
+        return {"episodes": 0}
+    mean = lambda k: float(np.mean([r[k] for r in rows]))
+    finished = [r for r in rows if r["finished"]]
+    return {
+        "episodes": len(rows),
+        "mean_lines": round(mean("lines"), 2),
+        "finish_rate": round(len(finished) / len(rows), 3),
+        "time_s": (round(float(np.mean([r["time_ms"] for r in finished])) / 1000, 1)
+                   if finished else None),
+        "inputs_per_piece": round(mean("inputs_per_piece"), 3),
+        "quad_rate": round(mean("quad_rate"), 3),
+        "holds_per_piece": round(mean("holds_per_piece"), 3),
+        "pps": round(mean("pps"), 3),
+    }
+
+
+class _Oracle(torch.nn.Module):
+    """A stand-in net that always emits the teacher's own label."""
+
+    def __init__(self, env, bot):
+        super().__init__()
+        self.env, self.bot = env, bot
+
+    def forward(self, obs):
+        want = teacher_labels(self.env, self.bot)
+        q = torch.full((obs.shape[0], N_PLACEMENTS), -10.0)
+        q[torch.arange(obs.shape[0]), want] = 10.0
+        return q
+
+
+def oracle_ceiling(episodes=12, latency=100, seed=31):
+    """What this pathway scores with PERFECT predictions.
+
+    Run this before training, not after. It separates "the student has not
+    learned" from "the pathway cannot do better", and those look identical from
+    the outside — which cost most of a day here. The check costs about a
+    minute.
+
+    It is what caught hold being missing from the action space: the ceiling was
+    31.0 lines at a 50% finish rate, so no amount of training could have
+    reached the human manifold, where every record is a finish. With hold the
+    ceiling is 36.8 lines and 83%.
+    """
+    env = TetrisSprintBatched(min(episodes, 24), latency=latency)
+    oracle = _Oracle(env, SprintBot(env, markov=True))
+    rows = rollout(env, placement_policy(oracle, torch.device("cpu")),
+                   total_episodes=episodes, seed=seed,
+                   max_steps=episodes * HORIZON)
+    if not rows:
+        return {"episodes": 0}
+    mean = lambda k: float(np.mean([r[k] for r in rows]))
+    finished = [r for r in rows if r["finished"]]
+    return {"episodes": len(rows), "mean_lines": round(mean("lines"), 2),
+            "finish_rate": round(len(finished) / len(rows), 3),
+            "inputs_per_piece": round(mean("inputs_per_piece"), 3),
+            "quad_rate": round(mean("quad_rate"), 3),
+            "holds_per_piece": round(mean("holds_per_piece"), 3)}
+
+
+def distil(steps=8000, batch=256, lr=1e-3, channels=64, seed=0, latency=100,
+           pool_envs=64, pool_pieces=120, rounds=5, out=None, device="cpu"):
+    device = torch.device(device)
+    torch.manual_seed(seed)
+    out = pathlib.Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+
+    ceiling = oracle_ceiling(latency=latency)
+    print(f"pathway ceiling (perfect predictions): "
+          f"lines {ceiling.get('mean_lines', 0):5.1f}  "
+          f"finish {ceiling.get('finish_rate', 0):.2f}  "
+          f"quad {ceiling.get('quad_rate', 0):.3f}  "
+          f"hold {ceiling.get('holds_per_piece', 0):.3f}", flush=True)
+    print("  ^ no student can beat this; a run that stalls well below it is a\n"
+          "    pathway problem, not a training problem.", flush=True)
+
+    print("collecting teacher placements ...", flush=True)
+    obs, labels = collect(pool_envs, pool_pieces, latency=latency, seed=seed)
+    print(f"  {obs.shape[0]:,} placement decisions, "
+          f"{len(torch.unique(labels))} distinct targets used", flush=True)
+
+    student = BoardNet(OBS_SHAPE, N_PLACEMENTS, channels).to(device)
+    opt = torch.optim.Adam(student.parameters(), lr=lr)
+    pending = snapshot_schedule(steps, count=14, lo=25)
+    per_round = max(1, steps // rounds)
+    log, started = [], time.time()
+
+    def save(tag):
+        torch.save({"steps": tag, "channels": channels, "latency": latency,
+                    "placement": True, "state": student.state_dict()},
+                   out / f"ckpt_{tag:08d}.pt")
+        index = torch.randint(0, obs.shape[0], (4096,))
+        with torch.no_grad():
+            predicted = student(obs[index].float().to(device)).argmax(dim=1).cpu()
+        pool = float((predicted == labels[index]).float().mean())
+        # Both numbers, always, and `own` first when reading: pool agreement
+        # said 91.5% while own-state agreement said 21.5%, and the second was
+        # the one describing the policy.
+        own = own_state_agreement(student, device, latency=latency)
+        report = evaluate(student, device, latency=latency)
+        report.update({"steps": tag, "pool_agreement": round(pool, 4),
+                       "own_state_agreement": round(own, 4),
+                       "elapsed_s": round(time.time() - started, 1)})
+        log.append(report)
+        (out / "train_log.json").write_text(
+            json.dumps({"ceiling": ceiling, "log": log}, indent=2))
+        print(f"  [{tag:>6,}] own {own:.3f} (pool {pool:.3f})  "
+              f"lines {report.get('mean_lines', 0):5.1f}  "
+              f"finish {report.get('finish_rate', 0):.2f}  "
+              f"in/pc {report.get('inputs_per_piece', 0):5.2f}  "
+              f"quad {report.get('quad_rate', 0):.3f}", flush=True)
+
+    while pending and pending[0] <= 0:
+        save(pending.pop(0))
+    for step in range(1, steps + 1):
+        index = torch.randint(0, obs.shape[0], (batch,))
+        logits = student(obs[index].float().to(device))
+        loss = torch.nn.functional.cross_entropy(logits, labels[index].to(device))
+        opt.zero_grad(set_to_none=True)
+        loss.backward()
+        opt.step()
+        while pending and pending[0] <= step:
+            save(pending.pop(0))
+        if rounds > 1 and step % per_round == 0 and step < steps:
+            extra_obs, extra_labels = collect_student(
+                student, device, pool_envs, max(60, pool_pieces // 3),
+                latency=latency, seed=seed + step)
+            obs = torch.cat([obs, extra_obs])
+            labels = torch.cat([labels, extra_labels])
+            print(f"  dagger round at {step:,}: +{extra_obs.shape[0]:,} boards "
+                  f"(total {obs.shape[0]:,})", flush=True)
+    return student
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--steps", type=int, default=8000)
+    ap.add_argument("--batch", type=int, default=256)
+    ap.add_argument("--channels", type=int, default=64)
+    ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--latency", type=int, default=100)
+    ap.add_argument("--pool-envs", type=int, default=64)
+    ap.add_argument("--pool-pieces", type=int, default=120)
+    ap.add_argument("--rounds", type=int, default=5,
+                    help="DAgger rounds; 1 reproduces plain cloning")
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--device", default="cpu")
+    ap.add_argument("--out", default="coldopen/ladders/sprint_placement")
+    args = ap.parse_args()
+    distil(steps=args.steps, batch=args.batch, lr=args.lr, channels=args.channels,
+           seed=args.seed, latency=args.latency, pool_envs=args.pool_envs,
+           pool_pieces=args.pool_pieces, rounds=args.rounds, out=args.out,
+           device=args.device)
+    print(f"wrote {args.out}")
+
+
+if __name__ == "__main__":
+    main()

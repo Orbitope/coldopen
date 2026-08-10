@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "tetris_sprint state and trajectory schemas",
+  "$defs": {
+    "state": {
+      "type": "object",
+      "description": "One serialized environment state. Mirrors spec.md's state-space table exactly. Everything is integer arithmetic, so no field declares x-atol: the differential test requires bit-exact equality throughout.",
+      "properties": {
+        "t": { "type": "integer", "minimum": 0, "maximum": 1200 },
+        "board": {
+          "type": "array",
+          "minItems": 24,
+          "maxItems": 24,
+          "items": {
+            "type": "array",
+            "minItems": 10,
+            "maxItems": 10,
+            "items": { "type": "integer", "minimum": 0, "maximum": 1 }
+          },
+          "description": "Locked cells only; row index 0 is the BOTTOM row."
+        },
+        "piece": { "type": "integer", "minimum": 0, "maximum": 6 },
+        "rot": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "x": { "type": "integer", "minimum": -2, "maximum": 8 },
+        "y": { "type": "integer", "minimum": -2, "maximum": 23 },
+        "hold": { "type": "integer", "minimum": -1, "maximum": 6 },
+        "hold_used": { "type": "integer", "minimum": 0, "maximum": 1 },
+        "queue": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "bag": { "type": "integer", "minimum": 1, "maximum": 127 },
+        "lines": { "type": "integer", "minimum": 0, "maximum": 43 },
+        "time_ms": { "type": "integer", "minimum": 0, "maximum": 3000000 },
+        "fall_ms": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "lock_ms": { "type": "integer", "minimum": 0, "maximum": 499 },
+        "lock_resets": { "type": "integer", "minimum": 0, "maximum": 15 }
+      },
+      "required": [
+        "t", "board", "piece", "rot", "x", "y",
+        "hold", "hold_used", "queue", "bag", "lines",
+        "time_ms", "fall_ms", "lock_ms", "lock_resets"
+      ],
+      "additionalProperties": false
+    },
+    "action": {
+      "description": "One input: 0 tap_left, 1 tap_right, 2 das_left, 3 das_right, 4 rotate_cw, 5 rotate_ccw, 6 rotate_180, 7 soft_drop, 8 hard_drop, 9 hold.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9
+    },
+    "trajectory": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "env": { "type": "string" },
+            "format_version": { "type": "string" },
+            "simulacrum_version": { "type": "string" },
+            "seed": { "type": "integer" },
+            "source": { "enum": ["reference", "batched"] },
+            "instance": { "type": ["integer", "null"] },
+            "git_sha": { "type": ["string", "null"] },
+            "created_at": { "type": "string" }
+          },
+          "required": ["env", "format_version", "seed", "source", "created_at"]
+        },
+        "initial": {
+          "type": "object",
+          "properties": {
+            "episode": { "type": "integer" },
+            "state": { "$ref": "#/$defs/state" }
+          },
+          "required": ["episode", "state"]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "t": { "type": "integer" },
+              "episode": { "type": "integer" },
+              "state": { "$ref": "#/$defs/state" },
+              "action": { "$ref": "#/$defs/action" },
+              "reward": { "type": "number" },
+              "terminated": { "type": "boolean" }
+            },
+            "required": ["t", "episode", "state", "action", "reward", "terminated"]
+          }
+        }
+      },
+      "required": ["metadata", "initial", "steps"]
+    }
+  }
+}

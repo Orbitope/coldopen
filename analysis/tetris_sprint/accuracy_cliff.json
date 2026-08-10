@@ -1,0 +1,60 @@
+{
+  "what": "task performance vs per-placement imitation accuracy, oracle corrupted by a known random fraction; same pathway, emitter and teacher throughout",
+  "episodes_per_point": 12,
+  "latency_ms": 100,
+  "dagger_student_for_comparison": {
+    "own_state_agreement": 0.834,
+    "lines": 1.3
+  },
+  "rows": [
+    {
+      "accuracy": 1.0,
+      "lines": 36.8,
+      "finish": 0.83,
+      "quad": 0.621,
+      "inputs_per_piece": 3.35
+    },
+    {
+      "accuracy": 0.98,
+      "lines": 40.2,
+      "finish": 0.92,
+      "quad": 0.494,
+      "inputs_per_piece": 3.37
+    },
+    {
+      "accuracy": 0.95,
+      "lines": 27.8,
+      "finish": 0.42,
+      "quad": 0.472,
+      "inputs_per_piece": 3.4
+    },
+    {
+      "accuracy": 0.9,
+      "lines": 10.2,
+      "finish": 0.0,
+      "quad": 0.185,
+      "inputs_per_piece": 3.41
+    },
+    {
+      "accuracy": 0.8,
+      "lines": 5.6,
+      "finish": 0.0,
+      "quad": 0.069,
+      "inputs_per_piece": 3.58
+    },
+    {
+      "accuracy": 0.6,
+      "lines": 0.8,
+      "finish": 0.0,
+      "quad": 0.0,
+      "inputs_per_piece": 3.73
+    },
+    {
+      "accuracy": 0.4,
+      "lines": 0.3,
+      "finish": 0.0,
+      "quad": 0.0,
+      "inputs_per_piece": 3.68
+    }
+  ]
+}

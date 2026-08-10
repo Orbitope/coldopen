@@ -1,0 +1,154 @@
+[
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 0,
+    "elapsed_s": 9.2
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 2000,
+    "elapsed_s": 18.6
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 3003,
+    "elapsed_s": 27.7
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 4508,
+    "elapsed_s": 37.0
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 6768,
+    "elapsed_s": 46.3
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 10160,
+    "elapsed_s": 56.1
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 15254,
+    "elapsed_s": 69.1
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 22901,
+    "elapsed_s": 85.2
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 34381,
+    "elapsed_s": 104.6
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 24.1,
+    "time_s_on_win": null,
+    "steps": 51617,
+    "elapsed_s": 133.3
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 22.9,
+    "time_s_on_win": null,
+    "steps": 77494,
+    "elapsed_s": 169.0
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 12.0,
+    "time_s_on_win": null,
+    "steps": 116342,
+    "elapsed_s": 215.6
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 22.0,
+    "time_s_on_win": null,
+    "steps": 174665,
+    "elapsed_s": 274.4
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 262227,
+    "elapsed_s": 378.3
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 393684,
+    "elapsed_s": 541.4
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 591042,
+    "elapsed_s": 779.7
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 887337,
+    "elapsed_s": 1138.1
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 1332169,
+    "elapsed_s": 1663.1
+  },
+  {
+    "episodes": 32,
+    "win_rate": 0.0,
+    "mean_safe_revealed": 0.0,
+    "time_s_on_win": null,
+    "steps": 2000000,
+    "elapsed_s": 2433.0
+  }
+]

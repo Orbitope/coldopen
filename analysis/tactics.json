@@ -1,0 +1,54 @@
+[
+  {
+    "positions": 1920,
+    "measured_at_plies": 10,
+    "win_available": 0.19791666666666666,
+    "blunder_available": 0.25677083333333334,
+    "mean_legal_moves": 6.845833333333333,
+    "game": "connect_four",
+    "expected_tactics": "high",
+    "information": "perfect",
+    "chance": false,
+    "n_actions": 7,
+    "mean_episode_plies": 21.8
+  },
+  {
+    "positions": 1920,
+    "measured_at_plies": 10,
+    "win_available": 0.0,
+    "blunder_available": 0.0,
+    "mean_legal_moves": 7.944791666666666,
+    "game": "othello",
+    "expected_tactics": "low",
+    "information": "perfect",
+    "chance": false,
+    "n_actions": 65,
+    "mean_episode_plies": 60.5
+  },
+  {
+    "positions": 1920,
+    "measured_at_plies": 10,
+    "win_available": 0.0046875,
+    "blunder_available": 0.0015625,
+    "mean_legal_moves": 4.981770833333333,
+    "game": "backgammon",
+    "expected_tactics": "medium",
+    "information": "perfect",
+    "chance": true,
+    "n_actions": 156,
+    "mean_episode_plies": 213.9
+  },
+  {
+    "positions": 1920,
+    "measured_at_plies": 10,
+    "win_available": 0.08541666666666667,
+    "blunder_available": 0.12708333333333333,
+    "mean_legal_moves": 2.275,
+    "game": "leduc_holdem",
+    "expected_tactics": "none",
+    "information": "hidden",
+    "chance": true,
+    "n_actions": 3,
+    "mean_episode_plies": 4.2
+  }
+]

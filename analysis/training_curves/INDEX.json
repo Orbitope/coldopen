@@ -1,0 +1,213 @@
+{
+  "backgammon": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "backgammon_reference": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "connect_four": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "connect_four_distilled": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "steps",
+      "teacher_agreement"
+    ]
+  },
+  "connect_four_reference": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "leduc_holdem": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "leduc_holdem_reference": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "minesweeper": {
+    "checkpoints": 19,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "mean_safe_revealed",
+      "steps",
+      "time_s_on_win",
+      "win_rate"
+    ]
+  },
+  "minesweeper_prob": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "mean_safe_revealed",
+      "steps",
+      "win_rate"
+    ]
+  },
+  "minesweeper_prob_beginner": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "mean_safe_revealed",
+      "steps",
+      "time_s_on_win",
+      "total_safe",
+      "win_rate"
+    ]
+  },
+  "minesweeper_prob_intermediate": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "mean_safe_revealed",
+      "steps",
+      "time_s_on_win",
+      "total_safe",
+      "win_rate"
+    ]
+  },
+  "minesweeper_v2": {
+    "checkpoints": 19,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "mean_safe_revealed",
+      "steps",
+      "time_s_on_win",
+      "win_rate"
+    ]
+  },
+  "othello": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "othello_reference": {
+    "checkpoints": 19,
+    "fields": [
+      "draw_vs_random",
+      "elapsed_s",
+      "plies",
+      "score_vs_random",
+      "updates",
+      "win_vs_random"
+    ]
+  },
+  "sprint_dagger": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "finish_rate",
+      "inputs_per_piece",
+      "mean_lines",
+      "mean_time_s",
+      "quad_rate",
+      "steps",
+      "teacher_agreement"
+    ]
+  },
+  "sprint_distilled": {
+    "checkpoints": 17,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "finish_rate",
+      "inputs_per_piece",
+      "mean_lines",
+      "mean_time_s",
+      "quad_rate",
+      "steps",
+      "teacher_agreement"
+    ]
+  },
+  "sprint_placement": {
+    "checkpoints": 15,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "finish_rate",
+      "holds_per_piece",
+      "inputs_per_piece",
+      "mean_lines",
+      "own_state_agreement",
+      "pool_agreement",
+      "pps",
+      "quad_rate",
+      "steps",
+      "time_s"
+    ]
+  },
+  "tetris_sprint": {
+    "checkpoints": 19,
+    "fields": [
+      "elapsed_s",
+      "episodes",
+      "finish_rate",
+      "inputs_per_piece",
+      "mean_lines",
+      "mean_time_s",
+      "quad_rate",
+      "steps",
+      "updates"
+    ]
+  }
+}

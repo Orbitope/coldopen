@@ -6,10 +6,19 @@ __pycache__/
 .DS_Store
 
 # Trained networks are large and regenerable; the JSON in analysis/ is the record.
-coldopen/checkpoints/
-coldopen/reference/
-coldopen/ladders/
+# No trailing slash: these are sometimes symlinks to a run kept elsewhere.
+# NOTE: this also hides each ladder's train_log.json, which is NOT regenerable
+# in any cheap sense - it is the measured curve, and several findings ARE
+# curves (beginner 3%->67%, the DQN's flat zero over 2M steps). Those are
+# mirrored into analysis/training_curves/ by hand; do that after any run whose
+# curve you would cite.
+coldopen/checkpoints
+coldopen/reference
+coldopen/ladders
 *_stdout.log
 
-# Human game archives are big and belong to whoever published them.
+# Human game archives are big and belong to whoever published them. They are
+# also personal data even after pseudonymisation, so they stay local: the
+# analysis JSON in analysis/ is the record, and it carries no identifiers.
 data/human/
+data/cache/

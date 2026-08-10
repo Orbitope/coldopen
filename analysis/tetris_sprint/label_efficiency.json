@@ -1,0 +1,51 @@
+{
+  "question": "how many LABELLED human games does it take to match what a model fitted only on agents delivers with none?",
+  "answer": "more than 300. The agent-fitted grid model is not beaten by a human-fitted model at any sample size tested.",
+  "why_pps_alone_is_not_a_valid_cold_start_baseline": "ranking by pps requires knowing that pps is the discriminating axis and its direction. That knowledge comes from labelled human data, which is exactly what does not exist at cold start. The earlier comparison scored a label-informed baseline against a label-free method.",
+  "agent_models_use_zero_human_labels": true,
+  "held_out_evaluation": "same held-out human records for every method, 200 random splits per sample size",
+  "curve": [
+    {
+      "labelled_games": 5,
+      "human_fitted": 0.8280309896533865,
+      "agent_grid_zero_labels": 0.9271854300248528,
+      "agent_coupled_zero_labels": 0.6612496848237623
+    },
+    {
+      "labelled_games": 10,
+      "human_fitted": 0.8826689075875725,
+      "agent_grid_zero_labels": 0.9268851387195767,
+      "agent_coupled_zero_labels": 0.6614719616247511
+    },
+    {
+      "labelled_games": 20,
+      "human_fitted": 0.9067390473503019,
+      "agent_grid_zero_labels": 0.9270784987866132,
+      "agent_coupled_zero_labels": 0.6613531192505221
+    },
+    {
+      "labelled_games": 40,
+      "human_fitted": 0.9150943014331862,
+      "agent_grid_zero_labels": 0.9267335712889365,
+      "agent_coupled_zero_labels": 0.6613347673616051
+    },
+    {
+      "labelled_games": 80,
+      "human_fitted": 0.9180426618596965,
+      "agent_grid_zero_labels": 0.9266381176756932,
+      "agent_coupled_zero_labels": 0.6585201586604373
+    },
+    {
+      "labelled_games": 160,
+      "human_fitted": 0.9223116763364634,
+      "agent_grid_zero_labels": 0.926534503142874,
+      "agent_coupled_zero_labels": 0.6616749715840359
+    },
+    {
+      "labelled_games": 300,
+      "human_fitted": 0.9203984671730874,
+      "agent_grid_zero_labels": 0.9219223412913727,
+      "agent_coupled_zero_labels": 0.6562774009766685
+    }
+  ]
+}
