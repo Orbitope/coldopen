@@ -625,6 +625,34 @@ curve gives E4 what E5's ladder never had: **two independent dials** (training
 progress × ε-lapse rate) over records carrying the same fields as a human
 leaderboard entry. E6's collinearity lesson is answered at design time.
 
+### The two-dial ladder, oracle-judged (`analysis/minesweeper/beginner_ladder.json`)
+
+Six checkpoints × three lapse rates, 12 episodes each, every reveal judged by
+the deduction oracle *on the position as seen*:
+
+| steps | ε | win | proven-safe | avoidable guess | blunder |
+|---|---|---|---|---|---|
+| 72 | 0.00 | 0.00 | 0.10 | 0.79 | 0.08 |
+| 216 | 0.00 | 0.25 | 0.77 | 0.20 | 0.03 |
+| 645 | 0.00 | 0.33 | 0.89 | 0.07 | 0.03 |
+| 1,931 | 0.00 | 0.42 | 0.81 | 0.12 | 0.01 |
+| 8,327 | 0.00 | **0.67** | 0.83 | 0.16 | **0.01** |
+| 8,327 | 0.15 | 0.33 | 0.67 | 0.23 | 0.10 |
+| 8,327 | 0.35 | 0.00 | 0.53 | 0.28 | 0.19 |
+
+The two dials degrade **differently**, which is the design goal: training
+moves proven-safe up (0.10 → 0.83) and blunders down (0.08 → 0.01); the lapse
+dial at a fixed checkpoint pushes blunders back up (0.01 → 0.19) while
+proven-safe falls more slowly. Two axes, distinguishable in telemetry — the
+anti-collinearity property sprint's one-dial ladder lacked, now measured
+rather than hoped for.
+
+Status: **the agent side of E4 is complete** — validated env at three board
+sizes, five ladders, deduction oracle, both telemetry families, and a
+two-dial judged ladder on disk. The remaining input is human data, blocked on
+minesweeper.online support; the ingest contract (outcome field, replay
+format, player split) is ready for the day it arrives.
+
 ---
 
 ## E5 — TETR.IO simulation
