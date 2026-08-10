@@ -174,7 +174,9 @@ decide it are fixed.
    neighbours), clipped at the board edges.
 2. `eligible` = every cell not in `excluded`. `|eligible| ≥ H·W − 9 ≥ M`.
 3. `mines` = the `M` eligible cells with the smallest `MINE_KEYS` values, ties
-   broken by smaller cell index.
+   broken by smaller cell index. Both implementations use `rng.draw_bits`
+   directly — no masking or rescaling, because every transformation is another
+   place the two can disagree.
 
 Drawing the keys at reset but *applying* them at the first click makes the
 board a deterministic function of `(seed, first_cell)` — reproducible, and
@@ -212,7 +214,7 @@ Hold in every reachable state, including terminal states.
 
 | slot | name | used at | distribution |
 |---|---|---|---|
-| 0 | `MINE_KEYS` | reset (step 0), `index = cell` for each of `H·W` cells | uniform `uint32` |
+| 0 | `MINE_KEYS` | reset (step 0), `index = cell` for each of `H·W` cells | uniform 64-bit, `rng.draw_bits` |
 
 One stochastic decision only: the mine layout. It is realised as a key per cell
 rather than as a sample of `M` positions because "take the `M` smallest keys
