@@ -603,7 +603,7 @@ training runs with debug off and validation stays on the base class.
 | DQN v1, 2M steps | 0.000 win everywhere; flag-spin. **Rational** under its reward: an uninformed reveal is a mine with prior ~21% (EV ≈ −210k) against flagging at −230/step, and the +1 shaping for a correct reveal was 0.4% of the step cost |
 | DQN v2 (death repriced −1M→−20k, shaping ×300, auxiliary mine head) | first curriculum advances ever — frontier **3 → 22** hidden cells in 63k steps — then stalled for 1.4M steps; full-board play still 0, because a blank board is off-distribution for a policy trained on mostly-revealed ones |
 | mineprob Expert | 25 → 81 safe cells over 16k updates; judgement ladder, no wins |
-| **mineprob Beginner** | **3% → 67% win rate** over 16 checkpoints, ~4.0s time-on-win — the first agent records comparable to a human leaderboard entry |
+| **mineprob Beginner** | **0% → 67% win rate** over 16 checkpoints (first wins at update 104), ~4.0s time-on-win — the first agent records comparable to a human leaderboard entry |
 | mineprob Intermediate | first wins at 2.1k updates, caps ~2–3%; progress 74 → 139/216 |
 
 The controlling comparison, same net, same env, same observations:
