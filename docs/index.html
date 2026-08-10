@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KG3409EZDQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-KG3409EZDQ');
+</script>
+
+<title>Cold Open: Guessing a Player's Rank Before They Have One</title>
+<meta name="description" content="A new account has no results, so ranked games guess. I tried to learn that guess from RL agents instead of from people — and spent most of the project discovering that my own evaluation numbers were lying to me. Four of those lies, playable in your browser.">
+<meta property="og:title" content="Cold Open: Guessing a Player's Rank Before They Have One">
+<meta property="og:description" content="Training agents to stand in for players you don't have yet. The idea works — but four different measurements told me it didn't, or told me it did for the wrong reason. Interactive.">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111009'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%23E8C068' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%236B7A8D'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --void:#111009; --surface:#1a1812; --raised:#211e17; --border:#2a2820;
+    --amber:#C49A3C; --amber-bright:#E8C068;
+    --steel:#6B7A8D; --steel-bright:#9AAABB;
+    --mauve:#9A7AB0; --sage:#7D9A6A; --terra:#C47A5A; --coral:#FF5E3A;
+    --text-bright:#EDE8DC; --text-primary:#C8C2B4; --text-muted:#6A6358;
+    --font-display:'Rajdhani',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);
+    -webkit-font-smoothing:antialiased;line-height:1.7;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:radial-gradient(circle,rgba(154,170,187,.10) 1px,transparent 1px);background-size:48px 48px}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 30%,rgba(0,0,0,0) 45%,rgba(0,0,0,.6) 100%)}
+  .wrap{position:relative;z-index:1}
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:50;
+    background:linear-gradient(90deg,var(--amber),var(--amber-bright))}
+
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px}
+  .kicker{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin-bottom:22px}
+  .hero h1{font-family:var(--font-display);font-weight:700;font-size:clamp(36px,8vw,80px);line-height:1.03;color:var(--text-bright);max-width:17ch}
+  .hero h1 .accent{color:var(--amber-bright)}
+  .hero .sub{margin-top:24px;max-width:60ch;font-size:14px;color:var(--text-muted);line-height:1.75}
+  .hero .sub b{color:var(--text-primary);font-weight:500}
+  .scroll-cue{margin-top:46px;font-size:11px;letter-spacing:.2em;color:var(--text-muted);text-transform:uppercase;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.scroll-cue{animation:none}}
+
+  .beat{max-width:680px;margin:0 auto;padding:11vh 24px 3vh}
+  .beat.tight{padding-top:4vh}
+  .beat .eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--amber);margin-bottom:18px}
+  .beat .eyebrow.win{color:var(--sage)}
+  .beat .eyebrow.bad{color:var(--coral)}
+  .beat h2{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,4.5vw,40px);color:var(--text-bright);line-height:1.12;margin-bottom:20px}
+  .beat h3{font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--text-bright);margin:26px 0 12px}
+  .beat p{font-size:15px;color:var(--text-primary);margin-bottom:16px}
+  .beat p b{color:var(--text-bright);font-weight:500}
+  .beat code{background:var(--raised);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:13px;color:var(--steel-bright)}
+  .beat .amber{color:var(--amber-bright)} .beat .sage{color:var(--sage)}
+  .beat .coral{color:var(--coral)} .beat .steel{color:var(--steel-bright)} .beat .dim{color:var(--text-muted)}
+  .beat ul{margin:0 0 16px 18px;font-size:14.5px;color:var(--text-primary)}
+  .beat li{margin-bottom:9px}
+  .rule{width:1px;height:60px;margin:0 auto;background:linear-gradient(transparent,var(--border),transparent)}
+  .pull{border-left:2px solid var(--amber);padding:4px 0 4px 16px;margin:22px 0;font-size:15px;color:var(--text-bright)}
+
+  .fig{max-width:940px;margin:34px auto;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#0d0c07}
+  .fig .cap{font-size:11px;color:var(--text-muted);padding:11px 16px;border-top:1px solid var(--border);letter-spacing:.03em;line-height:1.6}
+  .fig .cap b{color:var(--text-primary);font-weight:500}
+  .fig.narrow{max-width:700px}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+
+  .wdg-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;
+    border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);letter-spacing:.04em;flex-wrap:wrap}
+  .wdg-head b{color:var(--text-bright);font-weight:500}
+  .tag{font-weight:500;letter-spacing:.12em;padding:3px 10px;border-radius:3px;font-size:11px;white-space:nowrap}
+  .tag.ok{color:#0d0c07;background:var(--sage)} .tag.no{color:#0d0c07;background:var(--coral)}
+  .tag.warn{color:#0d0c07;background:var(--amber)}
+  .tag.idle{color:var(--text-muted);border:1px solid var(--border)}
+  .wdg-foot{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .btn{font-family:var(--font-display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    background:transparent;color:var(--text-primary);border:1px solid var(--border);border-radius:4px;padding:7px 14px;cursor:pointer;transition:.2s}
+  .btn:hover{color:var(--text-bright);border-color:var(--amber)}
+  .btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .btn.on{color:#0d0c07;background:var(--amber);border-color:var(--amber)}
+
+  .toggle-row{display:flex;border-bottom:1px solid var(--border)}
+  .toggle{flex:1;padding:12px 6px;font-family:var(--font-display);font-weight:600;font-size:12px;
+    letter-spacing:.08em;text-transform:uppercase;text-align:center;cursor:pointer;background:transparent;
+    color:var(--text-muted);border:none;border-right:1px solid var(--border);
+    border-bottom:2px solid transparent;transition:.2s}
+  .toggle:last-child{border-right:none}
+  .toggle.active{color:var(--text-bright);border-bottom-color:var(--amber);background:var(--surface)}
+  .toggle:hover{color:var(--text-primary)}
+  .toggle:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+
+  .ctl{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;font-size:11px;color:var(--text-muted)}
+  .ctl label{display:flex;align-items:center;gap:9px;letter-spacing:.06em}
+  .ctl input[type=range]{width:150px;accent-color:var(--amber)}
+  .ctl .v{color:var(--amber-bright);font-variant-numeric:tabular-nums;min-width:4ch;display:inline-block}
+
+  svg.chart{display:block;width:100%;height:auto}
+  .ax{stroke:var(--border);stroke-width:1}
+  .axlab{fill:var(--text-muted);font-size:9px;font-family:var(--font-mono)}
+  .gridline{stroke:var(--border);stroke-width:.5;stroke-dasharray:2 4}
+  .series-h{stroke:var(--steel-bright);stroke-width:2;fill:none}
+  .series-a{stroke:var(--amber-bright);stroke-width:2.5;fill:none}
+  .dot-h{fill:var(--steel-bright)} .dot-a{fill:var(--amber-bright)}
+  .readout{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;padding:6px 16px 14px;font-size:11.5px;color:var(--text-muted)}
+  .readout b{color:var(--text-bright);font-weight:500;font-variant-numeric:tabular-nums}
+  .readout .a b{color:var(--amber-bright)} .readout .h b{color:var(--steel-bright)}
+
+  /* minesweeper */
+  .msboard{display:grid;gap:2px;justify-content:center;padding:16px}
+  .cell{width:26px;height:26px;border-radius:2px;background:var(--raised);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;cursor:pointer;
+    font-family:var(--font-mono);transition:.12s;color:var(--text-primary);padding:0;line-height:1}
+  .cell:hover{border-color:var(--amber)}
+  .cell.open{background:#0a0906;border-color:#191710;cursor:default}
+  .cell.open:hover{border-color:#191710}
+  .cell.boom{background:var(--coral);color:#0d0c07}
+  .cell.hint-safe{box-shadow:inset 0 0 0 2px var(--sage)}
+  .cell.hint-mine{box-shadow:inset 0 0 0 2px var(--coral)}
+  .n1{color:#7FA8D4}.n2{color:var(--sage)}.n3{color:var(--terra)}.n4{color:var(--mauve)}
+  .n5{color:#C47A5A}.n6{color:#5FA8A0}.n7{color:var(--text-bright)}.n8{color:var(--text-muted)}
+  .verdict{padding:10px 16px;font-size:12px;border-top:1px solid var(--border);text-align:center;min-height:40px}
+  .verdict .lab{font-weight:500;letter-spacing:.06em}
+  .lab.safe{color:var(--sage)} .lab.avoid{color:var(--amber-bright)}
+  .lab.forced{color:var(--steel-bright)} .lab.blunder{color:var(--coral)}
+  .tally{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding:0 16px 12px;font-size:11px;color:var(--text-muted)}
+  .tally b{font-weight:500;font-variant-numeric:tabular-nums}
+
+  table.data{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0 2px}
+  table.data th{text-align:left;color:var(--text-muted);font-weight:500;padding:7px 10px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  table.data td{padding:7px 10px;border-bottom:1px solid rgba(42,40,32,.5);color:var(--text-primary);font-variant-numeric:tabular-nums}
+  table.data tr:last-child td{border-bottom:none}
+  table.data td.hi{color:var(--amber-bright)}
+  table.data td.dim{color:var(--text-muted)}
+
+  .caveats{max-width:680px;margin:0 auto;padding:4vh 24px 2vh;font-size:13px;color:var(--text-muted);line-height:1.75}
+  .caveats .c{display:flex;gap:10px;margin-bottom:14px}
+  .caveats .c::before{content:"▸";color:var(--amber);flex:none}
+  .caveats b{color:var(--text-primary);font-weight:500}
+
+  .outro{max-width:680px;margin:0 auto;padding:11vh 24px 10vh;text-align:center}
+  .outro h2{font-family:var(--font-display);font-weight:600;font-size:clamp(24px,4vw,38px);color:var(--text-bright);margin-bottom:18px}
+  .outro p{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+  .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+  .links a{display:inline-flex;align-items:center;padding:10px 20px;background:var(--surface);
+    border:1px solid var(--border);border-radius:3px;color:var(--text-primary);text-decoration:none;
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:.2s}
+  .links a:hover{border-color:var(--amber);color:var(--amber-bright);background:rgba(196,154,60,.06)}
+  .foot{margin-top:34px;font-size:11px;color:var(--text-muted);letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Coldopen · reading skill before the results exist</div>
+  <h1>Every measurement I trusted was <span class="accent">lying to me</span>.</h1>
+  <p class="sub">A new account has no results, so ranked games guess — and the first few matches are miserable for everyone while they do. You could instead read skill from <b>how</b> somebody plays. But to learn that reading you need labelled players, and a game that hasn't launched has none. So: train a ladder of bots from hopeless to expert, learn the mapping from their behaviour, and point it at people. The idea works. What took months was that four separate measurements each told me it didn't — or that it did, for a reason that turned out to be false. The demos below run live in your browser.</p>
+  <div class="scroll-cue">scroll</div>
+</header>
+
+<section class="beat">
+  <div class="eyebrow">The setup</div>
+  <h2>Bots as stand-ins for players you don't have yet.</h2>
+  <p>I built two games as simulators I could train agents inside: a <b>Tetris sprint</b> (clear 40 lines, fastest wins) and <b>Minesweeper</b>. Both are real games with real public leaderboards, which matters — the whole point is to check the bots against actual humans at the end.</p>
+  <p>The recipe is simple enough to state in one line. Make agents of varying skill, record how they play — how fast, how efficiently, how often they set up the big clears — then fit a model from behaviour to skill. Apply it to a human and you have a rank estimate from their very first game, with no match history at all.</p>
+  <p>Then you check it against 396 real Tetris players whose ranks you already know. That check is where things got strange.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow bad">Lie #1</div>
+  <h2>The baseline that cheated.</h2>
+  <p>Here is the scoreboard I got. Higher is better; 1.0 would be a perfect ranking of all 396 players.</p>
+</section>
+
+<figure class="fig narrow reveal">
+  <div class="wdg-head"><span>predicting human rank · 396 TETR.IO players</span><span class="tag no" id="t1_tag">simulator loses</span></div>
+  <table class="data" style="padding:0 6px">
+    <tr><th>method</th><th style="text-align:right">score</th></tr>
+    <tr><td><b>just sort players by pieces-per-second</b></td><td style="text-align:right" class="hi">0.932</td></tr>
+    <tr><td>sort by keystrokes-per-piece</td><td style="text-align:right">0.773</td></tr>
+    <tr><td>a model fitted on <em>humans</em>, cross-validated</td><td style="text-align:right">0.923</td></tr>
+    <tr><td><b>my agent-trained model</b></td><td style="text-align:right" class="dim">0.660</td></tr>
+  </table>
+  <div class="cap">Sorting players by a single number beat months of simulator work by 0.27. I wrote it up as a clean negative result.</div>
+</figure>
+
+<section class="beat tight">
+  <p>That conclusion was wrong, and it took me an embarrassingly long time to see why.</p>
+  <div class="pull">To sort players by pieces-per-second, you first have to know that pieces-per-second is the right thing to sort by. Where does that knowledge come from? From looking at players whose rank you already know.</div>
+  <p>Which is <b>exactly the thing you don't have at a cold start.</b> I had let the baseline read the answer key and then scored the honest method against it.</p>
+  <p>And look at what the agent-trained model actually learned, from <span class="amber">zero human labels</span>: put all the weight on pieces-per-second, ignore the other four features. It <em>found</em> the right answer on its own. That's not losing to the baseline — that <em>is</em> the baseline, derived without the labels the baseline needs.</p>
+  <p>So the honest question isn't "does it beat the best predictor?" It's <b>how much labelled data would you need to do this well without it?</b> Drag the slider.</p>
+</section>
+
+<figure class="fig reveal">
+  <div class="wdg-head"><span>label efficiency · same held-out players, 200 random splits each</span><span class="tag" id="le_tag">—</span></div>
+  <div class="ctl">
+    <label>labelled human games available
+      <input type="range" id="le_slider" min="0" max="6" value="0" step="1">
+      <span class="v" id="le_n">5</span></label>
+  </div>
+  <svg class="chart" id="le_chart" viewBox="0 0 720 300" role="img" aria-label="label efficiency curve"></svg>
+  <div class="readout">
+    <span class="h">fitted on humans <b id="le_h">—</b></span>
+    <span class="a">fitted on agents, zero labels <b id="le_a">—</b></span>
+    <span>gap <b id="le_gap">—</b></span>
+  </div>
+  <div class="cap">The amber line never learns anything — it has no labels to learn from. It's flat because it's the <b>same model</b> at every point on the axis. The steel line is what you could do yourself, if you had that many labelled players. <b>It never catches up within the range the data can measure.</b></div>
+</figure>
+
+<section class="beat tight">
+  <p>At five labelled games the simulator is worth about 0.10 of correlation. At three hundred it's still ahead. That's the actual result, and it only appears once you stop asking the wrong question.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow bad">Lie #2</div>
+  <h2>The check that couldn't see a bot doing nothing.</h2>
+  <p>Before you compare bots to humans, you have to confirm the bots are even in the same neighbourhood — that they produce the range of behaviour people produce. My check asked whether each bot's numbers fell inside the human range. It came back <span class="sage">100% inside</span> on three of five features.</p>
+  <p>All three were false. Here's the one that gave it away: <b>quad rate</b>, the fraction of your lines cleared four-at-once. It's the signature move of a good Tetris player.</p>
+</section>
+
+<figure class="fig reveal">
+  <div class="wdg-head"><span>quad rate · 396 humans vs my bot</span><span class="tag" id="q_tag">—</span></div>
+  <div class="toggle-row">
+    <button class="toggle active" data-q="range">check: is it inside the human range?</button>
+    <button class="toggle" data-q="rank">check: which human rank is this?</button>
+  </div>
+  <svg class="chart" id="q_chart" viewBox="0 0 720 260" role="img" aria-label="quad rate distribution"></svg>
+  <div class="cap" id="q_cap">—</div>
+</figure>
+
+<section class="beat tight">
+  <p>Human quad rates span nearly the whole 0-to-1 range, so <b>a bot sitting at 0.01 is technically "inside the range"</b> — and simultaneously below every human alive. A range check cannot see the difference between covering a distribution and huddling at the bottom of it.</p>
+  <p>Asking "which human rank does this look like?" instead exposed it in one line. And the fix wasn't subtle either: my bot's scoring function paid it for <em>any</em> line clear, so it cashed in singles the moment it could and never stacked four rows. Teaching it to hold out for quads moved its quad rate from <span class="coral">0.01</span> to <span class="sage">0.61</span>.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow bad">Lie #3</div>
+  <h2>The failing grade with no passing grade.</h2>
+  <p>Next metric. For one bot, do all five of its measured features agree about how good it is? If its speed says "expert" and its stacking says "beginner", it isn't imitating any real person.</p>
+  <p>I scored my ladder: <b>eight ranks of disagreement</b>, on an 18-rank scale. Damning. I started rewriting the bot.</p>
+  <p>Then I ran the identical test on the humans.</p>
+</section>
+
+<figure class="fig narrow reveal">
+  <div class="wdg-head"><span>internal disagreement · lower is more consistent</span><span class="tag idle">18-rank scale</span></div>
+  <svg class="chart" id="nf_chart" viewBox="0 0 700 190" role="img" aria-label="noise floor comparison"></svg>
+  <div class="cap">A single human sprint disagrees with itself by the same eight ranks. <b>Eight is just what this measurement reads when nothing is wrong</b> — one game is a small sample, and any real player looks inconsistent across five features. My bots were no worse than a real game.</div>
+</figure>
+
+<section class="beat tight">
+  <p>The number wasn't a grade. It was a thermometer I'd never calibrated, and I nearly rebuilt a working system because of it.</p>
+  <p>What <em>did</em> survive the comparison was narrower and much more useful: four of the five features sat inside the human spread, and exactly one didn't. My bot used the hold slot — Tetris's "save this piece for later" button — like a beginner while playing like an expert everywhere else. Fixing that made it better at the actual game, not just better at resembling a person.</p>
+  <div class="pull">Any measurement of "how human is this?" is uninterpretable until you run it on humans and see what score they get.</div>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow bad">Lie #4</div>
+  <h2>The dial that was secretly a switch.</h2>
+  <p>To build a ladder of bots you need a knob that makes them worse by degrees. An obvious one: train a bot to copy an expert, and stop training early. A half-trained copy should play half as well.</p>
+  <p>It doesn't. Drag the accuracy slider — this is a perfect player whose decisions I corrupt at a known rate, so nothing else varies.</p>
+</section>
+
+<figure class="fig reveal">
+  <div class="wdg-head"><span>corrupting a perfect player · 40-line sprint</span><span class="tag" id="cl_tag">—</span></div>
+  <div class="ctl">
+    <label>decisions made correctly
+      <input type="range" id="cl_slider" min="0" max="6" value="0" step="1">
+      <span class="v" id="cl_acc">100%</span></label>
+  </div>
+  <svg class="chart" id="cl_chart" viewBox="0 0 720 290" role="img" aria-label="accuracy cliff"></svg>
+  <div class="readout">
+    <span>lines cleared of 40 <b id="cl_lines">—</b></span>
+    <span>games actually finished <b id="cl_fin">—</b></span>
+  </div>
+  <div class="cap">Every human record on the leaderboard is a <b>finished</b> game. So the entire human-relevant band is squeezed into the top 5% of this axis, and everything below 90% is indistinguishable rubble. <b>A 90%-accurate copy isn't a mediocre player. It's not a player at all.</b></div>
+</figure>
+
+<section class="beat tight">
+  <p>A ladder needs a knob whose middle settings produce middle play. Imitation accuracy isn't one, because a sprint is a hundred decisions in a row and one bad one ends it. The knob that <em>did</em> work changes what the bot is <b>trying to do</b> — expert bots hold out for quads, beginner bots grab any clear going — which degrades smoothly all the way down.</p>
+  <p class="dim">A footnote I enjoyed: a trained-but-imperfect bot is <em>worse</em> than a randomly corrupted one at the same error rate. Random mistakes cancel out. A model's mistakes are systematic — it's wrong the same way on similar boards, so its errors compound.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow">The design lesson</div>
+  <h2>One knob makes bots that all look the same.</h2>
+  <p>Here's why my agent-trained model got confused in the first place. I built the Tetris ladder with a single skill knob, so <em>everything</em> moved together: faster bots were also better stackers, better planners, tidier with their keystrokes. Real players don't work like that — there are fast sloppy players and slow careful ones.</p>
+  <p>When every feature moves in lockstep, a model can't tell which one matters. Mine gave pieces-per-second a <b>negative</b> weight, in a population where speed is the strongest predictor of skill there is.</p>
+  <p>The second game was built with three independent knobs instead. Same plot, both games:</p>
+</section>
+
+<figure class="fig reveal">
+  <div class="wdg-head"><span>speed vs judgement · each dot is one bot configuration</span><span class="tag" id="sc_tag">—</span></div>
+  <div class="toggle-row">
+    <button class="toggle active" data-sc="sprint">Tetris — one knob</button>
+    <button class="toggle" data-sc="mine">Minesweeper — three knobs</button>
+  </div>
+  <svg class="chart" id="sc_chart" viewBox="0 0 720 330" role="img" aria-label="collinearity scatter"></svg>
+  <div class="cap" id="sc_cap">—</div>
+</figure>
+
+<section class="beat tight">
+  <p>Left: a diagonal smear. Speed and judgement are the same number in different clothes, so a model fitted on it learns a relationship that falls apart on humans. Right: a cloud. You can be fast and careless, or slow and careful, independently — like people.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow win">What a better test looks like</div>
+  <h2>Minesweeper can tell you if a click was a mistake.</h2>
+  <p>The deep problem with the Tetris sprint is that it's a time trial. Rank correlates 0.93 with raw speed, so there was never room for a cleverer method to add anything. I picked Minesweeper next for one reason: it has a skill measure that <b>logic can settle</b>.</p>
+  <p>After any position, a solver can determine which hidden squares are <em>provably</em> safe. So for every click a player makes you can ask: was there a guaranteed-safe square available, and did you take it? That's a judgement score, it has nothing to do with speed, and it's computable for bots and humans identically.</p>
+  <p>Play a few clicks. <b>Hold the hint button</b> to see what the solver knows.</p>
+</section>
+
+<figure class="fig narrow reveal">
+  <div class="wdg-head"><span>minesweeper · 9×9, 10 mines</span><span class="tag idle" id="ms_tag">click any square to start</span></div>
+  <div class="msboard" id="ms_board"></div>
+  <div class="verdict" id="ms_verdict">The first click is always safe.</div>
+  <div class="tally">
+    <span>provably safe <b class="lab safe" id="ms_t_safe">0</b></span>
+    <span>avoidable guess <b class="lab avoid" id="ms_t_avoid">0</b></span>
+    <span>forced guess <b class="lab forced" id="ms_t_forced">0</b></span>
+    <span>hit a known mine <b class="lab blunder" id="ms_t_blunder">0</b></span>
+  </div>
+  <div class="wdg-foot">
+    <button class="btn" id="ms_hint">hold to reveal solver</button>
+    <button class="btn" id="ms_new">new board</button>
+  </div>
+  <div class="cap">Green outline: provably safe. Red outline: provably a mine. No outline on a hidden square means the solver can't tell either — <b>if you click one of those and there was a safe square available, that's an avoidable guess.</b> This is the exact measurement applied to the bots, and it would be applied to human replays unchanged.</div>
+</figure>
+
+<section class="beat tight">
+  <p>My best Minesweeper bot reveals a provably-safe square <span class="sage">83%</span> of the time and clicks a known mine <span class="sage">1%</span> of the time. Turn its "lapse rate" up and blunders climb to 19% while its speed doesn't change at all — two independent axes, which is exactly what the Tetris ladder failed to produce.</p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow">An aside worth the detour</div>
+  <h2>What actually taught the bot to play.</h2>
+  <p>I spent two million steps of reinforcement learning on Minesweeper and got a bot that never won a single game. It learned something, though: it learned to <b>never click anything</b>. With 99 mines hidden among 480 squares, an uninformed click is bad enough that flagging squares forever is genuinely the better strategy. It found the optimum of the reward I gave it, and the optimum was cowardice.</p>
+  <p>What worked instead was changing not the reward but the <em>amount of information per step</em>. The simulator knows where its mines are. So instead of one thumbs-up-or-down per click, give the network the answer for all 480 squares at once and ask it to predict them.</p>
+</section>
+
+<figure class="fig narrow reveal">
+  <div class="wdg-head"><span>same network, same game, two training signals</span><span class="tag ok">learning</span></div>
+  <svg class="chart" id="sig_chart" viewBox="0 0 700 250" role="img" aria-label="signal density comparison"></svg>
+  <div class="cap">Reinforcement learning: <b>0 wins after 2,000,000 attempts.</b> Supervised on dense labels: winning two thirds of its games after 12,000. Not a smarter algorithm — the same network, fed a signal that actually says something.</div>
+</figure>
+
+<div class="rule"></div>
+
+<section class="beat">
+  <div class="eyebrow">Where this stands</div>
+  <h2>One game is an anecdote.</h2>
+  <p>I want to be straight about what this does and doesn't show, because the temptation to round it up is strong.</p>
+  <p><b>What holds up:</b> a model trained purely on bots was worth more than 300 labelled human games on the one test I could run. That's a real result and it survives the corrected comparison.</p>
+  <p><b>What doesn't:</b> that test ran on a single game, and that game turned out to be nearly the worst possible choice — a time trial whose ranking is 93% explained by one obvious number. There was no headroom for any method to fill. I picked it because I could get the data, which is not the same as picking it because it could answer the question.</p>
+  <p>Minesweeper is the game where the question can actually be answered, and everything on the bot side is finished and waiting. The human half is stuck: the site's data isn't reachable without hammering their servers in ways I'm not willing to, and my email asking nicely hasn't been answered yet.</p>
+</section>
+
+<div class="caveats">
+  <div class="c"><span>The one thing I'd tell anyone starting this: <b>before you build a simulator for a game, check how well the single most obvious statistic already predicts rank.</b> If it's 0.9, there is nothing left for you to win.</span></div>
+  <div class="c"><span>Three claims in this project were published and then retracted — a bug I asserted without checking, a validation gate I believed was green because I'd read it off a terminal rather than the file, and a metric that was measuring a stuck program rather than a trained one. They're all still in the repository's history. <b>Every one was caught by a control, not by a failing test.</b></span></div>
+  <div class="c"><span>None of the human data is in the repository. It belongs to the people who published it, and it's personal data even after the names are hashed. Everything you can see on this page is an aggregate.</span></div>
+</div>
+
+<section class="outro">
+  <h2>The failure mode isn't code that crashes.</h2>
+  <p>It's a number that looks decisive and points the wrong way. Every trap on this page produced a confident, plausible, entirely wrong conclusion — and each one was caught by asking what the measurement reads when nothing is wrong.</p>
+  <div class="links">
+    <a href="https://github.com/Orbitope/coldopen">Repository</a>
+    <a href="https://orbitope.github.io">More Orbitope</a>
+  </div>
+  <div class="foot">Orbitope · coldopen</div>
+</section>
+
+</div>
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, text) {
+    const n = document.createElementNS(svgNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+
+  /* scroll progress + reveal ------------------------------------------- */
+  const progress = $("progress");
+  addEventListener("scroll", () => {
+    const h = document.body.scrollHeight - innerHeight;
+    progress.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + "%";
+  }, { passive: true });
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(n => io.observe(n));
+
+  /* ---------------- widget 1: label efficiency ------------------------ */
+  const LE = DATA.labelEfficiency;
+  function drawLE(sel) {
+    const svg = $("le_chart"); clear(svg);
+    const W = 720, H = 300, L = 62, R = 24, T = 26, B = 46;
+    const x = i => L + (i / (LE.length - 1)) * (W - L - R);
+    const y = v => T + (1 - (v - 0.75) / 0.25) * (H - T - B);
+    for (let v = 0.75; v <= 1.001; v += 0.05) {
+      svg.appendChild(el("line", { class: "gridline", x1: L, x2: W - R, y1: y(v), y2: y(v) }));
+      svg.appendChild(el("text", { class: "axlab", x: L - 8, y: y(v) + 3, "text-anchor": "end" }, v.toFixed(2)));
+    }
+    LE.forEach((d, i) => svg.appendChild(el("text",
+      { class: "axlab", x: x(i), y: H - B + 18, "text-anchor": "middle" }, d.n)));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle" },
+      "labelled human games you have"));
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: y(0.75), y2: y(0.75) }));
+
+    const path = k => LE.map((d, i) => (i ? "L" : "M") + x(i) + " " + y(d[k])).join(" ");
+    svg.appendChild(el("path", { class: "series-h", d: path("human") }));
+    svg.appendChild(el("path", { class: "series-a", d: path("agent") }));
+    LE.forEach((d, i) => {
+      svg.appendChild(el("circle", { class: "dot-h", cx: x(i), cy: y(d.human), r: i === sel ? 5 : 3 }));
+      svg.appendChild(el("circle", { class: "dot-a", cx: x(i), cy: y(d.agent), r: i === sel ? 5 : 3 }));
+    });
+    // the gap the simulator buys, at the selected point
+    svg.appendChild(el("line", {
+      x1: x(sel), x2: x(sel), y1: y(LE[sel].human), y2: y(LE[sel].agent),
+      stroke: "var(--amber)", "stroke-width": 1.5, "stroke-dasharray": "3 3"
+    }));
+    svg.appendChild(el("text", { class: "axlab", x: x(0) + 6, y: y(LE[0].agent) - 12, fill: "var(--amber-bright)" },
+      "fitted on agents — zero labels"));
+    svg.appendChild(el("text", { class: "axlab", x: x(0) + 6, y: y(LE[0].human) + 18, fill: "var(--steel-bright)" },
+      "fitted on humans"));
+  }
+  function updLE() {
+    const i = +$("le_slider").value, d = LE[i];
+    $("le_n").textContent = d.n;
+    $("le_h").textContent = d.human.toFixed(3);
+    $("le_a").textContent = d.agent.toFixed(3);
+    const gap = d.agent - d.human;
+    $("le_gap").textContent = (gap >= 0 ? "+" : "") + gap.toFixed(3);
+    const tag = $("le_tag");
+    tag.className = "tag " + (gap > 0 ? "ok" : "no");
+    tag.textContent = gap > 0 ? "simulator still ahead" : "labels caught up";
+    drawLE(i);
+  }
+  $("le_slider").max = LE.length - 1;
+  $("le_slider").addEventListener("input", updLE);
+  updLE();
+
+  /* ---------------- widget 2: range check vs rank check ---------------- */
+  const BOT_QUAD = 0.01;                       // the v1 bot, pinned at the bottom
+  let qMode = "range";
+  function drawQ() {
+    const svg = $("q_chart"); clear(svg);
+    const W = 720, H = 260, L = 50, R = 24, T = 22, B = 44;
+    const hist = DATA.humanQuad.hist, n = hist.length, mx = Math.max(...hist);
+    const bw = (W - L - R) / n;
+    const x = v => L + v * (W - L - R);
+    hist.forEach((c, i) => {
+      const h = (c / mx) * (H - T - B);
+      svg.appendChild(el("rect", {
+        x: L + i * bw + 1, y: H - B - h, width: bw - 2, height: h,
+        fill: "var(--steel)", opacity: .55, rx: 1
+      }));
+    });
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: H - B, y2: H - B }));
+    [0, .25, .5, .75, 1].forEach(v => svg.appendChild(el("text",
+      { class: "axlab", x: x(v), y: H - B + 17, "text-anchor": "middle" }, v.toFixed(2))));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle" },
+      "quad rate — fraction of lines cleared four at a time"));
+
+    if (qMode === "range") {
+      const p2 = x(DATA.humanQuad.p2), p98 = x(DATA.humanQuad.p98);
+      svg.appendChild(el("rect", {
+        x: p2, y: T, width: p98 - p2, height: H - T - B,
+        fill: "var(--sage)", opacity: .10
+      }));
+      [[p2, "2nd pct"], [p98, "98th pct"]].forEach(([px, lab]) => {
+        svg.appendChild(el("line", { x1: px, x2: px, y1: T, y2: H - B, stroke: "var(--sage)", "stroke-width": 1.5 }));
+        svg.appendChild(el("text", { class: "axlab", x: px + 4, y: T + 12, fill: "var(--sage)" }, lab));
+      });
+    } else {
+      DATA.humanRanks.forEach(r => {
+        svg.appendChild(el("line", {
+          x1: x(r.quad), x2: x(r.quad), y1: T + 8, y2: H - B,
+          stroke: "var(--steel-bright)", "stroke-width": 1, opacity: .5
+        }));
+      });
+      const worst = DATA.humanRanks[0], best = DATA.humanRanks[DATA.humanRanks.length - 1];
+      svg.appendChild(el("text", { class: "axlab", x: x(worst.quad) + 4, y: T + 8, fill: "var(--steel-bright)" },
+        "rank " + worst.rank));
+      svg.appendChild(el("text", { class: "axlab", x: x(best.quad) - 4, y: T + 8, "text-anchor": "end", fill: "var(--steel-bright)" },
+        "rank " + best.rank));
+    }
+    const bx = x(BOT_QUAD);
+    svg.appendChild(el("line", { x1: bx, x2: bx, y1: T - 6, y2: H - B + 6, stroke: "var(--coral)", "stroke-width": 2.5 }));
+    svg.appendChild(el("text", { class: "axlab", x: bx + 7, y: H - B - 6, fill: "var(--coral)" }, "my bot: 0.01"));
+
+    const tag = $("q_tag");
+    if (qMode === "range") {
+      tag.className = "tag ok"; tag.textContent = "PASS — 100% inside";
+      $("q_cap").innerHTML = "The bot sits at 0.01. The human 2nd-to-98th percentile band starts at " +
+        DATA.humanQuad.p2.toFixed(2) + ", so <b>the bot is inside the range and the check passes</b> — while being worse at this than every human in the sample.";
+    } else {
+      tag.className = "tag no"; tag.textContent = "FAIL — matches the weakest rank";
+      $("q_cap").innerHTML = "Each steel line is one human rank's average, weakest on the left. Now the same bot obviously " +
+        "<b>sits at the very bottom rung and never moves</b>, no matter how much its other features improve.";
+    }
+  }
+  document.querySelectorAll("[data-q]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-q]").forEach(o => o.classList.remove("active"));
+    b.classList.add("active"); qMode = b.dataset.q; drawQ();
+  }));
+  drawQ();
+
+  /* ---------------- figure: the noise floor --------------------------- */
+  (function () {
+    const svg = $("nf_chart"); clear(svg);
+    const W = 700, H = 190, L = 190, R = 40, T = 26;
+    const rows = [
+      ["a single human's own game", 8.0, "var(--steel-bright)"],
+      ["my agent ladder", 8.0, "var(--amber-bright)"]
+    ];
+    const x = v => L + (v / 12) * (W - L - R);
+    rows.forEach((r, i) => {
+      const y = T + i * 52;
+      svg.appendChild(el("text", { class: "axlab", x: L - 12, y: y + 20, "text-anchor": "end", "font-size": 11 }, r[0]));
+      svg.appendChild(el("rect", { x: L, y: y, width: x(r[1]) - L, height: 30, fill: r[2], opacity: .8, rx: 2 }));
+      svg.appendChild(el("text", { class: "axlab", x: x(r[1]) + 8, y: y + 20, fill: r[2], "font-size": 12 }, r[1].toFixed(1) + " ranks"));
+    });
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: T + 108, y2: T + 108 }));
+    [0, 4, 8, 12].forEach(v => svg.appendChild(el("text",
+      { class: "axlab", x: x(v), y: T + 126, "text-anchor": "middle" }, v)));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: T + 148, "text-anchor": "middle" },
+      "how much the five features disagree about the same player"));
+  })();
+
+  /* ---------------- widget 3: the accuracy cliff ---------------------- */
+  const CL = DATA.cliff.slice().sort((a, b) => a.acc - b.acc);
+  function drawCL(sel) {
+    const svg = $("cl_chart"); clear(svg);
+    const W = 720, H = 290, L = 58, R = 30, T = 26, B = 52;
+    const x = i => L + (i / (CL.length - 1)) * (W - L - R);
+    const y = v => T + (1 - v / 45) * (H - T - B);
+    [0, 10, 20, 30, 40].forEach(v => {
+      svg.appendChild(el("line", { class: "gridline", x1: L, x2: W - R, y1: y(v), y2: y(v) }));
+      svg.appendChild(el("text", { class: "axlab", x: L - 8, y: y(v) + 3, "text-anchor": "end" }, v));
+    });
+    svg.appendChild(el("line", {
+      x1: L, x2: W - R, y1: y(40), y2: y(40), stroke: "var(--sage)",
+      "stroke-width": 1, "stroke-dasharray": "4 4", opacity: .7
+    }));
+    svg.appendChild(el("text", { class: "axlab", x: W - R - 4, y: y(40) - 6, "text-anchor": "end", fill: "var(--sage)" },
+      "40 lines = a finished game"));
+    CL.forEach((d, i) => {
+      const h = y(0) - y(d.lines);
+      svg.appendChild(el("rect", {
+        x: x(i) - 22, y: y(d.lines), width: 44, height: Math.max(h, 1), rx: 2,
+        fill: d.finish > 0 ? "var(--sage)" : "var(--coral)",
+        opacity: i === sel ? 1 : .32
+      }));
+      svg.appendChild(el("text", { class: "axlab", x: x(i), y: H - B + 18, "text-anchor": "middle" },
+        Math.round(d.acc * 100) + "%"));
+    });
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: y(0), y2: y(0) }));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 12, "text-anchor": "middle" },
+      "share of decisions made correctly"));
+    svg.appendChild(el("text", {
+      class: "axlab", x: L - 44, y: (T + H - B) / 2, transform: `rotate(-90 ${L - 44} ${(T + H - B) / 2})`,
+      "text-anchor": "middle"
+    }, "lines cleared"));
+  }
+  function updCL() {
+    const i = +$("cl_slider").value, d = CL[i];
+    $("cl_acc").textContent = Math.round(d.acc * 100) + "%";
+    $("cl_lines").textContent = d.lines.toFixed(1);
+    $("cl_fin").textContent = Math.round(d.finish * 100) + "%";
+    const tag = $("cl_tag");
+    tag.className = "tag " + (d.finish > 0.4 ? "ok" : d.finish > 0 ? "warn" : "no");
+    tag.textContent = d.finish > 0.4 ? "plays like a person" : d.finish > 0 ? "sometimes finishes" : "never finishes a game";
+    drawCL(i);
+  }
+  const cls = $("cl_slider");
+  cls.max = CL.length - 1; cls.value = CL.length - 1;
+  cls.addEventListener("input", updCL);
+  updCL();
+
+  /* ---------------- widget 4: collinearity scatter -------------------- */
+  let scMode = "sprint";
+  function drawSC() {
+    const svg = $("sc_chart"); clear(svg);
+    const W = 720, H = 330, L = 64, R = 28, T = 24, B = 54;
+    const pts = scMode === "sprint"
+      ? DATA.sprintScatter.map(p => ({ x: p[0], y: p[1] }))
+      : DATA.msGrid.map(p => ({ x: p.bvs, y: p.safe }));
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+    const x0 = 0, x1 = Math.max(...xs) * 1.05, y0 = 0, y1 = Math.max(...ys) * 1.1;
+    const X = v => L + ((v - x0) / (x1 - x0)) * (W - L - R);
+    const Y = v => T + (1 - (v - y0) / (y1 - y0)) * (H - T - B);
+    for (let i = 0; i <= 4; i++) {
+      const v = y0 + (i / 4) * (y1 - y0);
+      svg.appendChild(el("line", { class: "gridline", x1: L, x2: W - R, y1: Y(v), y2: Y(v) }));
+      svg.appendChild(el("text", { class: "axlab", x: L - 8, y: Y(v) + 3, "text-anchor": "end" }, v.toFixed(2)));
+    }
+    pts.forEach(p => svg.appendChild(el("circle", {
+      cx: X(p.x), cy: Y(p.y), r: 3.4,
+      fill: scMode === "sprint" ? "var(--coral)" : "var(--sage)", opacity: .55
+    })));
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: H - B, y2: H - B }));
+    for (let i = 0; i <= 4; i++) {
+      const v = x0 + (i / 4) * (x1 - x0);
+      svg.appendChild(el("text", { class: "axlab", x: X(v), y: H - B + 17, "text-anchor": "middle" }, v.toFixed(1)));
+    }
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 14, "text-anchor": "middle" },
+      scMode === "sprint" ? "speed — pieces per second" : "speed — board-value per second"));
+    svg.appendChild(el("text", {
+      class: "axlab", x: L - 46, y: (T + H - B) / 2,
+      transform: `rotate(-90 ${L - 46} ${(T + H - B) / 2})`, "text-anchor": "middle"
+    }, scMode === "sprint" ? "judgement — planning use" : "judgement — provably-safe rate"));
+
+    const r = scMode === "sprint" ? DATA.corr.sprint : DATA.corr.minesweeper;
+    const tag = $("sc_tag");
+    tag.className = "tag " + (Math.abs(r) > 0.5 ? "no" : "ok");
+    tag.textContent = "correlation " + (r > 0 ? "+" : "") + r.toFixed(2);
+    $("sc_cap").innerHTML = scMode === "sprint"
+      ? "One knob, so speed and judgement rise together: correlation <b>" + r.toFixed(2) +
+        "</b>. A model fitted here can't separate them, and it gave speed a negative weight."
+      : "Three knobs — training, lapse rate, input delay — moved independently: correlation <b>" + r.toFixed(2) +
+        "</b>. Speed says nothing about judgement, which is what makes the two features worth having.";
+  }
+  document.querySelectorAll("[data-sc]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-sc]").forEach(o => o.classList.remove("active"));
+    b.classList.add("active"); scMode = b.dataset.sc; drawSC();
+  }));
+  drawSC();
+
+  /* ---------------- figure: signal density ---------------------------- */
+  (function () {
+    const svg = $("sig_chart"); clear(svg);
+    const W = 700, H = 250, L = 56, R = 130, T = 24, B = 48;
+    const lg = v => Math.log10(Math.max(v, 1));
+    const maxX = lg(2e6);
+    const X = v => L + (lg(v) / maxX) * (W - L - R);
+    const Y = v => T + (1 - v) * (H - T - B);
+    [0, .25, .5, .75, 1].forEach(v => {
+      svg.appendChild(el("line", { class: "gridline", x1: L, x2: W - R, y1: Y(v), y2: Y(v) }));
+      svg.appendChild(el("text", { class: "axlab", x: L - 8, y: Y(v) + 3, "text-anchor": "end" },
+        Math.round(v * 100) + "%"));
+    });
+    const line = (pts, cls) => {
+      const d = pts.filter(p => p.x > 0 && p.y != null)
+        .map((p, i) => (i ? "L" : "M") + X(p.x) + " " + Y(p.y)).join(" ");
+      svg.appendChild(el("path", { class: cls, d }));
+    };
+    line(DATA.dqnCurve, "series-h");
+    line(DATA.beginnerCurve, "series-a");
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: Y(0), y2: Y(0) }));
+    [1e2, 1e3, 1e4, 1e5, 1e6].forEach(v => svg.appendChild(el("text",
+      { class: "axlab", x: X(v), y: H - B + 17, "text-anchor": "middle" },
+      v >= 1e6 ? "1M" : v >= 1e3 ? (v / 1e3) + "k" : v)));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle" },
+      "training steps (log scale)"));
+    const last = DATA.beginnerCurve[DATA.beginnerCurve.length - 1];
+    svg.appendChild(el("text", { class: "axlab", x: X(last.x) + 8, y: Y(last.y) + 4, fill: "var(--amber-bright)" },
+      "dense labels"));
+    svg.appendChild(el("text", { class: "axlab", x: X(2e6) + 8, y: Y(0) - 4, fill: "var(--steel-bright)" },
+      "reinforcement learning"));
+    svg.appendChild(el("text", { class: "axlab", x: L + 6, y: T + 10, fill: "var(--text-muted)" },
+      "games won"));
+  })();
+
+  /* ---------------- widget 5: minesweeper + solver -------------------- */
+  const MS = (function () {
+    const H = 9, W = 9, M = 10, K = H * W;
+    let mines, open, gen, dead, tally, hint = false;
+
+    const nb = c => {
+      const r = (c / W) | 0, q = c % W, out = [];
+      for (let dr = -1; dr <= 1; dr++) for (let dq = -1; dq <= 1; dq++) {
+        if (!dr && !dq) continue;
+        const rr = r + dr, qq = q + dq;
+        if (rr >= 0 && rr < H && qq >= 0 && qq < W) out.push(rr * W + qq);
+      }
+      return out;
+    };
+    const NB = Array.from({ length: K }, (_, c) => nb(c));
+    const count = c => NB[c].reduce((a, j) => a + (mines[j] ? 1 : 0), 0);
+
+    function reset() {
+      mines = new Array(K).fill(false); open = new Array(K).fill(false);
+      gen = false; dead = false;
+      tally = { safe: 0, avoid: 0, forced: 0, blunder: 0 };
+      render();
+      $("ms_verdict").innerHTML = "The first click is always safe.";
+      $("ms_tag").className = "tag idle";
+      $("ms_tag").textContent = "click any square to start";
+    }
+
+    function place(first) {
+      // mines anywhere outside the clicked square's 3x3, so the first click
+      // always opens a region — same rule the simulator uses
+      const banned = new Set([first, ...NB[first]]);
+      const pool = [];
+      for (let i = 0; i < K; i++) if (!banned.has(i)) pool.push(i);
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = (Math.random() * (i + 1)) | 0;
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      pool.slice(0, M).forEach(i => mines[i] = true);
+      gen = true;
+    }
+
+    function flood(c) {
+      open[c] = true;
+      if (count(c) !== 0) return;
+      const stack = [c];
+      while (stack.length) {
+        const i = stack.pop();
+        for (const j of NB[i]) {
+          if (open[j]) continue;
+          open[j] = true;
+          if (count(j) === 0) stack.push(j);
+        }
+      }
+    }
+
+    /* The solver: unary rules to a fixpoint, then pairwise subset rules.
+       Deliberately not complete — it never claims a cell it hasn't proven,
+       which is the only property the verdict needs. */
+    function solve() {
+      const known = new Map();        // cell -> true (mine) / false (safe)
+      const constraints = () => {
+        const out = [];
+        for (let i = 0; i < K; i++) {
+          if (!open[i]) continue;
+          const cells = NB[i].filter(j => !open[j] && !known.has(j));
+          const need = count(i) - NB[i].filter(j => known.get(j) === true).length;
+          if (cells.length) out.push({ cells: new Set(cells), need });
+        }
+        return out;
+      };
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const cs = constraints();
+        for (const c of cs) {
+          if (c.need === 0) { for (const j of c.cells) if (!known.has(j)) { known.set(j, false); changed = true; } }
+          else if (c.need === c.cells.size) { for (const j of c.cells) if (!known.has(j)) { known.set(j, true); changed = true; } }
+        }
+        if (changed) continue;
+        for (let a = 0; a < cs.length && !changed; a++) {
+          for (let b = 0; b < cs.length && !changed; b++) {
+            if (a === b) continue;
+            const A = cs[a], B = cs[b];
+            if (A.cells.size >= B.cells.size) continue;
+            let subset = true;
+            for (const j of A.cells) if (!B.cells.has(j)) { subset = false; break; }
+            if (!subset) continue;
+            const rest = [...B.cells].filter(j => !A.cells.has(j));
+            if (B.need - A.need === rest.length) {
+              for (const j of rest) if (!known.has(j)) { known.set(j, true); changed = true; }
+            } else if (B.need === A.need) {
+              for (const j of rest) if (!known.has(j)) { known.set(j, false); changed = true; }
+            }
+          }
+        }
+      }
+      const safe = new Set(), mine = new Set();
+      known.forEach((v, j) => (v ? mine : safe).add(j));
+      return { safe, mine };
+    }
+
+    function render(verdict) {
+      const board = $("ms_board");
+      board.style.gridTemplateColumns = `repeat(${W}, 26px)`;
+      clear(board);
+      const v = gen && !dead ? solve() : { safe: new Set(), mine: new Set() };
+      for (let i = 0; i < K; i++) {
+        const b = document.createElement("button");
+        b.className = "cell";
+        b.setAttribute("aria-label", "square " + i);
+        if (open[i]) {
+          b.classList.add("open");
+          if (mines[i]) { b.classList.add("boom"); b.textContent = "✳"; }
+          else { const c = count(i); if (c) { b.textContent = c; b.classList.add("n" + c); } }
+        } else if (hint && gen && !dead) {
+          if (v.safe.has(i)) b.classList.add("hint-safe");
+          else if (v.mine.has(i)) b.classList.add("hint-mine");
+        }
+        if (!open[i] && !dead) b.addEventListener("click", () => click(i));
+        board.appendChild(b);
+      }
+      $("ms_t_safe").textContent = tally.safe;
+      $("ms_t_avoid").textContent = tally.avoid;
+      $("ms_t_forced").textContent = tally.forced;
+      $("ms_t_blunder").textContent = tally.blunder;
+      if (verdict) $("ms_verdict").innerHTML = verdict;
+    }
+
+    function click(c) {
+      if (dead || open[c]) return;
+      let verdict;
+      if (!gen) {
+        place(c); flood(c);
+        verdict = 'First click — the board is built around it, so it is always safe.';
+        $("ms_tag").className = "tag idle"; $("ms_tag").textContent = "in play";
+      } else {
+        const v = solve();
+        if (v.mine.has(c)) { tally.blunder++; verdict = '<span class="lab blunder">HIT A KNOWN MINE</span> — the solver had already proven this one.'; }
+        else if (v.safe.has(c)) { tally.safe++; verdict = '<span class="lab safe">PROVABLY SAFE</span> — logic guaranteed this square.'; }
+        else if (v.safe.size > 0) { tally.avoid++; verdict = '<span class="lab avoid">AVOIDABLE GUESS</span> — ' + v.safe.size + ' proven-safe square' + (v.safe.size > 1 ? "s were" : " was") + ' available.'; }
+        else { tally.forced++; verdict = '<span class="lab forced">FORCED GUESS</span> — nothing was provable. Even a perfect player guesses here.'; }
+        flood(c);
+        if (mines[c]) {
+          dead = true;
+          for (let i = 0; i < K; i++) if (mines[i]) open[i] = true;
+          verdict += '<br><span class="dim">Boom. New board?</span>';
+          $("ms_tag").className = "tag no"; $("ms_tag").textContent = "dead";
+        }
+      }
+      const left = open.reduce((a, o, i) => a + (o || mines[i] ? 0 : 1), 0);
+      if (!dead && left === 0) {
+        $("ms_tag").className = "tag ok"; $("ms_tag").textContent = "cleared";
+        verdict += '<br><span class="sage">Board cleared.</span>';
+      }
+      render(verdict);
+    }
+
+    const hintBtn = $("ms_hint");
+    const setHint = on => { hint = on; hintBtn.classList.toggle("on", on); render(); };
+    ["mousedown", "touchstart"].forEach(e => hintBtn.addEventListener(e, ev => { ev.preventDefault(); setHint(true); }));
+    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach(e => hintBtn.addEventListener(e, () => setHint(false)));
+    hintBtn.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") setHint(true); });
+    hintBtn.addEventListener("keyup", () => setHint(false));
+    $("ms_new").addEventListener("click", reset);
+    reset();
+    return { reset };
+  })();
+})();
+</script>
+</body>
+</html>
