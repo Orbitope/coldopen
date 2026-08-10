@@ -174,9 +174,18 @@ decide it are fixed.
    neighbours), clipped at the board edges.
 2. `eligible` = every cell not in `excluded`. `|eligible| ≥ H·W − 9 ≥ M`.
 3. `mines` = the `M` eligible cells with the smallest `MINE_KEYS` values, ties
-   broken by smaller cell index. Both implementations use `rng.draw_bits`
-   directly — no masking or rescaling, because every transformation is another
-   place the two can disagree.
+   broken by smaller cell index (a *stable* ascending sort gives exactly this).
+
+**The key is masked to its low 32 bits, and that is load-bearing.**
+`draw_bits` returns a uint64 as a Python int in `[0, 2^64)`, while its torch
+counterpart returns the same 64 bits reinterpreted as *signed* int64 — the
+value prints negative whenever bit 63 is set. Sorting those two ascending
+produces different orderings for half the key space, so the two
+implementations would place mines differently while both "using the same
+draw". The low 32 bits are identical under either reading, so masking removes
+the ambiguity. Over 480 cells a 32-bit key collides with probability ~3e-5 per
+episode, and the index tie-break resolves collisions identically on both
+sides.
 
 Drawing the keys at reset but *applying* them at the first click makes the
 board a deterministic function of `(seed, first_cell)` — reproducible, and
@@ -214,7 +223,7 @@ Hold in every reachable state, including terminal states.
 
 | slot | name | used at | distribution |
 |---|---|---|---|
-| 0 | `MINE_KEYS` | reset (step 0), `index = cell` for each of `H·W` cells | uniform 64-bit, `rng.draw_bits` |
+| 0 | `MINE_KEYS` | reset (step 0), `index = cell` for each of `H·W` cells | `rng.draw_bits(...) & 0xFFFFFFFF` — the low 32 bits |
 
 One stochastic decision only: the mine layout. It is realised as a key per cell
 rather than as a sample of `M` positions because "take the `M` smallest keys

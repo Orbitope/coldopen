@@ -140,3 +140,34 @@ def load_checkpoint(path, info, device="cpu"):
     net.load_state_dict(blob["state"])
     net.eval()
     return net
+
+
+class FullyConvNet(nn.Module):
+    """Conv body -> 1x1 conv head: [B, C, H, W] -> [B, out_channels, H, W].
+
+    For games whose actions ARE cells. Flattening the output in row-major
+    order aligns exactly with a kind-major action encoding (kind*K + r*W + c),
+    so no linear layer sits between the board and the Q-values — and no
+    bottleneck forces 1440 spatially-structured actions through 128 units,
+    which is what the Flatten+Linear head in BoardNet does.
+
+    The payoff is weight sharing: a local pattern ("this 1 touches exactly one
+    unrevealed cell") is learned once and applied at every position, instead
+    of once per location. Depth is the knob that matters — deduction chains
+    need receptive field, and 3x3 convs buy 2 cells of radius each.
+    """
+
+    def __init__(self, in_channels, out_channels, channels=64, depth=6):
+        super().__init__()
+        layers = [nn.Conv2d(in_channels, channels, 3, padding=1), nn.ReLU()]
+        for _ in range(depth - 1):
+            layers += [nn.Conv2d(channels, channels, 3, padding=1), nn.ReLU()]
+        self.body = nn.Sequential(*layers)
+        self.head = nn.Conv2d(channels, out_channels, 1)
+
+    def forward(self, x):
+        return self.head(self.body(x))
+
+    def q_values(self, x):
+        """[B, out_channels * H * W], kind-major — the action-space view."""
+        return self.forward(x).flatten(1)

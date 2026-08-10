@@ -103,7 +103,8 @@ class MinesweeperReference(ReferenceEnv):
         # board is NOT laid out yet; only the keys that will decide it.
         keys = []
         for cell in range(self.K):
-            keys.append(rng.draw_bits(self.key, 0, Slots.MINE_KEYS, cell))
+            # spec: RNG slots — low 32 bits, identical in both backends
+            keys.append(rng.draw_bits(self.key, 0, Slots.MINE_KEYS, cell) & 0xFFFFFFFF)
         self.state = State(
             t=0,
             mines=[0] * self.K,
@@ -274,7 +275,8 @@ class MinesweeperReference(ReferenceEnv):
         # self.key rather than carrying it around.
         keys = []
         for cell in range(self.K):
-            keys.append(rng.draw_bits(self.key, 0, Slots.MINE_KEYS, cell))
+            # spec: RNG slots — low 32 bits, identical in both backends
+            keys.append(rng.draw_bits(self.key, 0, Slots.MINE_KEYS, cell) & 0xFFFFFFFF)
         return State(
             t=int(obj["t"]),
             mines=[int(v) for v in obj["mines"]],
