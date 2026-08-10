@@ -523,6 +523,79 @@ JSON endpoints, which must be discovered first.
 **Handling.** Hash player IDs at ingest. The pipeline needs a stable key and a
 skill label, never a username. Publish aggregates only.
 
+### Status: environment built and validated; scrape stopped; curriculum in place
+
+`envs/minesweeper/` — spec, reference, batched implementation, full battery
+**PASS** (10/10). Design decisions and their reasons:
+
+* **guaranteed opening** (mines drawn outside the closed 3×3 of the first
+  click) — removes first-move luck from a judgement measurement;
+* **standard boards**, so the solver has to separate a *forced* guess from an
+  avoidable one — the more informative feature;
+* **reveal + flag + chord** with distinct time costs (30/30/60ms + LATENCY).
+  Distinct costs are an E6 lesson made structural: equal costs would make
+  3BV/s ≡ efficiency ÷ latency, collapsing the two E1 axes into one number
+  and reproducing sprint's collinear-telemetry failure by construction;
+* the deduction oracle lives in the **telemetry layer**, not the env.
+
+The differential test caught one real independent-misreading (the batched
+flood seeded from a count-0 *mine*, revealing the ring around a death — the
+spec stops a mine reveal before the flood), and two traps were avoided by
+design: torch reinterprets `draw_bits`' uint64 as signed, so mine keys are
+masked to 32 bits or the two implementations sort different layouts; and the
+flood is gated per-instance on "this step revealed a zero", because a global
+fixpoint would reveal cells when a flag is *removed*.
+
+**The scrape is stopped** (see `coldopen/human/minesweeper_notes.md`):
+robots.txt is permissive, but the data is unreachable over plain HTTP — every
+variant returns the same 29,946-byte SPA shell — and the one XHR the front end
+makes, `/authorize`, **creates a user account per call**. Every viable route
+either drives a browser thousands of times or writes to their production user
+table. Blocked pending a support reply; ~4 stray anonymous accounts were
+created during diagnosis before this was understood.
+
+### The exploration wall, and the curriculum that answers it
+
+An expert win is ~381 correct reveals with zero fatal ones; random play dies
+in a handful of clicks. This is sprint's wall again — DQN there learned
+nothing in 3M steps — so it is met head-on this time rather than discovered
+at the end:
+
+* **Fully-convolutional Q-net** (`FullyConvNet`): the `[3, H, W]` head *is*
+  the kind-major action space. 49.5k parameters against BoardNet's 4.2M, and
+  a local deduction pattern ("this 1 touches exactly one unrevealed cell") is
+  learned once and applied at all 480 positions instead of once per location
+  through a flat bottleneck. Minesweeper deduction is local,
+  translation-invariant pattern matching — the exact structure conv weight
+  sharing encodes. The honest limit: a fixed receptive field cannot do global
+  mine-count deductions; the solver stays the oracle.
+* **Reverse curriculum** (`coldopen/ms_curriculum.py`, after Salimans & Chen
+  2018): reset agents into boards with only `k` safe cells left, and move the
+  start line backwards as the windowed win rate clears a threshold. The win
+  bonus is visible from step one, and value propagates backwards through
+  states the agent has actually mastered. Start states come from a pluggable
+  source:
+  - **synthetic** (running today): boards from the env's own layout rule with
+    all but `k` random safe cells revealed. No human data — ladders trained
+    this way stay cold-start legitimate. A parity test pins the curriculum's
+    layout copy byte-for-byte to `fast.py`'s.
+  - **human replays** (contract ready, data later): when scraped replays
+    exist (`coldopen/human/minesweeper_replays.py` fixes the JSON format),
+    each click of a real game is a board state a person actually visited;
+    replaying clicks through the *reference* env captures those states, and
+    they slot into the same curriculum as an alternative source — shaping the
+    start distribution toward the human-visited manifold.
+
+**Contamination rules for the replay source, fixed in advance:** a
+replay-trained ladder is a separate track (`ladders/minesweeper_replays`),
+never the cold-start claim; replay players and evaluation players are split
+disjointly by hash before anything trains; and the E6-style comparison treats
+it as a point on the label-efficiency curve — *what does a replay corpus buy
+over the synthetic curriculum?* — not as a second cold-start method. Injected
+starts satisfy every env invariant except I9 (which defines `t == 0` as
+ungenerated — a curriculum start is deliberately mid-game), so curriculum
+training runs with debug off and validation stays on the base class.
+
 ---
 
 ## E5 — TETR.IO simulation

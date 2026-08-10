@@ -36,9 +36,11 @@ import torch
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "envs"))
 
-from coldopen.nets import BoardNet
+from coldopen.ms_curriculum import (CurriculumMinesweeper, Pacer,
+                                    SyntheticStates)
+from coldopen.nets import FullyConvNet
 from coldopen.selfplay import NStep, checkpoint_schedule
-from minesweeper.fast import CHORD, FLAG, REVEAL, MinesweeperBatched
+from minesweeper.fast import CHORD, FLAG, REVEAL
 
 OBS_SHAPE = (11, 16, 30)
 K = 16 * 30
@@ -71,8 +73,8 @@ def potential(env):
 
 def evaluate(net, device, episodes=32, latency=200, seed=123):
     """Greedy rollout; wins, mean revealed, and time on wins. Unshaped."""
-    env = MinesweeperBatched(min(episodes, 32), latency=latency,
-                             emit_final_states=False)
+    env = CurriculumMinesweeper(min(episodes, 32), source=None,
+                                latency=latency, emit_final_states=False)
     env.reset(torch.arange(env.n, dtype=torch.int64) + seed)
     done = torch.zeros(env.n, dtype=torch.bool)
     wins = torch.zeros(env.n, dtype=torch.bool)
@@ -82,7 +84,7 @@ def evaluate(net, device, episodes=32, latency=200, seed=123):
     obs = env.observe()
     for _ in range(steps_cap):
         with torch.no_grad():
-            q = net(obs.to(device)).cpu()
+            q = net.q_values(obs.to(device)).cpu()
         acts = q.masked_fill(~action_mask(env), -1e9).argmax(dim=1)
         prev_rev = (env.revealed & ~env.mines).sum(dim=1)
         prev_time = env.time_ms.clone()
@@ -107,23 +109,76 @@ def evaluate(net, device, episodes=32, latency=200, seed=123):
     }
 
 
+class MsReplay:
+    """Ring buffer with bool observation planes, sized for THIS game.
+
+    Not shared with train_sprint's BoolReplay deliberately: that class binds
+    its module's OBS_SHAPE and N_ACTIONS at import, so importing it here would
+    silently allocate sprint-shaped tensors. Ten lines of duplication beats a
+    shape bug that only explodes at the first add().
+    """
+
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.obs = torch.zeros(capacity, *OBS_SHAPE, dtype=torch.bool)
+        self.next_obs = torch.zeros_like(self.obs)
+        self.action = torch.zeros(capacity, dtype=torch.long)
+        self.reward = torch.zeros(capacity)
+        self.done = torch.zeros(capacity, dtype=torch.bool)
+        self.next_mask = torch.zeros(capacity, N_ACTIONS, dtype=torch.bool)
+        self.pos, self.full = 0, False
+
+    def add(self, obs, action, reward, sign, done, next_obs, next_legal):
+        del sign  # single-player: signs are all +1
+        n = obs.shape[0]
+        idx = (torch.arange(n) + self.pos) % self.capacity
+        self.obs[idx] = obs.bool()
+        self.next_obs[idx] = next_obs.bool()
+        self.action[idx] = action
+        self.reward[idx] = reward
+        self.done[idx] = done
+        self.next_mask[idx] = next_legal
+        self.full = self.full or self.pos + n >= self.capacity
+        self.pos = (self.pos + n) % self.capacity
+
+    def __len__(self):
+        return self.capacity if self.full else self.pos
+
+    def sample(self, batch, device):
+        i = torch.randint(0, len(self), (batch,))
+        return (self.obs[i].float().to(device),
+                self.action[i].to(device),
+                self.reward[i].to(device),
+                self.next_obs[i].float().to(device),
+                self.done[i].to(device),
+                self.next_mask[i].to(device))
+
+
 def train(args):
     device = torch.device(args.device)
     torch.manual_seed(args.seed)
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    net = BoardNet(OBS_SHAPE, N_ACTIONS, args.channels).to(device)
-    target = BoardNet(OBS_SHAPE, N_ACTIONS, args.channels).to(device)
+    # Fully convolutional: the [3, H, W] head IS the kind-major action space,
+    # so a local deduction pattern is learned once and applied at all 480
+    # positions instead of once per location through a flat bottleneck.
+    net = FullyConvNet(OBS_SHAPE[0], 3, args.channels, depth=args.depth).to(device)
+    target = FullyConvNet(OBS_SHAPE[0], 3, args.channels, depth=args.depth).to(device)
     target.load_state_dict(net.state_dict())
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
 
-    env = MinesweeperBatched(args.envs, latency=args.latency,
-                             emit_final_states=False)
+    # Reverse curriculum: start near the goal, walk backwards as win rate
+    # allows. Synthetic source only here - cold-start legitimate. The pacer
+    # widens k_max whenever the recent win rate clears its threshold.
+    source = SyntheticStates(k_max=args.k_start, seed=args.seed) \
+        if args.curriculum else None
+    pacer = Pacer(source, threshold=0.5, window=256) if source else None
+    env = CurriculumMinesweeper(args.envs, source=source, latency=args.latency,
+                                emit_final_states=False)
     env.reset(torch.arange(args.envs, dtype=torch.int64) + args.seed)
 
-    from coldopen.train_sprint import BoolReplay
-    buf = BoolReplay(args.buffer)
+    buf = MsReplay(args.buffer)
     nstep = NStep(args.n_step)
     ones = torch.ones(args.envs)
 
@@ -135,6 +190,7 @@ def train(args):
 
     def save(tag):
         torch.save({"steps": tag, "channels": args.channels,
+                    "depth": args.depth, "arch": "fcn",
                     "latency": args.latency, "state": net.state_dict()},
                    out / f"ckpt_{tag:08d}.pt")
         report = evaluate(net, device, latency=args.latency)
@@ -151,7 +207,7 @@ def train(args):
         eps = args.eps_start + (args.eps_end - args.eps_start) * frac
 
         with torch.no_grad():
-            q = net(obs.to(device)).cpu()
+            q = net.q_values(obs.to(device)).cpu()
         mask = action_mask(env)
         greedy = q.masked_fill(~mask, -1e9).argmax(dim=1)
         noise = torch.rand(args.envs, N_ACTIONS)
@@ -159,34 +215,47 @@ def train(args):
         explore = torch.rand(args.envs) < eps
         acts = torch.where(explore, random_legal, greedy)
 
+        won_before = env.won  # cleared by auto-reset; capture via term+dead
+        dead_snapshot = env.dead
         next_obs, reward, term, _ = env.step(acts)
+        if pacer is not None and bool(term.any()):
+            # a terminated instance won iff it terminated without dying and
+            # before the horizon; env.won is already cleared by auto-reset,
+            # but reward carries the win bonus exactly once
+            won_flags = (reward > 500_000)[term].tolist()
+            if pacer.update(won_flags):
+                print(f"  curriculum -> k_max {source.k_max} "
+                      f"(step {steps:,})", flush=True)
         # potential-based shaping on revealed-safe progress, training-only
         phi_next = potential(env)
         phi_next = torch.where(term, torch.zeros_like(phi_next), phi_next)
         shaped = reward + args.gamma * phi_next - phi
         phi = potential(env)
 
-        next_mask = action_mask(env)
-        for sample in nstep.push(obs.bool(), acts, shaped / 1000.0, ones,
-                                 term, next_obs.bool(), next_mask):
-            buf.push(**sample)
+        ready = nstep.push(obs=obs.bool(), action=acts,
+                           reward=shaped / 1000.0, sign=ones, done=term,
+                           next_obs=next_obs.bool(),
+                           next_legal=action_mask(env))
+        if ready is not None:
+            buf.add(**ready)
         obs = next_obs
         steps += args.envs
 
         if len(buf) >= args.learn_start:
             for _ in range(args.updates_per_step):
-                o, a, r, s, d, no, nm = buf.sample(args.batch, device)
+                o, a, r, no, d, nm = buf.sample(args.batch, device)
                 with torch.no_grad():
-                    nq = target(no)
-                    nq = nq.masked_fill(~nm, -1e9)
-                    online = net(no).masked_fill(~nm, -1e9).argmax(
+                    pick = target.q_values(no).masked_fill(~nm, -1e9)
+                    online = net.q_values(no).masked_fill(~nm, -1e9).argmax(
                         dim=1, keepdim=True)
-                    bootstrap = nq.gather(1, online).squeeze(1)
-                    y = r + (~d).float() * s * (args.gamma ** args.n_step) * bootstrap
-                pred = net(o).gather(1, a.unsqueeze(1)).squeeze(1)
+                    nq = pick.gather(1, online).squeeze(1)
+                    # n-step return, so the bootstrap is discounted by gamma^n
+                    y = torch.where(d, r, r + (args.gamma ** args.n_step) * nq)
+                pred = net.q_values(o).gather(1, a.unsqueeze(1)).squeeze(1)
                 loss = torch.nn.functional.smooth_l1_loss(pred, y)
                 opt.zero_grad(set_to_none=True)
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
                 opt.step()
                 updates += 1
                 if updates % args.target_sync == 0:
@@ -205,6 +274,11 @@ def main():
     p.add_argument("--batch", type=int, default=256)
     p.add_argument("--buffer", type=int, default=100_000)
     p.add_argument("--channels", type=int, default=64)
+    p.add_argument("--depth", type=int, default=8,
+                   help="conv layers; receptive field is ~2*depth+1 cells")
+    p.add_argument("--curriculum", action="store_true", default=True)
+    p.add_argument("--no-curriculum", dest="curriculum", action="store_false")
+    p.add_argument("--k-start", type=int, default=3)
     p.add_argument("--latency", type=int, default=200)
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--gamma", type=float, default=0.997)
