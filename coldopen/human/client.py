@@ -23,6 +23,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import re
 
 #: Identifies the crawler and gives an operator somewhere to complain to. A
 #: server admin who can see who we are and why can ask us to stop; one who
@@ -33,8 +34,97 @@ USER_AGENT = (
 )
 
 
+class Robots:
+    """A robots.txt matcher that follows RFC 9309, unlike the stdlib one.
+
+    `urllib.robotparser` matches rules in **file order** and returns the first
+    hit. Against minesweeper.online's actual policy —
+
+        User-agent: *
+        Allow: /
+        Disallow: /chat
+
+    — that makes `Allow: /` win for every path, and the stdlib parser reports
+    `/chat` as crawlable even though it is explicitly disallowed. An
+    "enforcement" layer that says yes to a forbidden path is worse than no
+    layer at all, because it is believed.
+
+    RFC 9309 section 2.2.2 specifies **longest match wins**, with `Allow`
+    taking precedence on an exact tie. Wildcards: `*` matches any run of
+    characters, `$` anchors the end of the path.
+    """
+
+    def __init__(self, text):
+        self.groups = {}
+        agents, collecting = [], False
+        for raw in text.splitlines():
+            line = raw.split("#", 1)[0].strip()
+            if not line or ":" not in line:
+                continue
+            field, _, value = line.partition(":")
+            field = field.strip().lower()
+            value = value.strip()
+            if field == "user-agent":
+                if not collecting:
+                    agents = []
+                agents.append(value.lower())
+                collecting = True
+                self.groups.setdefault(value.lower(), [])
+            elif field in ("allow", "disallow"):
+                collecting = False
+                if not value and field == "disallow":
+                    continue          # "Disallow:" with no value means allow all
+                for agent in agents or ["*"]:
+                    self.groups.setdefault(agent, []).append(
+                        (field == "allow", value))
+
+    @staticmethod
+    def _to_regex(pattern):
+        out, i = [], 0
+        while i < len(pattern):
+            ch = pattern[i]
+            if ch == "*":
+                out.append(".*")
+            elif ch == "$" and i == len(pattern) - 1:
+                out.append("$")
+            else:
+                out.append(re.escape(ch))
+            i += 1
+        return re.compile("^" + "".join(out))
+
+    def _rules_for(self, user_agent):
+        """The most specific matching group, falling back to `*`."""
+        agent = user_agent.lower()
+        best, best_len = None, -1
+        for name, rules in self.groups.items():
+            if name == "*":
+                continue
+            if name and name in agent and len(name) > best_len:
+                best, best_len = rules, len(name)
+        if best is not None:
+            return best
+        return self.groups.get("*", [])
+
+    def allowed(self, user_agent, path):
+        winner_allow, winner_len = True, -1
+        for is_allow, pattern in self._rules_for(user_agent):
+            if not self._to_regex(pattern).match(path):
+                continue
+            length = len(pattern)
+            if length > winner_len or (length == winner_len and is_allow):
+                winner_allow, winner_len = is_allow, length
+        return winner_allow
+
+    def crawl_delay(self, user_agent):
+        return None
+
+
 class RateLimited(Exception):
     """The server asked us to back off more times than we were willing to wait."""
+
+
+class Disallowed(Exception):
+    """robots.txt forbids this path, so the request is not made."""
 
 
 class PoliteClient:
@@ -47,7 +137,7 @@ class PoliteClient:
     """
 
     def __init__(self, base_url, cache_dir, min_interval=1.0, session_id=None,
-                 expiry_of=None, max_retries=5, timeout=30):
+                 expiry_of=None, max_retries=5, timeout=30, obey_robots=True):
         self.base_url = base_url.rstrip("/")
         self.cache_dir = pathlib.Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -57,7 +147,58 @@ class PoliteClient:
         self.max_retries = max_retries
         self.timeout = timeout
         self._last_request = 0.0
-        self.stats = {"hits": 0, "misses": 0, "retries": 0}
+        self.obey_robots = obey_robots
+        self._robots = None
+        self._robots_loaded = False
+        self.stats = {"hits": 0, "misses": 0, "retries": 0, "disallowed": 0}
+
+    # -- robots --------------------------------------------------------------
+
+    def _load_robots(self):
+        """Read and cache the host's robots.txt once per client.
+
+        Enforced in code rather than checked once by hand, because a policy
+        that lives in someone's memory is not a policy. A host that cannot be
+        asked (no robots.txt, or the fetch fails) is treated as permissive,
+        which matches the standard — absence of robots.txt means no
+        restrictions, not a prohibition.
+        """
+        if self._robots_loaded:
+            return self._robots
+        self._robots_loaded = True
+        parsed = urllib.parse.urlparse(self.base_url)
+        url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+        try:
+            request = urllib.request.Request(
+                url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(request, timeout=self.timeout) as resp:
+                text = resp.read().decode("utf-8", "replace")
+            self.robots_text = text
+            self._robots = Robots(text)
+        except Exception:
+            self._robots = None
+        return self._robots
+
+    def allowed(self, url):
+        """May we fetch this URL under the host's robots.txt?"""
+        if not self.obey_robots:
+            return True
+        parser = self._load_robots()
+        if parser is None:
+            return True
+        path = urllib.parse.urlparse(url).path or "/"
+        query = urllib.parse.urlparse(url).query
+        if query:
+            path += "?" + query
+        return parser.allowed(USER_AGENT, path)
+
+    def crawl_delay(self):
+        """The host's declared Crawl-delay, if it declares one."""
+        parser = self._load_robots()
+        if parser is None:
+            return None
+        value = parser.crawl_delay(USER_AGENT)
+        return float(value) if value is not None else None
 
     # -- cache ---------------------------------------------------------------
 
@@ -146,6 +287,10 @@ class PoliteClient:
         if cached is not None:
             self.stats["hits"] += 1
             return cached
+
+        if not self.allowed(url):
+            self.stats["disallowed"] += 1
+            raise Disallowed(f"robots.txt disallows {url}")
 
         body = self._fetch(url)
         self.stats["misses"] += 1
