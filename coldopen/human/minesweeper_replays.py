@@ -13,6 +13,7 @@ One JSON file, `{"replays": [...]}`, each replay:
     {
       "player": "<pseudonymised at ingest — never a username>",
       "rank": <int leaderboard-derived skill label, if known>,
+      "outcome": "<won | lost | abandoned>",
       "H": 16, "W": 30, "M": 99,
       "mines": [<H*W flat 0/1>],
       "clicks": [
@@ -22,6 +23,14 @@ One JSON file, `{"replays": [...]}`, each replay:
         ...
       ]
     }
+
+`outcome` is required and lost/abandoned games are first-class: the site's
+player histories record failures (win rate = wins/attempts exists on every
+profile), leaderboards do not — and the sprint lesson is that a comparison
+restricted to each side's completed games truncates both distributions. The
+E4 metric is win rate + progress-at-death + telemetry, not time-on-wins
+alone; agent ladders lose plenty, and human losses are what make that
+comparable.
 
 Pseudonymise with `coldopen.human.client.pseudonymise` AT the scraper — this
 module must never see a real identifier. Display names and any other

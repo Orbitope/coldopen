@@ -53,8 +53,16 @@ from coldopen.nets import FullyConvNet
 from minesweeper.fast import MinesweeperBatched
 
 OBS_CHANNELS = 11
-H, W = 16, 30
-K = H * W
+
+#: The three ranked board sizes on minesweeper.online. The FCN is fully
+#: convolutional, so ONE architecture handles every size unchanged - another
+#: payoff of the spatial head. Beginner and intermediate exist because of the
+#: sprint lesson: every human leaderboard record is a completed game, so a
+#: comparable agent must actually WIN games, and Expert wins are still out of
+#: reach. On Beginner the same net should win outright.
+BOARDS = {"beginner": (9, 9, 10),
+          "intermediate": (16, 16, 40),
+          "expert": (16, 30, 99)}
 
 
 def mine_probs(net, obs):
@@ -83,13 +91,14 @@ def prob_policy(net, epsilon=0.0, generator=None):
             rand_choice = noise.argmin(dim=1)
             flip = torch.rand(env.n, generator=generator) < epsilon
             choice = torch.where(flip, rand_choice, choice)
-        return 0 * K + choice                          # kind 0 = reveal
-    return policy
+        return choice                                  # kind 0 = reveal, so
+    return policy                                      # action id == cell id
 
 
-def collect(net, n_envs, steps, epsilon, seed, device):
+def collect(net, n_envs, steps, epsilon, seed, device, board=(16, 30, 99)):
     """(observation, mine mask, hidden mask) under the net's own play."""
-    env = MinesweeperBatched(n_envs, emit_final_states=False)
+    H, W, M = board
+    env = MinesweeperBatched(n_envs, H=H, W=W, M=M, emit_final_states=False)
     env.reset(torch.arange(n_envs, dtype=torch.int64) + seed * 9973)
     policy = prob_policy(net, epsilon,
                          torch.Generator().manual_seed(seed))
@@ -107,33 +116,43 @@ def collect(net, n_envs, steps, epsilon, seed, device):
     return (torch.cat(observations), torch.cat(labels), torch.cat(masks))
 
 
-def evaluate(net, device, episodes=64, seed=123):
-    """Win rate and progress of the argmin policy on full expert boards."""
-    env = MinesweeperBatched(min(episodes, 64), emit_final_states=False)
+def evaluate(net, device, episodes=64, seed=123, board=(16, 30, 99)):
+    """Win rate, progress and time of the argmin policy on full boards."""
+    H, W, M = board
+    env = MinesweeperBatched(min(episodes, 64), H=H, W=W, M=M,
+                             emit_final_states=False)
     env.reset(torch.arange(env.n, dtype=torch.int64) + seed)
     policy = prob_policy(net)
     done = torch.zeros(env.n, dtype=torch.bool)
     wins = torch.zeros(env.n, dtype=torch.bool)
     progress = torch.zeros(env.n, dtype=torch.int64)
+    times = torch.zeros(env.n, dtype=torch.int64)
     obs = env.observe()
-    for _ in range(K):
+    for _ in range(env.K):
         acts = policy(obs.to(device), env)
         safe_before = (env.revealed & ~env.mines).sum(dim=1)
+        time_before = env.time_ms.clone()
         obs, reward, term, _ = env.step(acts)
         newly = term & ~done
-        wins = wins | (newly & (reward > 500_000))
+        won_now = newly & (reward > 500_000)
+        wins = wins | won_now
         progress = torch.where(newly, safe_before, progress)
+        times = torch.where(won_now, time_before + 230, times)
         done = done | term
         if bool(done.all()):
             break
     progress = torch.where(done, progress,
                            (env.revealed & ~env.mines).sum(dim=1))
     return {"episodes": int(env.n),
+            "total_safe": int(env.K - env.M),
             "win_rate": round(float(wins.float().mean()), 4),
-            "mean_safe_revealed": round(float(progress.float().mean()), 1)}
+            "mean_safe_revealed": round(float(progress.float().mean()), 1),
+            "time_s_on_win": (round(float(times[wins].float().mean()) / 1000, 1)
+                              if bool(wins.any()) else None)}
 
 
 def train(args):
+    board = BOARDS[args.board]
     device = torch.device(args.device)
     torch.manual_seed(args.seed)
     out = pathlib.Path(args.out)
@@ -147,14 +166,16 @@ def train(args):
     def save(tag):
         torch.save({"steps": tag, "channels": args.channels,
                     "depth": args.depth, "arch": "mineprob",
-                    "state": net.state_dict()}, out / f"ckpt_{tag:08d}.pt")
-        report = evaluate(net, device)
+                    "board": board, "state": net.state_dict()},
+                   out / f"ckpt_{tag:08d}.pt")
+        report = evaluate(net, device, board=board)
         report.update({"steps": tag,
                        "elapsed_s": round(time.time() - started, 1)})
         log.append(report)
         (out / "train_log.json").write_text(json.dumps(log, indent=2))
         print(f"  [{tag:>7,}] win {report['win_rate']:.3f}  "
-              f"safe {report['mean_safe_revealed']:6.1f}/{K - 99}", flush=True)
+              f"safe {report['mean_safe_revealed']:6.1f}/{report['total_safe']}  "
+              f"time {report['time_s_on_win']}", flush=True)
 
     obs = labels = mask = None
     step = 0
@@ -167,7 +188,7 @@ def train(args):
         eps = max(0.05, 0.5 * (0.5 ** round_id))
         new_obs, new_labels, new_mask = collect(
             net, args.pool_envs, args.pool_steps, eps,
-            seed=args.seed + round_id, device=device)
+            seed=args.seed + round_id, device=device, board=board)
         if obs is None:
             obs, labels, mask = new_obs, new_labels, new_mask
         else:
@@ -199,6 +220,7 @@ def train(args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=12000)
+    ap.add_argument("--board", choices=sorted(BOARDS), default="expert")
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--channels", type=int, default=64)
     ap.add_argument("--depth", type=int, default=8)
