@@ -1191,27 +1191,68 @@ not absent. But an exhaustive search over **all 16 feature subsets containing
 beats `pps` alone** (0.9334). The residual information describes variation
 *within* a rank, not the ordering *between* ranks.
 
-#### The design conclusion, which is the part worth keeping
+#### Correction: the `pps` baseline was never cold-start legitimate
 
-40 LINES is a time trial: its ground truth is close to a single observable
-axis, and `pps` captures it at ρ = 0.93. No simulator can add to that, and
-neither can any amount of further feature engineering — the human-fitted
-ceiling proves it.
+Everything above compares the agent-fitted model against "rank by `pps`" and
+concludes the simulator earned nothing. **That comparison is invalid, and the
+conclusion drawn from it was wrong.**
 
-**The agent approach needs games whose skill is not reducible to one observable
-axis.** Sprint is close to the worst possible test case on that criterion, and
-that was knowable in advance from E1's own tetrio column (ρ 0.926 from speed
-alone, before any of this was built). The check to run *before* building a
-simulator for a game: how well does the best single observable feature already
-predict rank? If it is 0.9, there is no room. This is the same discipline as
-the overlap gate, one level earlier — measure the headroom before paying for
-the method.
+To rank players by `pps` you must first know that `pps` is the discriminating
+axis, and which direction it runs. That knowledge comes from labelled human
+data — from having looked at players whose rank you already know. It is
+precisely what does not exist at a cold start. The baseline was allowed to peek
+at the test set's labels; the agent-fitted model was not. Scoring one against
+the other measures nothing.
 
-That does not retire the agent track. It says the track should be pointed at
-games where the ceiling leaves room: E1 measured Lichess at 0.358 from its best
-single axis and SkillCraft at 0.661, against sprint's 0.932. Minesweeper (E4)
-is the interesting untested case — not real-time in the same sense, with 3BV/s
-and efficiency plausibly less redundant than pps is here.
+Look again at what the grid model learned **from zero human labels**: weights
+≈ `[0, 0, 0, 0, +0.73]`. It discovered on its own that `pps` is the axis and
+the other four are noise. That is not a failure to beat the baseline — *it is
+the baseline, derived without the labels the baseline needs.*
+
+#### The honest question: how many labelled games is the simulator worth?
+
+Same held-out human records for every method, 200 random splits per sample
+size. The agent models never see a human label at all.
+
+| labelled human games | human-fitted | **agent grid (0 labels)** | agent coupled (0 labels) |
+|---|---|---|---|
+| 5 | +0.828 | **+0.927** | +0.661 |
+| 10 | +0.883 | **+0.927** | +0.661 |
+| 20 | +0.907 | **+0.927** | +0.661 |
+| 40 | +0.915 | **+0.927** | +0.661 |
+| 80 | +0.918 | **+0.927** | +0.659 |
+| 160 | +0.922 | **+0.927** | +0.662 |
+| 300 | +0.920 | **+0.922** | +0.656 |
+
+**A model fitted only on agents is not beaten by a model fitted on humans at
+any sample size tested.** The simulator is worth *more than 300 labelled
+games* — it is never dominated in the range the data can measure. At the sizes
+that actually matter for cold start, the gap is large: 0.927 against 0.828 at
+five labelled games.
+
+And the coupled ladder's 0.660, which read as a failure against a 0.932
+baseline, is a different thing entirely once the baseline is priced correctly.
+It is a usable ranking from the very first game, with no rating, no match
+history, and no labelled data anywhere in its construction.
+
+#### What still stands, and what does not
+
+Still true: the multivariate diagnosis. A one-dimensional ladder produces
+collinear telemetry, ridge assigns arbitrary weights among redundant
+predictors (`pps` at −0.399), and decoupling into a grid fixes it (+0.73). That
+is a real construction lesson — **build the ladder with at least as many
+independent axes as the skill you are trying to model.**
+
+Still true: the residual-signal result. No feature subset beats `pps` alone
+even when fitted on humans, so sprint's non-speed features do not improve rank
+*ordering*. Sprint really is close to a one-axis game.
+
+**No longer claimed:** that the simulator earned nothing, or that a
+single-observable-axis screen should gate whether an environment gets built. A
+game being one-axis limits the *ceiling*, but the cold-start method still has
+to find that axis without labels, and here it did. The screen worth running is
+narrower than I wrote: it bounds how much headroom exists above the best
+achievable predictor, not whether the approach is worth attempting.
 
 ### What "early" can and cannot mean with this data
 

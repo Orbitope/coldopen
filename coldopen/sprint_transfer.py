@@ -11,13 +11,24 @@ own virtual sprint time, which the game defines and no human contributes to —
 then apply it once to 396 human records and measure Spearman against true
 rank.
 
-**The baseline is the whole point.** E1's most useful finding was that a
-one-axis "transfer" score is numerically identical to just ranking players by
-that axis: the fitted model was the target game's own correlation wearing a
-costume. So every number here is reported beside `no_fit` — rank by a single
-standardised feature, no model at all. An agent-fitted model that does not
-beat its own no-fit baselines has added nothing, however good its correlation
-looks in isolation.
+**On the `no_fit` baselines, and a correction.** E1's most useful finding was
+that a one-axis "transfer" score is numerically identical to just ranking
+players by that axis, so every number here is reported beside `no_fit` — rank
+by a single standardised feature, no model at all.
+
+But those baselines are **not cold-start legitimate**, and reading them as the
+bar to clear produced a wrong conclusion once already. Ranking by `pps`
+requires knowing that `pps` is the discriminating axis and which way it runs,
+and that knowledge comes from labelled human data — exactly what a cold start
+lacks. The baselines are a useful *ceiling* (how good could any ranking on
+these features be?) and a useful check against fitting artefacts. They are not
+a competitor the label-free method has to beat.
+
+The honest comparison is `label_efficiency.json`: how many labelled human games
+must a human-fitted model see before it matches what the agent-fitted model
+delivers with none? Measured answer on sprint: **more than 300** — the
+agent-fitted grid model is not beaten at any sample size tested, and leads by
+0.10 at five labelled games.
 
 **Where human data enters, precisely.** Only twice, and never in fitting:
 
