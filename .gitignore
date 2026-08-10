@@ -7,6 +7,11 @@ __pycache__/
 
 # Trained networks are large and regenerable; the JSON in analysis/ is the record.
 # No trailing slash: these are sometimes symlinks to a run kept elsewhere.
+# NOTE: this also hides each ladder's train_log.json, which is NOT regenerable
+# in any cheap sense - it is the measured curve, and several findings ARE
+# curves (beginner 3%->67%, the DQN's flat zero over 2M steps). Those are
+# mirrored into analysis/training_curves/ by hand; do that after any run whose
+# curve you would cite.
 coldopen/checkpoints
 coldopen/reference
 coldopen/ladders

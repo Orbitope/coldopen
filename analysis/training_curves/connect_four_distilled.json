@@ -1,0 +1,87 @@
+[
+  {
+    "steps": 0,
+    "teacher_agreement": 0.1272,
+    "elapsed_s": 0.2
+  },
+  {
+    "steps": 50,
+    "teacher_agreement": 0.6108,
+    "elapsed_s": 6.1
+  },
+  {
+    "steps": 67,
+    "teacher_agreement": 0.6394,
+    "elapsed_s": 8.2
+  },
+  {
+    "steps": 90,
+    "teacher_agreement": 0.6609,
+    "elapsed_s": 11.0
+  },
+  {
+    "steps": 120,
+    "teacher_agreement": 0.6782,
+    "elapsed_s": 14.7
+  },
+  {
+    "steps": 161,
+    "teacher_agreement": 0.6936,
+    "elapsed_s": 19.6
+  },
+  {
+    "steps": 215,
+    "teacher_agreement": 0.7192,
+    "elapsed_s": 26.0
+  },
+  {
+    "steps": 289,
+    "teacher_agreement": 0.7444,
+    "elapsed_s": 34.8
+  },
+  {
+    "steps": 386,
+    "teacher_agreement": 0.7607,
+    "elapsed_s": 46.2
+  },
+  {
+    "steps": 518,
+    "teacher_agreement": 0.7915,
+    "elapsed_s": 61.7
+  },
+  {
+    "steps": 693,
+    "teacher_agreement": 0.8103,
+    "elapsed_s": 82.2
+  },
+  {
+    "steps": 928,
+    "teacher_agreement": 0.8252,
+    "elapsed_s": 109.6
+  },
+  {
+    "steps": 1243,
+    "teacher_agreement": 0.8577,
+    "elapsed_s": 145.5
+  },
+  {
+    "steps": 1665,
+    "teacher_agreement": 0.8784,
+    "elapsed_s": 193.8
+  },
+  {
+    "steps": 2230,
+    "teacher_agreement": 0.9072,
+    "elapsed_s": 258.2
+  },
+  {
+    "steps": 2987,
+    "teacher_agreement": 0.9275,
+    "elapsed_s": 343.8
+  },
+  {
+    "steps": 4000,
+    "teacher_agreement": 0.9536,
+    "elapsed_s": 456.8
+  }
+]
