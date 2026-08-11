@@ -87,6 +87,11 @@ def build():
         "sprint": round(float(np.corrcoef(X[:, pi], X[:, hi])[0, 1]), 2),
         "minesweeper": round(float(np.corrcoef(sp, ju)[0, 1]), 2)}
 
+    screen = j("analysis/screens/tetrio_versus_headroom.json")
+    out["screen"] = {"sprint": screen["sprint_reference"],
+                     "versusAgg": screen["aggregate"],
+                     "versusOne": screen["cold_start_one_round"]}
+
     out["beginnerCurve"] = curve("minesweeper_prob_beginner")
     out["dqnCurve"] = curve("minesweeper")
     return out

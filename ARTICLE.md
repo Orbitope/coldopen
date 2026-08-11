@@ -257,6 +257,51 @@ That suggests a screen worth running *before* building an environment for a
 game: **how well does the best single observable feature already predict
 rank?** At 0.93, the ceiling is the floor.
 
+### The screen, run in anger
+
+TETR.IO's *versus* mode was the obvious next environment. Its label is
+attractive in exactly the way sprint's was not: **TR is a Glicko rating fed by
+match outcomes**, not a direct function of any per-round statistic. The data
+was already in hand — 25,707 rounds, 450 players, with per-round APM, PPS,
+attack-per-piece, garbage sent and received.
+
+| setting | best single observable | ρ vs rank |
+|---|---|---|
+| sprint (known dead) | `pps` | 0.932 |
+| versus, aggregated over ~57 rounds | `vsscore` | 0.985 |
+| **versus, a single round — the cold-start setting** | **`pps`** | **0.922** |
+
+It fails. A latent outcome-fed rating did not create headroom, because the
+thing the rating measures is still mostly speed: **Tetris skill is
+speed-limited in every mode.** Building the versus environment — garbage,
+attack tables, two-player dynamics — would have inherited the exact ceiling
+that made sprint uninformative. The screen cost one script; skipping it would
+have cost the environment.
+
+### What the screen implies about *labels*
+
+The generalisation is sharper than "check your features", and it is
+uncomfortable:
+
+> A label that is itself a performance measure — a time, a score, a
+> words-per-minute — will be predictable from that measure's behavioural
+> correlates. Headroom lives in labels that are **latent and multi-causal**.
+
+That disqualifies whole families without any ingestion work. Typing sites rank
+*by* words-per-minute, so rank ≈ WPM by construction. Rhythm games compute
+their rating as a deterministic function of accuracy and chart difficulty. The
+entire speed/accuracy-pair genre fails identically.
+
+It also lands on this project's own remaining hope. minesweeper.online's
+ranking page sorts by **time**, and 3BV/s is 3BV ÷ time — so a best-time
+leaderboard risks being the same trap a third time. The label with genuine
+headroom there is **win rate**: surviving an Expert board is dominated by
+guess-avoidance, which is judgement, while time is dominated by clicking
+speed. Those are precisely the two axes the three-dial ladder was built to
+separate. The right request to make of a data holder is therefore not "your
+leaderboard" but *"per-player win rate, and losing games as well as winning
+ones."*
+
 Minesweeper was chosen because its headline feature — *was a provably safe
 cell available, and did the player click one?* — is decided by a solver from
 the rules, not by a model's opinion, and is not reducible to speed. Its agent
@@ -265,6 +310,26 @@ decorrelated three-dial grid. The human half is blocked on data access, and
 until it arrives the central question has one data point.
 
 One game is an anecdote.
+
+### Where that leaves the approach
+
+Stacking the constraints together explains why this stalled, and it is
+structural rather than bad luck. A game must be **simulatable** to build agent
+ladders, must have **headroom** above its obvious statistic, and must have
+**accessible** human telemetry. Public sources fail at least one every time:
+games rich enough to have interesting telemetry (shooters, MOBAs, card games)
+are far too complex to simulate honestly, while games simple enough to
+simulate are simple *because* their skill is thin — and the one candidate that
+passed on paper serves its data only through an endpoint that writes to its
+own database.
+
+A game studio dissolves all three at once: they own the simulator, they hold
+latent matchmaking ratings rather than leaderboard times, they record losses,
+and access is a conversation. They also have the motive, since cold start is
+their problem. Which suggests the honest framing for this work is not "here is
+a solved method" but **"here is the method, the toolkit, and — most usefully —
+the one-script screen that tells you in minutes whether your game has any room
+for it."**
 
 ---
 

@@ -378,12 +378,38 @@
 <div class="rule"></div>
 
 <section class="beat">
+  <div class="eyebrow">The screen, run for real</div>
+  <h2>It cost one script and saved the next six weeks.</h2>
+  <p>The rule I came out of Tetris with was: <b>before building a simulator for a game, check how much of rank one obvious statistic already explains.</b> The next candidate was Tetris <em>versus</em> mode — two players, garbage attacks, and a rank that comes from a rating fed by <em>match outcomes</em> rather than any single number. Exactly the property the sprint lacked. I already had the data.</p>
+  <p>So I ran the screen before writing any of it.</p>
+</section>
+
+<figure class="fig narrow reveal">
+  <div class="wdg-head"><span>how much of rank does one number already explain?</span><span class="tag no">both fail</span></div>
+  <svg class="chart" id="hr_chart" viewBox="0 0 700 230" role="img" aria-label="headroom screen"></svg>
+  <div class="cap">Anything above the dashed line has no room left for a cleverer method. Versus mode, judged on a <b>single round</b> — which is the actual cold-start situation — scores 0.922 from pieces-per-second alone, statistically the same as the sprint's 0.932. <b>Tetris skill is speed-limited in every mode.</b></div>
+</figure>
+
+<section class="beat tight">
+  <p>A rating built from wins and losses didn't help, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
+  <div class="pull">A label that is itself a performance measure — a time, a score, a words-per-minute — will always be predictable from the behaviour that produces it. Headroom lives in labels that are latent and have several causes.</div>
+  <p>That one sentence disqualifies whole genres without downloading anything. Typing sites rank you <em>by</em> words-per-minute, so rank and WPM are the same thing wearing different hats. Rhythm games compute your rating as a formula over accuracy and chart difficulty. The entire speed-and-accuracy family fails identically.</p>
+  <p>It also lands on my own remaining hope. Minesweeper's leaderboard sorts by <b>time</b> — and 3BV/s is just board-value divided by time. Same trap, third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for isn't the leaderboard — it's <em>win rates, and the games people lost.</em></p>
+</section>
+
+<div class="rule"></div>
+
+<section class="beat">
   <div class="eyebrow">Where this stands</div>
   <h2>One game is an anecdote.</h2>
   <p>I want to be straight about what this does and doesn't show, because the temptation to round it up is strong.</p>
   <p><b>What holds up:</b> a model trained purely on bots was worth more than 300 labelled human games on the one test I could run. That's a real result and it survives the corrected comparison.</p>
   <p><b>What doesn't:</b> that test ran on a single game, and that game turned out to be nearly the worst possible choice — a time trial whose ranking is 93% explained by one obvious number. There was no headroom for any method to fill. I picked it because I could get the data, which is not the same as picking it because it could answer the question.</p>
   <p>Minesweeper is the game where the question can actually be answered, and everything on the bot side is finished and waiting. The human half is stuck: the site's data isn't reachable without hammering their servers in ways I'm not willing to, and my email asking nicely hasn't been answered yet.</p>
+  <h3>Why that stall is structural, not bad luck</h3>
+  <p>Stack the three requirements together and the squeeze is obvious. A game has to be <b>simulatable</b> to build bots for. It has to have <b>headroom</b> above its own obvious statistic. And its human data has to be <b>reachable</b>. Public sources fail at least one every single time: games rich enough to have interesting telemetry — shooters, MOBAs, card games — are far too complex to simulate honestly, while games simple enough to simulate are simple <em>because</em> their skill is thin.</p>
+  <p>A game studio dissolves all three at once. They own the simulator. Their ranks come from matchmaking ratings rather than leaderboard times, so the labels are latent. They record losses, not just records. And access is a conversation instead of a scrape. They also have the motive, since cold start is <em>their</em> problem — new players quitting in the first week is a number they already track.</p>
+  <p>So the honest framing isn't "here is a solved method". It's: here is the method, the toolkit, and — most usefully — <b>the one-script screen that tells you in minutes whether your game has any room for it.</b></p>
 </section>
 
 <div class="caveats">
@@ -698,6 +724,37 @@
       "reinforcement learning"));
     svg.appendChild(el("text", { class: "axlab", x: L + 6, y: T + 10, fill: "var(--text-muted)" },
       "games won"));
+  })();
+
+  /* ---------------- figure: the headroom screen ----------------------- */
+  (function () {
+    const svg = $("hr_chart"); if (!svg || !DATA.screen) return; clear(svg);
+    const W = 700, H = 230, L = 210, R = 60, T = 30;
+    const rows = [
+      ["Tetris sprint", DATA.screen.sprint, "var(--coral)"],
+      ["Tetris versus — one round", DATA.screen.versusOne.pps, "var(--coral)"],
+      ["Tetris versus — 57 rounds", DATA.screen.versusAgg.vsscore, "var(--terra)"]
+    ];
+    const x = v => L + v * (W - L - R);
+    rows.forEach((r, i) => {
+      const y = T + i * 46;
+      svg.appendChild(el("text", { class: "axlab", x: L - 12, y: y + 19,
+        "text-anchor": "end", "font-size": 11 }, r[0]));
+      svg.appendChild(el("rect", { x: L, y: y, width: Math.max(x(r[1]) - L, 1),
+        height: 28, fill: r[2], opacity: .8, rx: 2 }));
+      svg.appendChild(el("text", { class: "axlab", x: x(r[1]) + 8, y: y + 19,
+        fill: r[2], "font-size": 12 }, r[1].toFixed(3)));
+    });
+    // the "no headroom" threshold
+    svg.appendChild(el("line", { x1: x(0.9), x2: x(0.9), y1: T - 10, y2: T + 150,
+      stroke: "var(--text-muted)", "stroke-width": 1.5, "stroke-dasharray": "4 4" }));
+    svg.appendChild(el("text", { class: "axlab", x: x(0.9), y: T - 16,
+      "text-anchor": "middle" }, "0.90 — nothing left to win"));
+    svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: T + 150, y2: T + 150 }));
+    [0, .25, .5, .75, 1].forEach(v => svg.appendChild(el("text",
+      { class: "axlab", x: x(v), y: T + 168, "text-anchor": "middle" }, v.toFixed(2))));
+    svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: T + 190,
+      "text-anchor": "middle" }, "rank explained by ONE obvious statistic"));
   })();
 
   /* ---------------- widget 5: minesweeper + solver -------------------- */
