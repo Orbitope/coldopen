@@ -170,7 +170,7 @@
 <header class="hero">
   <div class="kicker">Coldopen · skill prediction without a match history</div>
   <h1>How do you rank a player who has never played? I trained <span class="accent">bots</span> to answer that.</h1>
-  <p class="sub">A new account has no results, so ranked games guess — and the first few matches are miserable for everyone while they do. You could instead read skill from <b>how</b> somebody plays. But to learn that reading you need labelled players, and a game that hasn't launched has none. So: train a ladder of bots from hopeless to expert, learn the mapping from their behaviour, and point it at people. <b>The idea works.</b> What took months was that four separate measurements each told me it didn't — or that it did, for a reason that turned out to be false. Every one of them is playable below.</p>
+  <p class="sub">A new account has no results, so ranked games guess — and the first few matches are miserable for everyone while they do. You could instead read skill from <b>how</b> somebody plays. But to learn that reading you need labelled players, and a game that hasn't launched has none. So: train a ladder of bots from hopeless to expert, learn the mapping from their behaviour, and point it at people. <b>The idea works.</b> The hard part was that four separate measurements each told me it didn't — or that it did, for a reason that turned out to be false. Every one of them is playable below.</p>
   <div class="scroll-cue">scroll</div>
 </header>
 
@@ -199,11 +199,11 @@
     <tr><td>a model fitted on <em>humans</em>, cross-validated</td><td style="text-align:right">0.923</td></tr>
     <tr><td><b>my agent-trained model</b></td><td style="text-align:right" class="dim">0.660</td></tr>
   </table>
-  <div class="cap">Sorting players by a single number beat months of simulator work by 0.27. I wrote it up as a clean negative result.</div>
+  <div class="cap">Sorting players by a single number beat the whole simulator by 0.27. I wrote it up as a clean negative result.</div>
 </figure>
 
 <section class="beat tight">
-  <p>That conclusion was wrong, and it took me an embarrassingly long time to see why.</p>
+  <p>That conclusion was wrong, and the reason is easy to miss.</p>
   <div class="pull">To sort players by pieces-per-second, you first have to know that pieces-per-second is the right thing to sort by. Where does that knowledge come from? From looking at players whose rank you already know.</div>
   <p>Which is <b>exactly the thing you don't have at a cold start.</b> I had let the baseline read the answer key and then scored the honest method against it.</p>
   <p>And look at what the agent-trained model actually learned, from <span class="amber">zero human labels</span>: put all the weight on pieces-per-second, ignore the other four features. It <em>found</em> the right answer on its own. That's not losing to the baseline — that <em>is</em> the baseline, derived without the labels the baseline needs.</p>
@@ -379,7 +379,7 @@
 
 <section class="beat">
   <div class="eyebrow">The screen, run for real</div>
-  <h2>It cost one script and saved the next six weeks.</h2>
+  <h2>One script, and it killed the next environment.</h2>
   <p>The rule I came out of Tetris with was: <b>before building a simulator for a game, check how much of rank one obvious statistic already explains.</b> The next candidate was Tetris <em>versus</em> mode — two players, garbage attacks, and a rank that comes from a rating fed by <em>match outcomes</em> rather than any single number. Exactly the property the sprint lacked. I already had the data.</p>
   <p>So I ran the screen before writing any of it.</p>
 </section>

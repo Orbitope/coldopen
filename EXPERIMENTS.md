@@ -745,7 +745,7 @@ This also disqualifies, by inspection and without fetching anything: **typing**
 (Monkeytype ranks *by* WPM, so rank ≈ WPM by construction) and **rhythm games**
 (osu! `pp` is a deterministic function of accuracy and map difficulty). The
 whole "speed/accuracy pair" family fails the screen the same way, which is
-worth knowing before anyone spends a week on an ingestion pipeline for one.
+worth knowing before building an ingestion pipeline for one.
 
 ---
 
