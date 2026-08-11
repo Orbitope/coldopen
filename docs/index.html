@@ -177,7 +177,7 @@
 <section class="beat">
   <div class="eyebrow">The setup</div>
   <h2>Bots as stand-ins for players you don't have yet.</h2>
-  <p>I built two games as simulators I could train agents inside: a <b>Tetris sprint</b> (clear 40 lines, fastest wins) and <b>Minesweeper</b>. Both are real games with real public leaderboards, which matters — the whole point is to check the bots against actual humans at the end.</p>
+  <p>I built two games as simulators I could train agents inside: a <b>Tetris sprint</b> (clear 40 lines as fast as you can — a ranked mode on TETR.IO, a big online Tetris platform) and <b>Minesweeper</b>. Both are real games with real public leaderboards, which matters — the whole point is to check the bots against actual humans at the end.</p>
   <p>The recipe is simple enough to state in one line. Make agents of varying skill, record how they play — how fast, how efficiently, how often they set up the big clears — then fit a model from behaviour to skill. Apply it to a human and you have a rank estimate from their very first game, with no match history at all.</p>
   <p>Then you check it against 396 real Tetris players whose ranks you already know. That check is where things got strange.</p>
 </section>
@@ -187,7 +187,7 @@
 <section class="beat">
   <div class="eyebrow bad">Lie #1</div>
   <h2>The baseline that cheated.</h2>
-  <p>Here is the scoreboard I got. Higher is better; 1.0 would be a perfect ranking of all 396 players.</p>
+  <p>Here is the scoreboard I got. Each method predicts an <em>ordering</em> of 396 ranked players from their play alone, and the score is a rank correlation: <b>1.0</b> means the predicted order matches their real ranks exactly, <b>0</b> means it might as well be random.</p>
 </section>
 
 <figure class="fig narrow reveal">
@@ -196,7 +196,7 @@
     <tr><th>method</th><th style="text-align:right">score</th></tr>
     <tr><td><b>just sort players by pieces-per-second</b></td><td style="text-align:right" class="hi">0.932</td></tr>
     <tr><td>sort by keystrokes-per-piece</td><td style="text-align:right">0.773</td></tr>
-    <tr><td>a model fitted on <em>humans</em>, cross-validated</td><td style="text-align:right">0.923</td></tr>
+    <tr><td>a model fitted on the <em>humans</em> themselves, scored on players it never saw</td><td style="text-align:right">0.923</td></tr>
     <tr><td><b>my agent-trained model</b></td><td style="text-align:right" class="dim">0.660</td></tr>
   </table>
   <div class="cap">Sorting players by a single number beat the whole simulator by 0.27. I wrote it up as a clean negative result.</div>
@@ -235,7 +235,7 @@
 <section class="beat">
   <div class="eyebrow bad">Lie #2</div>
   <h2>The check that couldn't see a bot doing nothing.</h2>
-  <p>Before you compare bots to humans, you have to confirm the bots are even in the same neighbourhood — that they produce the range of behaviour people produce. My check asked whether each bot's numbers fell inside the human range. It came back <span class="sage">100% inside</span> on three of five features.</p>
+  <p>Before you compare bots to humans, you have to confirm the bots are even in the same neighbourhood — that they produce the range of behaviour people produce. For each bot I measure five behaviours: speed, keystroke efficiency, quad rate, use of the hold slot, and back-to-back streaks (quads chained without a lesser clear between them). My check asked whether each bot's numbers fell inside the human range. It came back <span class="sage">100% inside</span> on three of the five.</p>
   <p>All three were false. Here's the one that gave it away: <b>quad rate</b>, the fraction of your lines cleared four-at-once. It's the signature move of a good Tetris player.</p>
 </section>
 
@@ -272,7 +272,7 @@
 
 <section class="beat tight">
   <p>The number wasn't a grade. It was a thermometer I'd never calibrated, and I nearly rebuilt a working system because of it.</p>
-  <p>What <em>did</em> survive the comparison was narrower and much more useful: four of the five features sat inside the human spread, and exactly one didn't. My bot used the hold slot — Tetris's "save this piece for later" button — like a beginner while playing like an expert everywhere else. Fixing that made it better at the actual game, not just better at resembling a person.</p>
+  <p>What <em>did</em> survive the comparison was narrower and much more useful: four of the five features sat inside the human spread, and exactly one didn't. My bot used the hold slot ("save this piece for later") like a beginner while playing like an expert everywhere else. Fixing that made it better at the actual game, not just better at resembling a person.</p>
   <div class="pull">Any measurement of "how human is this?" is uninterpretable until you run it on humans and see what score they get.</div>
 </section>
 
@@ -380,7 +380,7 @@
 <section class="beat">
   <div class="eyebrow">The screen, run for real</div>
   <h2>One script, and it killed the next environment.</h2>
-  <p>The rule I came out of Tetris with was: <b>before building a simulator for a game, check how much of rank one obvious statistic already explains.</b> The next candidate was Tetris <em>versus</em> mode — two players, garbage attacks, and a rank that comes from a rating fed by <em>match outcomes</em> rather than any single number. Exactly the property the sprint lacked. I already had the data.</p>
+  <p>The rule I came out of Tetris with was: <b>before building a simulator for a game, check how much of rank one obvious statistic already explains.</b> The next candidate was Tetris <em>versus</em> mode — two players, garbage attacks (your line clears dump junk rows on the opponent), and a rank that comes from a rating fed by <em>match outcomes</em> rather than any single number. Exactly the property the sprint lacked. I already had the data.</p>
   <p>So I ran the screen before writing any of it.</p>
 </section>
 
@@ -394,7 +394,7 @@
   <p>A rating built from wins and losses didn't help, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
   <div class="pull">A label that is itself a performance measure — a time, a score, a words-per-minute — will always be predictable from the behaviour that produces it. Headroom lives in labels that are latent and have several causes.</div>
   <p>That one sentence disqualifies whole genres without downloading anything. Typing sites rank you <em>by</em> words-per-minute, so rank and WPM are the same thing wearing different hats. Rhythm games compute your rating as a formula over accuracy and chart difficulty. The entire speed-and-accuracy family fails identically.</p>
-  <p>It also lands on my own remaining hope. Minesweeper's leaderboard sorts by <b>time</b> — and 3BV/s is just board-value divided by time. Same trap, third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for isn't the leaderboard — it's <em>win rates, and the games people lost.</em></p>
+  <p>It also lands on my own remaining hope. Minesweeper's leaderboard sorts by <b>time</b> — and its speed stat, 3BV/s, is just board value (the minimum clicks a board needs) divided by time. Same trap, third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for isn't the leaderboard — it's <em>win rates, and the games people lost.</em></p>
 </section>
 
 <div class="rule"></div>
@@ -669,11 +669,11 @@
       svg.appendChild(el("text", { class: "axlab", x: X(v), y: H - B + 17, "text-anchor": "middle" }, v.toFixed(1)));
     }
     svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 14, "text-anchor": "middle" },
-      scMode === "sprint" ? "speed — pieces per second" : "speed — board-value per second"));
+      scMode === "sprint" ? "speed — pieces per second" : "speed — 3BV per second"));
     svg.appendChild(el("text", {
       class: "axlab", x: L - 46, y: (T + H - B) / 2,
       transform: `rotate(-90 ${L - 46} ${(T + H - B) / 2})`, "text-anchor": "middle"
-    }, scMode === "sprint" ? "judgement — planning use" : "judgement — provably-safe rate"));
+    }, scMode === "sprint" ? "judgement — hold-slot usage" : "judgement — provably-safe rate"));
 
     const r = scMode === "sprint" ? DATA.corr.sprint : DATA.corr.minesweeper;
     const tag = $("sc_tag");
@@ -683,7 +683,7 @@
       ? "One knob, so speed and judgement rise together: correlation <b>" + r.toFixed(2) +
         "</b>. A model fitted here can't separate them, and it gave speed a negative weight."
       : "Three knobs — training, lapse rate, input delay — moved independently: correlation <b>" + r.toFixed(2) +
-        "</b>. Speed says nothing about judgement, which is what makes the two features worth having.";
+        "</b>. Speed says nothing about judgement, which is what makes the two features worth having. (3BV is a board's minimum clicks-to-clear, so 3BV/s is useful clicks per second.)";
   }
   document.querySelectorAll("[data-sc]").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll("[data-sc]").forEach(o => o.classList.remove("active"));

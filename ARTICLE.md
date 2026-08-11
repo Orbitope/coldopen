@@ -26,8 +26,9 @@ and expert/intermediate/beginner Minesweeper. Code and data:
 ## Trap 1: the baseline that peeked
 
 The headline test: fit a model on agent telemetry only, apply it once to 396
-real TETR.IO sprint records, measure Spearman correlation against the
-players' actual ranks.
+real TETR.IO sprint records, measure Spearman rank correlation against the
+players' actual ranks (ρ = 1 when the predicted ordering matches the true
+ranks exactly; 0 when unrelated).
 
 | method | ρ vs true rank |
 |---|---|
@@ -86,8 +87,8 @@ without it?"
 Before any accuracy claim, the agents have to occupy the same region of
 feature space as the people. My first overlap check asked whether agent
 values fell between the human 2nd and 98th percentiles. It reported every
-generator as **100% inside the human range** on quad rate, hold usage and
-back-to-back count.
+agent ladder as **100% inside the human range** on quad rate (the share of
+line clears made four rows at a time), hold usage and back-to-back count.
 
 All three were false. Pooled human quad rate spans 0.00 to 1.00, so an agent
 pinned at 0.00 — below every human alive — passes a range test. A range
@@ -95,8 +96,8 @@ check cannot detect degeneracy inside a wide range.
 
 Replacing it with "which human rank does this rung look like?" showed the
 truth immediately: quad rate pinned at the weakest rank, hold usage *below
-every human*, while finesse spanned sixteen ranks. The bot had a top
-player's keystroke efficiency and a beginner's stacking — a shape no human
+every human*, while finesse — keystrokes per piece — spanned sixteen ranks. The bot had a
+top player's keystroke efficiency and a beginner's stacking — a shape no human
 has.
 
 The cause was not the search but the objective. The bot's board score paid
@@ -151,7 +152,8 @@ first number was measured on the *teacher's* state distribution, which the
 student never visits. That mistake recurred three times in different guises
 before I started logging own-state agreement first, permanently.
 
-But even with well-posed labels and DAgger, task performance would not move.
+But even with well-posed labels and DAgger (retraining on the states the
+student itself visits), task performance would not move.
 So I corrupted a perfect policy by a known fraction to isolate accuracy from
 everything else:
 
@@ -295,7 +297,8 @@ their rating as a deterministic function of accuracy and chart difficulty. The
 entire speed/accuracy-pair genre fails identically.
 
 It also lands on this project's own remaining hope. minesweeper.online's
-ranking page sorts by **time**, and 3BV/s is 3BV ÷ time — so a best-time
+ranking page sorts by **time**, and the community speed stat 3BV/s is just
+3BV — a board's minimum clicks-to-clear — divided by time. So a best-time
 leaderboard risks being the same trap a third time. The label with genuine
 headroom there is **win rate**: surviving an Expert board is dominated by
 guess-avoidance, which is judgement, while time is dominated by clicking
