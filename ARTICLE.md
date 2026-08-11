@@ -1,4 +1,6 @@
-# Four Ways to Fool Yourself When Testing Cold-Start Skill Prediction
+# Ranking a Player From a Single Game
+
+### Four ways the evaluation lied to me about whether it worked
 
 A new account has no results. That is the cold-start problem in ranked games:
 the system must place a player before it has any evidence about them, and the
