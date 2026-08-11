@@ -683,6 +683,72 @@ replay format, player split) is ready for the day it arrives.
 
 ---
 
+## E4b — The headroom screen, applied before building anything
+
+E6 ended with a rule: **before building an environment for a game, check how
+much of rank one obvious observable already explains.** Sprint scored 0.932
+from `pps` and left no room for any method. The rule is only worth having if
+it is actually run, so it now runs first and its results live in
+`analysis/screens/`.
+
+### TETR.IO versus: rejected on the screen, in two minutes
+
+Versus mode looked like the obvious next environment, and the data was already
+on disk — 25,707 rounds, 450 players, with per-round `apm`, `pps`, `vsscore`,
+garbage sent/received, B2B and kills. Crucially its label is **TR, a Glicko
+rating fed by match outcomes**, not a direct function of any per-round
+statistic, which is exactly the property sprint lacked. It also has 20–121
+rounds per player, the career structure the cold-start question wants.
+
+| setting | best single observable | ρ vs rank |
+|---|---|---|
+| sprint (known dead) | `pps` | 0.932 |
+| versus, aggregated over ~57 rounds | `vsscore` | 0.985 |
+| **versus, a SINGLE round — the cold-start setting** | **`pps`** | **0.922** |
+
+**It fails.** 0.922 from one observable on one round is statistically
+indistinguishable from sprint's 0.932. A latent outcome-fed rating did not
+help, because the thing the rating is measuring is still mostly speed:
+**Tetris skill is speed-limited in every mode.** A versus environment — a
+substantial build, with garbage, attack tables and two-player dynamics — would
+have inherited the exact ceiling that made sprint uninformative.
+
+Cost of the screen: one script. Cost of skipping it: the last environment.
+
+### The consequence for minesweeper, which is not comfortable
+
+The same screen aimed at minesweeper exposes a problem with the *label*, not
+the game. minesweeper.online's ranking page sorts by **time**, and 3BV/s is
+just 3BV ÷ time — so a best-time leaderboard is at serious risk of being the
+same trap a third time.
+
+That reframes what to actually ask for when the data question is resolved.
+The label with genuine headroom is **win rate**, not best time: surviving an
+Expert board is dominated by guess-avoidance, which is judgement, while time
+is dominated by clicking speed. Those are the two axes the three-dial agent
+ladder was built to separate, and the oracle already measures the first one
+directly.
+
+So the request to make of the site is not "give us the leaderboard" — it is
+**"give us per-player win rate and, if possible, lost games."** Player
+profiles carry wins/attempts, which is why the replay contract requires an
+`outcome` field.
+
+More generally, the screen suggests a rule about *labels*:
+
+> A label that is itself a performance measure — a time, a score, a WPM — will
+> be predictable from the behavioural correlates of that measure. Headroom
+> lives in labels that are **latent and multi-causal**: survival, win rate,
+> ratings in games where several distinct abilities trade off.
+
+This also disqualifies, by inspection and without fetching anything: **typing**
+(Monkeytype ranks *by* WPM, so rank ≈ WPM by construction) and **rhythm games**
+(osu! `pp` is a deterministic function of accuracy and map difficulty). The
+whole "speed/accuracy pair" family fails the screen the same way, which is
+worth knowing before anyone spends a week on an ingestion pipeline for one.
+
+---
+
 ## E5 — TETR.IO simulation
 
 **Question.** Can an agent ladder trained entirely offline predict the skill of

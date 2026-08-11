@@ -1,0 +1,28 @@
+{
+  "question": "how much of rank is already explained by ONE observable?",
+  "why": "sprint scored 0.932 from pps and had no headroom for any method; run this BEFORE building an environment",
+  "sprint_reference": 0.932,
+  "aggregate": {
+    "pps": 0.918,
+    "apm": 0.977,
+    "app": 0.927,
+    "vsscore": 0.985,
+    "garbagesent": 0.964,
+    "garbagereceived": 0.898,
+    "defence": 0.701,
+    "btb": 0.799
+  },
+  "cold_start_one_round": {
+    "pps": 0.922,
+    "apm": 0.905,
+    "app": 0.787,
+    "vsscore": 0.9,
+    "garbagesent": 0.583,
+    "garbagereceived": 0.454,
+    "defence": 0.285,
+    "btb": 0.305
+  },
+  "verdict": "TETR.IO versus FAILS the screen: 0.922 from pps on a single round, statistically indistinguishable from sprint's 0.932. Tetris skill is speed-limited in every mode. Do not build a versus environment.",
+  "n_players": 450,
+  "n_rounds": 25707
+}
