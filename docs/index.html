@@ -18,6 +18,15 @@
 <meta property="og:title" content="Ranking a Player From a Single Game">
 <meta property="og:description" content="A new account has no results, so ranked games guess. I tried to learn that guess from RL agents instead of from people — and four separate measurements lied to me about whether it worked.">
 <meta property="og:type" content="article">
+<meta property="og:url" content="https://orbitope.com/coldopen/">
+<meta property="og:image" content="https://orbitope.com/coldopen/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://orbitope.com/coldopen/">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Article", "headline": "Ranking a Player From a Single Game", "description": "A new account has no results, so ranked games guess. I tried to learn that guess from RL agents instead of from people — and four separate measurements lied to me about whether it worked.", "image": "https://orbitope.com/coldopen/og.png", "url": "https://orbitope.com/coldopen/", "datePublished": "2026-08-01", "author": {"@type": "Person", "name": "Matthew Burke"}, "publisher": {"@type": "Organization", "name": "Orbitope"}}
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111009'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%23E8C068' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%236B7A8D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -161,6 +170,10 @@
     font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:.2s}
   .links a:hover{border-color:var(--amber);color:var(--amber-bright);background:rgba(196,154,60,.06)}
   .foot{margin-top:34px;font-size:11px;color:var(--text-muted);letter-spacing:.1em}
+
+/* Inline links to sibling Orbitope articles. Scoped to its own class because these pages do not all style a bare <a>. */
+.xref{color:var(--amber-bright,#E8C068);text-decoration:none;border-bottom:1px solid rgba(232,192,104,.38);transition:border-color .2s}
+.xref:hover{border-bottom-color:var(--amber-bright,#E8C068)}
 </style>
 </head>
 <body>
@@ -391,7 +404,7 @@
 </figure>
 
 <section class="beat tight">
-  <p>A rating built from wins and losses didn't help, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
+  <p><a class="xref" href="https://orbitope.com/sharkhunt/">A rating built from wins and losses didn't help</a>, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
   <div class="pull">A label that is itself a performance measure — a time, a score, a words-per-minute — will always be predictable from the behaviour that produces it. Headroom lives in labels that are latent and have several causes.</div>
   <p>That one sentence disqualifies whole genres without downloading anything. Typing sites rank you <em>by</em> words-per-minute, so rank and WPM are the same thing wearing different hats. Rhythm games compute your rating as a formula over accuracy and chart difficulty. The entire speed-and-accuracy family fails identically.</p>
   <p>It also lands on my own remaining hope. Minesweeper's leaderboard sorts by <b>time</b> — and its speed stat, 3BV/s, is just board value (the minimum clicks a board needs) divided by time. Same trap, third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for isn't the leaderboard — it's <em>win rates, and the games people lost.</em></p>
