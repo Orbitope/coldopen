@@ -103,11 +103,18 @@
     padding:7px 13px;cursor:pointer;transition:.2s}
   .a11y-btn:hover{color:var(--text-bright);border-color:var(--amber)}
   .a11y-btn:focus-visible{outline:3px solid var(--amber-bright);outline-offset:3px}
-  .a11y-btn[aria-pressed="true"]{color:var(--amber-bright);border-color:var(--amber);
-    box-shadow:inset 0 0 0 1px var(--amber)}
   .a11y-btn svg{flex:none}
-  @media(max-width:560px){.a11y-btn span{position:absolute;width:1px;height:1px;overflow:hidden;
-    clip-path:inset(50%)}.a11y-btn{min-width:44px;padding:8px}}
+  /* State is not carried by colour. Amber-vs-bone is invisible to exactly the
+     readers this control exists for, so on/off is spelled out in the label and
+     the icon flips fill as well. */
+  .a11y-btn .state{font-weight:700}
+  .a11y-btn .state::after{content:"OFF"}
+  .a11y-btn[aria-pressed="true"]{color:var(--amber-bright);border-color:var(--amber);
+    background:rgba(196,154,60,.16);box-shadow:inset 0 0 0 1px var(--amber)}
+  .a11y-btn[aria-pressed="true"] .state::after{content:"ON"}
+  .a11y-btn[aria-pressed="true"] .half{transform:rotate(180deg);transform-origin:12px 12px}
+  @media(max-width:560px){.a11y-btn .txt{position:absolute;width:1px;height:1px;overflow:hidden;
+    clip-path:inset(50%)}.a11y-btn{min-width:44px;padding:8px 10px}}
 
   html{scroll-behavior:smooth}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -250,10 +257,10 @@
         title="High-contrast, colour-blind-safe figures">
   <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none"
        stroke="currentColor" stroke-width="2" stroke-linecap="round">
-    <circle cx="12" cy="12" r="9"/><path d="M12 3v18"/>
-    <path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" stroke="none"/>
+    <circle cx="12" cy="12" r="9"/>
+    <path class="half" d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/>
   </svg>
-  <span>Contrast</span>
+  <span class="txt">Contrast</span><span class="state"></span>
 </button>
 
 <div class="progress" id="progress"></div>
