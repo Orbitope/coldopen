@@ -40,7 +40,82 @@
     --mauve:#9A7AB0; --sage:#7D9A6A; --terra:#C47A5A; --coral:#FF5E3A;
     --text-bright:#EDE8DC; --text-primary:#C8C2B4; --text-muted:#6A6358;
     --font-display:'Rajdhani',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  
+    --fig-bg:#0d0c07; --slate:#3f4a56; --border-strong:#3d3a30;
   }
+
+  /* ── Accessibility mode ────────────────────────────────────────────────
+     Engaged by the control in the corner, or automatically under
+     `prefers-contrast: more`. Three things change, in the order they
+     actually matter to a reader:
+
+       1. the data-series tokens move to a scale separated by LIGHTNESS as
+          well as hue. The house scale separates by hue alone, so sage and
+          terra land 20.4 apart under simulated deuteranopia — the same
+          colour, for the ~5% of men who have it.
+       2. hairlines get a 2px floor and decorative opacity is dropped.
+          Presentation attributes lose to any CSS declaration, so this
+          reaches the stroke widths figure JS sets inline, without a redraw.
+       3. where a figure encodes category by colour alone, it gains a
+          second channel — shape, or a letter.
+
+     (3) is what does the real work. Colour alone cannot be made
+     colour-blind-safe at five-plus categories: any set of hues at one
+     lightness collapses for somebody. The palette only buys margin, which
+     is why these hues can stay in the house families rather than going
+     electric to chase a separation number.                              */
+  html[data-a11y]{
+    --amber:#D9B45F; --amber-bright:#F2CF79;
+    --steel:#79BCF3; --steel-bright:#A8D2F7;
+    --mauve:#B563C6; --sage:#668442; --terra:#DB8F6D; --coral:#D45F77;
+    --slate:#4F9D99;
+    --text-muted:#A39B8C;      /* house var(--text-muted) is 3.21:1 — under the floor */
+    --text-primary:#DED8CA;
+    --border:#6E6959;          /* house var(--border) is 1.29:1 */
+    --border-strong:#837D6B;
+    --stroke-floor:2px;
+    --mark-opacity:1;
+  }
+  /* A blanket stroke-width would also thin the strokes that are deliberately
+     heavy. CSS cannot take a max against a presentation attribute, so raise
+     the thin values by name. */
+  html[data-a11y] .fig svg [stroke-width="1"],
+  html[data-a11y] .fig svg [stroke-width="1.5"],
+  html[data-a11y] .fig svg [stroke-width="0.5"],
+  html[data-a11y] .fig svg [stroke-width=".5"],
+  html[data-a11y] figure svg [stroke-width="1"],
+  html[data-a11y] figure svg [stroke-width="1.5"]{stroke-width:var(--stroke-floor)}
+  /* Decorative transparency halves effective contrast: a .72-opacity mark at
+     4.47:1 lands at 2.84:1, under the 3:1 floor for a graphic. */
+  html[data-a11y] figure svg [opacity]{opacity:var(--mark-opacity)}
+
+  .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap;border:0}
+  .kbd-hint{font-size:10px;color:var(--text-muted);letter-spacing:.04em}
+
+  /* The control that turns on legibility must not itself be the least legible
+     thing on the page. 10.7:1 resting, 44px target, first tab stop. */
+  .a11y-btn{position:fixed;top:14px;right:14px;z-index:60;display:inline-flex;align-items:center;
+    justify-content:center;gap:7px;min-height:44px;
+    font-family:var(--font-display,sans-serif);font-weight:600;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;background:rgba(26,24,18,.92);backdrop-filter:blur(6px);
+    color:var(--text-primary);border:1px solid var(--border-strong,#3d3a30);border-radius:4px;
+    padding:7px 13px;cursor:pointer;transition:.2s}
+  .a11y-btn:hover{color:var(--text-bright);border-color:var(--amber)}
+  .a11y-btn:focus-visible{outline:3px solid var(--amber-bright);outline-offset:3px}
+  .a11y-btn svg{flex:none}
+  /* State is not carried by colour. Amber-vs-bone is invisible to exactly the
+     readers this control exists for, so on/off is spelled out in the label and
+     the icon flips fill as well. */
+  .a11y-btn .state{font-weight:700}
+  .a11y-btn .state::after{content:"OFF"}
+  .a11y-btn[aria-pressed="true"]{color:var(--amber-bright);border-color:var(--amber);
+    background:rgba(196,154,60,.16);box-shadow:inset 0 0 0 1px var(--amber)}
+  .a11y-btn[aria-pressed="true"] .state::after{content:"ON"}
+  .a11y-btn[aria-pressed="true"] .half{transform:rotate(180deg);transform-origin:12px 12px}
+  @media(max-width:560px){.a11y-btn .txt{position:absolute;width:1px;height:1px;overflow:hidden;
+    clip-path:inset(50%)}.a11y-btn{min-width:44px;padding:8px 10px}}
+
   html{scroll-behavior:smooth}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
   body{background:var(--void);color:var(--text-primary);font-family:var(--font-mono);
@@ -80,7 +155,7 @@
   .rule{width:1px;height:60px;margin:0 auto;background:linear-gradient(transparent,var(--border),transparent)}
   .pull{border-left:2px solid var(--amber);padding:4px 0 4px 16px;margin:22px 0;font-size:15px;color:var(--text-bright)}
 
-  .fig{max-width:940px;margin:34px auto;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#0d0c07}
+  .fig{max-width:940px;margin:34px auto;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--fig-bg)}
   .fig .cap{font-size:11px;color:var(--text-muted);padding:11px 16px;border-top:1px solid var(--border);letter-spacing:.03em;line-height:1.6}
   .fig .cap b{color:var(--text-primary);font-weight:500}
   .fig.narrow{max-width:700px}
@@ -92,8 +167,8 @@
     border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);letter-spacing:.04em;flex-wrap:wrap}
   .wdg-head b{color:var(--text-bright);font-weight:500}
   .tag{font-weight:500;letter-spacing:.12em;padding:3px 10px;border-radius:3px;font-size:11px;white-space:nowrap}
-  .tag.ok{color:#0d0c07;background:var(--sage)} .tag.no{color:#0d0c07;background:var(--coral)}
-  .tag.warn{color:#0d0c07;background:var(--amber)}
+  .tag.ok{color:var(--fig-bg);background:var(--sage)} .tag.no{color:var(--fig-bg);background:var(--coral)}
+  .tag.warn{color:var(--fig-bg);background:var(--amber)}
   .tag.idle{color:var(--text-muted);border:1px solid var(--border)}
   .wdg-foot{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);
     display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
@@ -101,7 +176,7 @@
     background:transparent;color:var(--text-primary);border:1px solid var(--border);border-radius:4px;padding:7px 14px;cursor:pointer;transition:.2s}
   .btn:hover{color:var(--text-bright);border-color:var(--amber)}
   .btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-  .btn.on{color:#0d0c07;background:var(--amber);border-color:var(--amber)}
+  .btn.on{color:var(--fig-bg);background:var(--amber);border-color:var(--amber)}
 
   .toggle-row{display:flex;border-bottom:1px solid var(--border)}
   .toggle{flex:1;padding:12px 6px;font-family:var(--font-display);font-weight:600;font-size:12px;
@@ -137,11 +212,11 @@
   .cell:hover{border-color:var(--amber)}
   .cell.open{background:#0a0906;border-color:#191710;cursor:default}
   .cell.open:hover{border-color:#191710}
-  .cell.boom{background:var(--coral);color:#0d0c07}
+  .cell.boom{background:var(--coral);color:var(--fig-bg)}
   .cell.hint-safe{box-shadow:inset 0 0 0 2px var(--sage)}
   .cell.hint-mine{box-shadow:inset 0 0 0 2px var(--coral)}
   .n1{color:#7FA8D4}.n2{color:var(--sage)}.n3{color:var(--terra)}.n4{color:var(--mauve)}
-  .n5{color:#C47A5A}.n6{color:#5FA8A0}.n7{color:var(--text-bright)}.n8{color:var(--text-muted)}
+  .n5{color:var(--terra)}.n6{color:#5FA8A0}.n7{color:var(--text-bright)}.n8{color:var(--text-muted)}
   .verdict{padding:10px 16px;font-size:12px;border-top:1px solid var(--border);text-align:center;min-height:40px}
   .verdict .lab{font-weight:500;letter-spacing:.06em}
   .lab.safe{color:var(--sage)} .lab.avoid{color:var(--amber-bright)}
@@ -177,6 +252,17 @@
 </style>
 </head>
 <body>
+<!-- orbitope:a11y-control — self-contained; move as one block. -->
+<button id="a11yBtn" class="a11y-btn" type="button" aria-pressed="false"
+        title="High-contrast, colour-blind-safe figures">
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path class="half" d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/>
+  </svg>
+  <span class="txt">Contrast</span><span class="state"></span>
+</button>
+
 <div class="progress" id="progress"></div>
 <div class="wrap">
 
@@ -212,7 +298,7 @@
     <tr><td>a model fitted on the <em>humans</em> themselves, scored on players it never saw</td><td style="text-align:right">0.923</td></tr>
     <tr><td><b>my agent-trained model</b></td><td style="text-align:right" class="dim">0.660</td></tr>
   </table>
-  <div class="cap">Sorting players by a single number beat the whole simulator by 0.27. I wrote it up as a clean negative result.</div>
+  <figcaption class="cap" id="cap-1">Sorting players by a single number beat the whole simulator by 0.27. I wrote it up as a clean negative result.</figcaption>
 </figure>
 
 <section class="beat tight">
@@ -227,7 +313,7 @@
   <div class="wdg-head"><span>label efficiency · same held-out players, 200 random splits each</span><span class="tag" id="le_tag">—</span></div>
   <div class="ctl">
     <label>labelled human games available
-      <input type="range" id="le_slider" min="0" max="6" value="0" step="1">
+      <input type="range" id="le_slider" min="0" max="6" value="0" step="1" aria-label="Labelled human games available">
       <span class="v" id="le_n">5</span></label>
   </div>
   <svg class="chart" id="le_chart" viewBox="0 0 720 300" role="img" aria-label="label efficiency curve"></svg>
@@ -236,7 +322,7 @@
     <span class="a">fitted on agents, zero labels <b id="le_a">—</b></span>
     <span>gap <b id="le_gap">—</b></span>
   </div>
-  <div class="cap">The amber line never learns anything — it has no labels to learn from. It's flat because it's the <b>same model</b> at every point on the axis. The steel line is what you could do yourself, if you had that many labelled players. <b>It never catches up within the range the data can measure.</b></div>
+  <figcaption class="cap" id="cap-2">The amber line never learns anything — it has no labels to learn from. It's flat because it's the <b>same model</b> at every point on the axis. The steel line is what you could do yourself, if you had that many labelled players. <b>It never catches up within the range the data can measure.</b></figcaption>
 </figure>
 
 <section class="beat tight">
@@ -259,7 +345,7 @@
     <button class="toggle" data-q="rank">check: which human rank is this?</button>
   </div>
   <svg class="chart" id="q_chart" viewBox="0 0 720 260" role="img" aria-label="quad rate distribution"></svg>
-  <div class="cap" id="q_cap">—</div>
+  <figcaption class="cap" id="q_cap">—</figcaption>
 </figure>
 
 <section class="beat tight">
@@ -280,7 +366,7 @@
 <figure class="fig narrow reveal">
   <div class="wdg-head"><span>internal disagreement · lower is more consistent</span><span class="tag idle">18-rank scale</span></div>
   <svg class="chart" id="nf_chart" viewBox="0 0 700 190" role="img" aria-label="noise floor comparison"></svg>
-  <div class="cap">A single human sprint disagrees with itself by the same eight ranks. <b>Eight is just what this measurement reads when nothing is wrong</b> — one game is a small sample, and any real player looks inconsistent across five features. My bots were no worse than a real game.</div>
+  <figcaption class="cap" id="cap-4">A single human sprint disagrees with itself by the same eight ranks. <b>Eight is just what this measurement reads when nothing is wrong</b> — one game is a small sample, and any real player looks inconsistent across five features. My bots were no worse than a real game.</figcaption>
 </figure>
 
 <section class="beat tight">
@@ -302,7 +388,7 @@
   <div class="wdg-head"><span>corrupting a perfect player · 40-line sprint</span><span class="tag" id="cl_tag">—</span></div>
   <div class="ctl">
     <label>decisions made correctly
-      <input type="range" id="cl_slider" min="0" max="6" value="0" step="1">
+      <input type="range" id="cl_slider" min="0" max="6" value="0" step="1" aria-label="Percentage of decisions made correctly">
       <span class="v" id="cl_acc">100%</span></label>
   </div>
   <svg class="chart" id="cl_chart" viewBox="0 0 720 290" role="img" aria-label="accuracy cliff"></svg>
@@ -310,7 +396,7 @@
     <span>lines cleared of 40 <b id="cl_lines">—</b></span>
     <span>games actually finished <b id="cl_fin">—</b></span>
   </div>
-  <div class="cap">Every human record on the leaderboard is a <b>finished</b> game. So the entire human-relevant band is squeezed into the top 5% of this axis, and everything below 90% is indistinguishable rubble. <b>A 90%-accurate copy isn't a mediocre player. It's not a player at all.</b></div>
+  <figcaption class="cap" id="cap-5">Every human record on the leaderboard is a <b>finished</b> game. So the entire human-relevant band is squeezed into the top 5% of this axis, and everything below 90% is indistinguishable rubble. <b>A 90%-accurate copy isn't a mediocre player. It's not a player at all.</b></figcaption>
 </figure>
 
 <section class="beat tight">
@@ -335,7 +421,7 @@
     <button class="toggle" data-sc="mine">Minesweeper — three knobs</button>
   </div>
   <svg class="chart" id="sc_chart" viewBox="0 0 720 330" role="img" aria-label="collinearity scatter"></svg>
-  <div class="cap" id="sc_cap">—</div>
+  <figcaption class="cap" id="sc_cap">—</figcaption>
 </figure>
 
 <section class="beat tight">
@@ -366,7 +452,7 @@
     <button class="btn" id="ms_hint">hold to reveal solver</button>
     <button class="btn" id="ms_new">new board</button>
   </div>
-  <div class="cap">Green outline: provably safe. Red outline: provably a mine. No outline on a hidden square means the solver can't tell either — <b>if you click one of those and there was a safe square available, that's an avoidable guess.</b> This is the exact measurement applied to the bots, and it would be applied to human replays unchanged.</div>
+  <figcaption class="cap" id="cap-7">Green outline: provably safe. Red outline: provably a mine. No outline on a hidden square means the solver can't tell either — <b>if you click one of those and there was a safe square available, that's an avoidable guess.</b> This is the exact measurement applied to the bots, and it would be applied to human replays unchanged.</figcaption>
 </figure>
 
 <section class="beat tight">
@@ -385,7 +471,7 @@
 <figure class="fig narrow reveal">
   <div class="wdg-head"><span>same network, same game, two training signals</span><span class="tag ok">learning</span></div>
   <svg class="chart" id="sig_chart" viewBox="0 0 700 250" role="img" aria-label="signal density comparison"></svg>
-  <div class="cap">Reinforcement learning: <b>0 wins after 2,000,000 attempts.</b> Supervised on dense labels: winning two thirds of its games after 12,000. Not a smarter algorithm — the same network, fed a signal that actually says something.</div>
+  <figcaption class="cap" id="cap-8">Reinforcement learning: <b>0 wins after 2,000,000 attempts.</b> Supervised on dense labels: winning two thirds of its games after 12,000. Not a smarter algorithm — the same network, fed a signal that actually says something.</figcaption>
 </figure>
 
 <div class="rule"></div>
@@ -400,7 +486,7 @@
 <figure class="fig narrow reveal">
   <div class="wdg-head"><span>how much of rank does one number already explain?</span><span class="tag no">both fail</span></div>
   <svg class="chart" id="hr_chart" viewBox="0 0 700 230" role="img" aria-label="headroom screen"></svg>
-  <div class="cap">Anything above the dashed line has no room left for a cleverer method. Versus mode, judged on a <b>single round</b> — which is the actual cold-start situation — scores 0.922 from pieces-per-second alone, statistically the same as the sprint's 0.932. <b>Tetris skill is speed-limited in every mode.</b></div>
+  <figcaption class="cap" id="cap-9">Anything above the dashed line has no room left for a cleverer method. Versus mode, judged on a <b>single round</b> — which is the actual cold-start situation — scores 0.922 from pieces-per-second alone, statistically the same as the sprint's 0.932. <b>Tetris skill is speed-limited in every mode.</b></figcaption>
 </figure>
 
 <section class="beat tight">
@@ -442,6 +528,27 @@
 </section>
 
 </div>
+<!-- orbitope:a11y-control script — pairs with the button above. -->
+<script>
+(function(){
+  var KEY='orbitope-a11y', root=document.documentElement, btn=document.getElementById('a11yBtn');
+  function stored(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
+  function apply(on,persist){
+    if(on) root.setAttribute('data-a11y',''); else root.removeAttribute('data-a11y');
+    if(btn) btn.setAttribute('aria-pressed',on?'true':'false');
+    if(persist){ try{ localStorage.setItem(KEY,on?'on':'off'); }catch(e){} }
+    document.dispatchEvent(new CustomEvent('a11ychange',{detail:{on:on}}));
+  }
+  // No media query reports colour blindness, so prefers-contrast is only a
+  // hint. An explicit choice always wins, and it is shared across the site
+  // because every article sits on the one origin.
+  var pref=stored();
+  var auto=window.matchMedia&&window.matchMedia('(prefers-contrast: more)').matches;
+  apply(pref?pref==='on':!!auto,false);
+  if(btn) btn.addEventListener('click',function(){ apply(!root.hasAttribute('data-a11y'),true); });
+})();
+</script>
+
 <script src="data.js"></script>
 <script>
 (function () {
