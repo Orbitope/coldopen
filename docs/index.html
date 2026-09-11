@@ -271,7 +271,7 @@
 <header class="hero">
   <div class="kicker">Coldopen · skill prediction without a match history</div>
   <h1>How do you rank a player who has never played? I trained <span class="accent">bots</span> to answer that.</h1>
-  <p class="sub">A new account has no results, so ranked games guess — and the first few matches are miserable for everyone while they do. You could instead read skill from <b>how</b> somebody plays. But to learn that reading you need labelled players, and a game that hasn't launched has none. So: train a ladder of bots from hopeless to expert, learn the mapping from their behaviour, and point it at people. <b>The idea works.</b> The hard part was that four separate measurements each told me it didn't — or that it did, for a reason that turned out to be false. Every one of them is playable below.</p>
+  <p class="sub">A new account has no results, so ranked games guess — and the first few matches are miserable for everyone while they do. You could instead read skill from <b>how</b> somebody plays. But to learn that reading you need labeled players, and a game that hasn't launched has none. So: train a ladder of bots from hopeless to expert, learn the mapping from their behavior, and point it at people. <b>The idea works.</b> The hard part was that four separate measurements each told me it didn't — or that it did, for a reason that turned out to be false. Every one of them is playable below.</p>
   <div class="scroll-cue">scroll</div>
 </header>
 
@@ -279,7 +279,7 @@
   <div class="eyebrow">The setup</div>
   <h2>Bots as stand-ins for players you don't have yet.</h2>
   <p>I built two games as simulators I could train agents inside: a <b>Tetris sprint</b> (clear 40 lines as fast as you can — a ranked mode on TETR.IO, a big online Tetris platform) and <b>Minesweeper</b>. Both are real games with real public leaderboards, which matters — the whole point is to check the bots against actual humans at the end.</p>
-  <p>The recipe is simple enough to state in one line. Make agents of varying skill, record how they play — how fast, how efficiently, how often they set up the big clears — then fit a model from behaviour to skill. Apply it to a human and you have a rank estimate from their very first game, with no match history at all.</p>
+  <p>The recipe is simple enough to state in one line. Make agents of varying skill, record how they play — how fast, how efficiently, how often they set up the big clears — then fit a model from behavior to skill. Apply it to a human and you have a rank estimate from their very first game, with no match history at all.</p>
   <p>Then you check it against 396 real Tetris players whose ranks you already know. That check is where things got strange.</p>
 </section>
 
@@ -308,7 +308,7 @@
   <div class="pull">To sort players by pieces-per-second, you first have to know that pieces-per-second is the right thing to sort by. Where does that knowledge come from? From looking at players whose rank you already know.</div>
   <p>Which is <b>exactly the thing you don't have at a cold start.</b> I had let the baseline read the answer key and then scored the honest method against it.</p>
   <p>And look at what the agent-trained model actually learned, from <span class="amber">zero human labels</span>: put all the weight on pieces-per-second, ignore the other four features. It <em>found</em> the right answer on its own. That's not losing to the baseline — that <em>is</em> the baseline, derived without the labels the baseline needs.</p>
-  <p>So the honest question isn't "does it beat the best predictor?" It's <b>how much labelled data would you need to do this well without it?</b> Drag the slider.</p>
+  <p>So the honest question isn't "does it beat the best predictor?" It's <b>how much labeled data would you need to do this well without it?</b> Drag the slider.</p>
 </section>
 
 <figure class="fig reveal">
@@ -324,11 +324,11 @@
     <span class="a">fitted on agents, zero labels <b id="le_a">—</b></span>
     <span>gap <b id="le_gap">—</b></span>
   </div>
-  <figcaption class="cap" id="cap-2">The amber line never learns anything — it has no labels to learn from. It's flat because it's the <b>same model</b> at every point on the axis. The steel line is what you could do yourself, if you had that many labelled players. <b>It never catches up within the range the data can measure.</b></figcaption>
+  <figcaption class="cap" id="cap-2">The amber line never learns anything — it has no labels to learn from. It's flat because it's the <b>same model</b> at every point on the axis. The steel line is what you could do yourself, if you had that many labeled players. <b>It never catches up within the range the data can measure.</b></figcaption>
 </figure>
 
 <section class="beat tight">
-  <p>At five labelled games the simulator is worth about 0.10 of correlation. At three hundred it's still ahead. That's the actual result, and it only appears once you stop asking the wrong question.</p>
+  <p>At five labeled games the simulator is worth about 0.10 of correlation. At three hundred it's still ahead. That's the actual result, and it only appears once you stop asking the wrong question.</p>
 </section>
 
 <div class="rule"></div>
@@ -336,7 +336,7 @@
 <section class="beat">
   <div class="eyebrow bad">Lie #2</div>
   <h2>The check that couldn't see a bot doing nothing.</h2>
-  <p>Before you compare bots to humans, you have to confirm the bots are even in the same neighbourhood — that they produce the range of behaviour people produce. For each bot I measure five behaviours: speed, keystroke efficiency, quad rate, use of the hold slot, and back-to-back streaks (quads chained without a lesser clear between them). My check asked whether each bot's numbers fell inside the human range. It came back <span class="sage">100% inside</span> on three of the five.</p>
+  <p>Before you compare bots to humans, you have to confirm the bots are even in the same neighborhood — that they produce the range of behavior people produce. For each bot I measure five behaviors: speed, keystroke efficiency, quad rate, use of the hold slot, and back-to-back streaks (quads chained without a lesser clear between them). My check asked whether each bot's numbers fell inside the human range. It came back <span class="sage">100% inside</span> on three of the five.</p>
   <p>All three were false. Here's the one that gave it away: <b>quad rate</b>, the fraction of your lines cleared four-at-once. It's the signature move of a good Tetris player.</p>
 </section>
 
@@ -427,7 +427,7 @@
 </figure>
 
 <section class="beat tight">
-  <p>Left: a diagonal smear. Speed and judgement are the same number in different clothes, so a model fitted on it learns a relationship that falls apart on humans. Right: a cloud. You can be fast and careless, or slow and careful, independently — like people.</p>
+  <p>Left: a diagonal smear. Speed and judgment are the same number in different clothes, so a model fitted on it learns a relationship that falls apart on humans. Right: a cloud. You can be fast and careless, or slow and careful, independently — like people.</p>
 </section>
 
 <div class="rule"></div>
@@ -436,7 +436,7 @@
   <div class="eyebrow win">What a better test looks like</div>
   <h2>Minesweeper can tell you if a click was a mistake.</h2>
   <p>The deep problem with the Tetris sprint is that it's a time trial. Rank correlates 0.93 with raw speed, so there was never room for a cleverer method to add anything. I picked Minesweeper next for one reason: it has a skill measure that <b>logic can settle</b>.</p>
-  <p>After any position, a solver can determine which hidden squares are <em>provably</em> safe. So for every click a player makes you can ask: was there a guaranteed-safe square available, and did you take it? That's a judgement score, it has nothing to do with speed, and it's computable for bots and humans identically.</p>
+  <p>After any position, a solver can determine which hidden squares are <em>provably</em> safe. So for every click a player makes you can ask: was there a guaranteed-safe square available, and did you take it? That's a judgment score, it has nothing to do with speed, and it's computable for bots and humans identically.</p>
   <p>Play a few clicks. <b>Hold the hint button</b> to see what the solver knows.</p>
 </section>
 
@@ -493,7 +493,7 @@
 
 <section class="beat tight">
   <p><a class="xref" href="https://orbitope.com/sharkhunt/">A rating built from wins and losses didn't help</a>, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
-  <div class="pull">A label that is itself a performance measure — a time, a score, a words-per-minute — will always be predictable from the behaviour that produces it. Headroom lives in labels that are latent and have several causes.</div>
+  <div class="pull">A label that is itself a performance measure — a time, a score, a words-per-minute — will always be predictable from the behavior that produces it. Headroom lives in labels that are latent and have several causes.</div>
   <p>That one sentence disqualifies whole genres without downloading anything. Typing sites rank you <em>by</em> words-per-minute, so rank and WPM are the same thing wearing different hats. Rhythm games compute your rating as a formula over accuracy and chart difficulty. The entire speed-and-accuracy family fails identically.</p>
   <p>It also lands on my own remaining hope. Minesweeper's leaderboard sorts by <b>time</b> — and its speed stat, 3BV/s, is just board value (the minimum clicks a board needs) divided by time. Same trap, third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for isn't the leaderboard — it's <em>win rates, and the games people lost.</em></p>
 </section>
@@ -504,7 +504,7 @@
   <div class="eyebrow">Where this stands</div>
   <h2>One game is an anecdote.</h2>
   <p>I want to be straight about what this does and doesn't show, because the temptation to round it up is strong.</p>
-  <p><b>What holds up:</b> a model trained purely on bots was worth more than 300 labelled human games on the one test I could run. That's a real result and it survives the corrected comparison.</p>
+  <p><b>What holds up:</b> a model trained purely on bots was worth more than 300 labeled human games on the one test I could run. That's a real result and it survives the corrected comparison.</p>
   <p><b>What doesn't:</b> that test ran on a single game, and that game turned out to be nearly the worst possible choice — a time trial whose ranking is 93% explained by one obvious number. There was no headroom for any method to fill. I picked it because I could get the data, which is not the same as picking it because it could answer the question.</p>
   <p>Minesweeper is the game where the question can actually be answered, and everything on the bot side is finished and waiting. The human half is stuck: the site's data isn't reachable without hammering their servers in ways I'm not willing to, and my email asking nicely hasn't been answered yet.</p>
   <h3>Why that stall is structural, not bad luck</h3>
