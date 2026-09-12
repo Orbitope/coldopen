@@ -372,8 +372,8 @@
 </figure>
 
 <section class="beat tight">
-  <p>The number was an uncalibrated measurement, not a grade. I nearly rebuilt a working system because of it.</p>
-  <p>Something narrower survived the comparison, and it was more useful: four of the five features sat inside the human spread, and exactly one didn't. My bot used the hold slot ("save this piece for later") like a beginner while playing like an expert everywhere else. Fixing that made it better at the actual game, not just at resembling a person.</p>
+  <p>The number was an uncalibrated measurement. I nearly rebuilt a working system because of it.</p>
+  <p>Something narrower survived the comparison, and it was more useful: four of the five features sat inside the human spread, and exactly one didn't. My bot used the hold slot ("save this piece for later") like a beginner while playing like an expert everywhere else. Fixing that made it better at the actual game.</p>
   <div class="pull">Any measurement of "how human is this?" is uninterpretable until you run it on humans and see what score they get.</div>
 </section>
 
@@ -398,7 +398,7 @@
     <span>lines cleared of 40 <b id="cl_lines">—</b></span>
     <span>games actually finished <b id="cl_fin">—</b></span>
   </div>
-  <figcaption class="cap" id="cap-5">Every human record on the leaderboard is a <b>finished</b> game. So the entire human-relevant band is squeezed into the top 5% of this axis, and everything below 90% is indistinguishable failure. <b>A 90%-accurate copy is not a player at all, never mind a mediocre one.</b></figcaption>
+  <figcaption class="cap" id="cap-5">Every human record on the leaderboard is a <b>finished</b> game. So the entire human-relevant band is squeezed into the top 5% of this axis, and everything below 90% is indistinguishable failure. <b>A 90%-accurate copy is not a player at all.</b></figcaption>
 </figure>
 
 <section class="beat tight">
@@ -467,13 +467,13 @@
   <div class="eyebrow">An aside</div>
   <h2>What taught the bot to play.</h2>
   <p>I spent two million steps of reinforcement learning on Minesweeper and got a bot that never won a single game. It learned something, though: to <b>never click anything</b>. With 99 mines hidden among 480 squares, an uninformed click is bad enough that flagging squares forever is the better strategy. It found the optimum of the reward I gave it, and that optimum was to do nothing.</p>
-  <p>What worked instead was changing the amount of information per step, not the reward. The simulator knows where its mines are. So instead of one thumbs-up-or-down per click, give the network the answer for all 480 squares at once and ask it to predict them.</p>
+  <p>What worked instead was changing the amount of information per step. The simulator knows where its mines are. So instead of one thumbs-up-or-down per click, give the network the answer for all 480 squares at once and ask it to predict them.</p>
 </section>
 
 <figure class="fig narrow reveal">
   <div class="wdg-head"><span>same network, same game, two training signals</span><span class="tag ok">learning</span></div>
   <svg class="chart" id="sig_chart" viewBox="0 0 700 250" role="img" aria-label="signal density comparison"></svg>
-  <figcaption class="cap" id="cap-8">Reinforcement learning: <b>0 wins after 2,000,000 attempts.</b> Supervised on dense labels: winning two thirds of its games after 12,000. This is the same network fed a signal that says something, not a smarter algorithm.</figcaption>
+  <figcaption class="cap" id="cap-8">Reinforcement learning: <b>0 wins after 2,000,000 attempts.</b> Supervised on dense labels: winning two thirds of its games after 12,000. This is the same network fed a signal that says something.</figcaption>
 </figure>
 
 <div class="rule"></div>
@@ -495,7 +495,7 @@
   <p><a class="xref" href="https://orbitope.com/sharkhunt/">A rating built from wins and losses didn't help</a>, because the thing that rating measures is still mostly speed. Building the versus simulator would have inherited the exact ceiling that made the first one uninformative.</p>
   <div class="pull">A label that is itself a performance measure (a time, a score, a words-per-minute) will always be predictable from the behavior that produces it. Headroom exists only in labels that are latent and have several causes.</div>
   <p>That one sentence disqualifies whole genres without downloading anything. Typing sites rank you <em>by</em> words-per-minute, so rank and WPM are the same quantity. Rhythm games compute your rating as a formula over accuracy and chart difficulty. The entire speed-and-accuracy family fails identically.</p>
-  <p>It applies to my own remaining hope too. Minesweeper's leaderboard sorts by <b>time</b>, and its speed stat, 3BV/s, is board value (the minimum clicks a board needs) divided by time. This is the same trap a third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for is <em>win rates, and the games people lost</em>, not the leaderboard.</p>
+  <p>It applies to my own remaining hope too. Minesweeper's leaderboard sorts by <b>time</b>, and its speed stat, 3BV/s, is board value (the minimum clicks a board needs) divided by time. This is the same trap a third time. The label with real room in it is <b>win rate</b>: surviving an expert board is mostly about not guessing, while time is mostly about clicking fast. So the thing to ask a data holder for is <em>win rates, and the games people lost</em>.</p>
 </section>
 
 <div class="rule"></div>
@@ -508,13 +508,13 @@
   <p>Minesweeper is the game where the question can be answered, and the bot side is finished. The human half is stuck: the site's data isn't reachable without hammering their servers in ways I'm not willing to, and my email asking nicely hasn't been answered yet.</p>
   <h3>Why the stall is structural</h3>
   <p>Stack the three requirements together. A game has to be <b>simulatable</b> to build bots for. It has to have <b>headroom</b> above its own obvious statistic. And its human data has to be <b>reachable</b>. Public sources fail at least one every time: games rich enough to have interesting telemetry (shooters, MOBAs, card games) are too complex to simulate honestly, while games simple enough to simulate are simple <em>because</em> their skill is thin.</p>
-  <p>A game studio removes all three constraints at once. They own the simulator. Their ranks come from matchmaking ratings rather than leaderboard times, so the labels are latent. They record losses, not just records. And access is a conversation instead of a scrape. They also have the motive, since cold start is <em>their</em> problem: new players quitting in the first week is a number they already track.</p>
+  <p>A game studio removes all three constraints at once. They own the simulator. Their ranks come from matchmaking ratings rather than leaderboard times, so the labels are latent. They record losses. And access is a conversation instead of a scrape. They also have the motive, since cold start is <em>their</em> problem: new players quitting in the first week is a number they already track.</p>
   <p>So this is the method, the toolkit, and most usefully <b>the one-script screen that tells you in minutes whether your game has any room for it.</b> It is not a solved method.</p>
 </section>
 
 <div class="caveats">
   <div class="c"><span>For anyone starting this: <b>before you build a simulator for a game, check how well the single most obvious statistic already predicts rank.</b> If it's 0.9, nothing is left for you to win.</span></div>
-  <div class="c"><span>I published and then retracted three claims in this project: a bug I asserted without checking, a validation gate I believed was green because I'd read it off a terminal rather than the file, and a metric that was measuring a stuck program rather than a trained one. They're all still in the repository's history. <b>A control caught every one, not a failing test.</b></span></div>
+  <div class="c"><span>I published and then retracted three claims in this project: a bug I asserted without checking, a validation gate I believed was green because I'd read it off a terminal rather than the file, and a metric that was measuring a stuck program rather than a trained one. They're all still in the repository's history. <b>A control caught every one.</b></span></div>
   <div class="c"><span>None of the human data is in the repository. It belongs to the people who published it, and it's personal data even after the names are hashed. Everything you can see on this page is an aggregate.</span></div>
 </div>
 
