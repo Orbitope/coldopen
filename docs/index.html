@@ -256,7 +256,7 @@
 <body>
 <!-- orbitope:a11y-control — self-contained; move as one block. -->
 <button id="a11yBtn" class="a11y-btn" type="button" aria-pressed="false"
-        title="High-contrast, colour-blind-safe figures">
+        title="High-contrast, color-blind-safe figures">
   <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none"
        stroke="currentColor" stroke-width="2" stroke-linecap="round">
     <circle cx="12" cy="12" r="9"/>
@@ -314,8 +314,8 @@
 <figure class="fig reveal">
   <div class="wdg-head"><span>label efficiency · same held-out players, 200 random splits each</span><span class="tag" id="le_tag">—</span></div>
   <div class="ctl">
-    <label>labelled human games available
-      <input type="range" id="le_slider" min="0" max="6" value="0" step="1" aria-label="Labelled human games available">
+    <label>labeled human games available
+      <input type="range" id="le_slider" min="0" max="6" value="0" step="1" aria-label="Labeled human games available">
       <span class="v" id="le_n">5</span></label>
   </div>
   <svg class="chart" id="le_chart" viewBox="0 0 720 300" role="img" aria-label="label efficiency curve"></svg>
@@ -417,7 +417,7 @@
 </section>
 
 <figure class="fig reveal">
-  <div class="wdg-head"><span>speed vs judgement · each dot is one bot configuration</span><span class="tag" id="sc_tag">—</span></div>
+  <div class="wdg-head"><span>speed vs judgment · each dot is one bot configuration</span><span class="tag" id="sc_tag">—</span></div>
   <div class="toggle-row">
     <button class="toggle active" data-sc="sprint">Tetris — one knob</button>
     <button class="toggle" data-sc="mine">Minesweeper — three knobs</button>
@@ -588,7 +588,7 @@
     LE.forEach((d, i) => svg.appendChild(el("text",
       { class: "axlab", x: x(i), y: H - B + 18, "text-anchor": "middle" }, d.n)));
     svg.appendChild(el("text", { class: "axlab", x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle" },
-      "labelled human games you have"));
+      "labeled human games you have"));
     svg.appendChild(el("line", { class: "ax", x1: L, x2: W - R, y1: y(0.75), y2: y(0.75) }));
 
     const path = k => LE.map((d, i) => (i ? "L" : "M") + x(i) + " " + y(d[k])).join(" ");
@@ -793,17 +793,17 @@
     svg.appendChild(el("text", {
       class: "axlab", x: L - 46, y: (T + H - B) / 2,
       transform: `rotate(-90 ${L - 46} ${(T + H - B) / 2})`, "text-anchor": "middle"
-    }, scMode === "sprint" ? "judgement — hold-slot usage" : "judgement — provably-safe rate"));
+    }, scMode === "sprint" ? "judgment — hold-slot usage" : "judgment — provably-safe rate"));
 
     const r = scMode === "sprint" ? DATA.corr.sprint : DATA.corr.minesweeper;
     const tag = $("sc_tag");
     tag.className = "tag " + (Math.abs(r) > 0.5 ? "no" : "ok");
     tag.textContent = "correlation " + (r > 0 ? "+" : "") + r.toFixed(2);
     $("sc_cap").innerHTML = scMode === "sprint"
-      ? "One knob, so speed and judgement rise together: correlation <b>" + r.toFixed(2) +
+      ? "One knob, so speed and judgment rise together: correlation <b>" + r.toFixed(2) +
         "</b>. A model fitted here can't separate them, and it gave speed a negative weight."
       : "Three knobs — training, lapse rate, input delay — moved independently: correlation <b>" + r.toFixed(2) +
-        "</b>. Speed says nothing about judgement, which is what makes the two features worth having. (3BV is a board's minimum clicks-to-clear, so 3BV/s is useful clicks per second.)";
+        "</b>. Speed says nothing about judgment, which is what makes the two features worth having. (3BV is a board's minimum clicks-to-clear, so 3BV/s is useful clicks per second.)";
   }
   document.querySelectorAll("[data-sc]").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll("[data-sc]").forEach(o => o.classList.remove("active"));
